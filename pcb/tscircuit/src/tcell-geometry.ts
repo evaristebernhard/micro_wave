@@ -21,6 +21,7 @@ export const tCellVariantMeta = {
       matchedExtractionTCellSeed.variants.A.seriesTransformerOhm,
     branchTransformerOhm:
       matchedExtractionTCellSeed.variants.A.branchTransformerOhm,
+    bridgePhaseDeg: matchedExtractionTCellSeed.variants.A.requiredBridgePhaseDeg,
     bridgeResidualPhaseDeg: bridgeResidual("A"),
     hasRfOut: true
   },
@@ -33,6 +34,7 @@ export const tCellVariantMeta = {
       matchedExtractionTCellSeed.variants.B.seriesTransformerOhm,
     branchTransformerOhm:
       matchedExtractionTCellSeed.variants.B.branchTransformerOhm,
+    bridgePhaseDeg: matchedExtractionTCellSeed.variants.B.requiredBridgePhaseDeg,
     bridgeResidualPhaseDeg: bridgeResidual("B"),
     hasRfOut: true
   },
@@ -45,6 +47,7 @@ export const tCellVariantMeta = {
       matchedExtractionTCellSeed.variants.C.seriesTransformerOhm,
     branchTransformerOhm:
       matchedExtractionTCellSeed.variants.C.branchTransformerOhm,
+    bridgePhaseDeg: matchedExtractionTCellSeed.variants.C.requiredBridgePhaseDeg,
     bridgeResidualPhaseDeg: bridgeResidual("C"),
     hasRfOut: true
   },
@@ -55,6 +58,7 @@ export const tCellVariantMeta = {
     junctionY: null,
     seriesTransformerOhm: null,
     branchTransformerOhm: 50,
+    bridgePhaseDeg: 0,
     bridgeResidualPhaseDeg: 0,
     hasRfOut: false
   }
@@ -67,6 +71,7 @@ export const tCellVariantMeta = {
     junctionY: number | null
     seriesTransformerOhm: number | null
     branchTransformerOhm: number | null
+    bridgePhaseDeg: number
     bridgeResidualPhaseDeg: number
     hasRfOut: boolean
   }
