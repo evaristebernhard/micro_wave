@@ -6,21 +6,24 @@
 
 ## 当前基线
 
-**当前有效需求基线：`docs/01_rf_simulation_requirements_v2.md`。**
+**当前有效需求基线：`docs/01_rf_simulation_requirements_v3.md`。**
 
 - `docs/01_rf_simulation_requirements_v1.md`：原始需求冻结版，仅保留追踪
-- `docs/01_rf_simulation_requirements_v2.md`：修正功率、线宽、桥损耗、长馈线、板数识别和分区架构后的当前版本
+- `docs/01_rf_simulation_requirements_v2.md`：第一轮工程修订版，现保留用于追踪
+- `docs/01_rf_simulation_requirements_v3.md`：当前客户技术修订基线；明确写入不可执行原始指标、替代验收口径和客户需确认项
 - `docs/02_system_theory_analysis_v1.md`：系统拓扑、功率预算、级联均匀性、WR340/50 Ω、磁吸接口等理论分析
 - `docs/03_patch_antenna_theory_v1.md`：2.45 GHz 前向辐射矩形 Patch 的尺寸、弱耦合、馈电、功率守恒与 tscircuit/HFSS 参数化基线
 - `docs/04_pcb_design_manual_v1.md`：第一版 tscircuit PCB 的执行手册，含坐标、尺寸、层叠、Patch/主线/耦合/识别线/磁吸接口规则和 HFSS 交接清单
 - `docs/05_gradient_coupling_system_architecture_v1.md`：梯度耦合分区架构、等功率递推、A/B/C/D 四类板、500 W 系统功率边界和分配网络约束
 - `docs/06_patch_design_rationale_v1.md`：解释矩形 Patch 是什么、如何向工件输送微波能量、原方形螺旋方案的高频/级联问题，以及为什么当前把 Patch 作为优化主基线
 - `docs/07_theory_gap_closure_v1.md`：闭合长串 FR4 损耗上限、灰板 raw S21 指标冲突、强耦合器可实现性、D 终端板与两层梯度分配等剩余理论问题
+- `docs/08_original_requirements_feasibility_audit_v1.md`：原始客户需求可行性审计；逐项记录已证明不可同时满足或不能按原样验收的指标
 
-## V2 主要修订
+## V3 当前工程口径
 
 ### 功率
 
+- 原“500 W + 100 块 + 5–8 W/块”不再作为同时硬指标；
 - 磁控管硬件上限仍为 500 W；
 - 预留约 20% 系统损耗/反射余量，初始有效功率预算按 400 W；
 - 5–8 W/块不再作为 1–100 块全范围硬指标；

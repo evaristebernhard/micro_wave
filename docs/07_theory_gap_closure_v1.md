@@ -2,6 +2,8 @@
 
 > 本文针对当前 micro_wave 方案中仍未闭合的几个关键理论问题做进一步分析。
 >
+> 本文中的可执行结论已汇总进 `docs/01_rf_simulation_requirements_v3.md`；原始指标不可实现项单独汇总在 `docs/08_original_requirements_feasibility_audit_v1.md`。
+>
 > 重点回答：
 >
 > 1. 当前采用的 0.42 dB / 50 mm cell 是否有合理的一阶理论依据；
