@@ -5,6 +5,8 @@
 > 当前推荐基线改为 **低损耗分配主干 + 1–4 块梯度耦合 Zone + 末级终端辐射板**。
 >
 > 本文中的耦合比例是系统级目标值，最终仍需由 HFSS/openEMS 将目标耦合比例映射为实际的 gap、overlap、coupled-line length、inset 和匹配几何。
+>
+> **后续理论补充：** `docs/07_theory_gap_closure_v1.md` 进一步证明了 25/100 块连续 FR4 长串的损耗上限、raw S21≤0.5 dB 与高比例取能的指标冲突，并指出 C 板约 47.6% 已属于接近 3 dB hybrid 的强耦合问题。故 A/B/C 的百分比是系统功率目标，不代表当前 6 mm side-coupled seed 已经能够物理实现。
 
 ---
 
