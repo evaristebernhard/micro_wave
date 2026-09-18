@@ -39,6 +39,7 @@ const RfGeometry = ({ boardClass }: VariantProps) => {
   const patchPortHint = boardClass === "D" ? "pin1" : "pin2"
   const insetFeedCenterY =
     (patchDerived.patchYMin + patchDerived.notchYMax) / 2
+  const phaseJunctionPadSize = pcb.rfTraceW + 0.3
 
   return (
     <chip
@@ -106,6 +107,23 @@ const RfGeometry = ({ boardClass }: VariantProps) => {
                 pcbY={mm(pcb.rfTraceY)}
                 width={mm(pcb.rfPadW)}
                 height={mm(pcb.rfPadH)}
+                shape="rect"
+              />
+              {/* D phase-route miter junctions force contiguous copper in Circuit JSON. */}
+              <smtpad
+                portHints={["pin1"]}
+                pcbX={mm(terminalPhaseRouteSeed.junctionX)}
+                pcbY={mm(terminalPhaseRouteSeed.junctionY)}
+                width={mm(phaseJunctionPadSize)}
+                height={mm(phaseJunctionPadSize)}
+                shape="rect"
+              />
+              <smtpad
+                portHints={["pin1"]}
+                pcbX={mm(terminalPhaseRouteSeed.patchEntryX)}
+                pcbY={mm(terminalPhaseRouteSeed.patchEntryY)}
+                width={mm(phaseJunctionPadSize)}
+                height={mm(phaseJunctionPadSize)}
                 shape="rect"
               />
             </>
@@ -203,6 +221,31 @@ const RfGeometry = ({ boardClass }: VariantProps) => {
                     height={mm(pcb.rfTraceW)}
                     shape="rotated_rect"
                     ccwRotation={180 - derived.phaseFeedAngleDeg}
+                  />
+                  {/* V-feed miter junctions: intentional overlap for one RF conductor. */}
+                  <smtpad
+                    portHints={[patchPortHint]}
+                    pcbX="0mm"
+                    pcbY={mm(derived.phaseFeedStartY)}
+                    width={mm(phaseJunctionPadSize)}
+                    height={mm(phaseJunctionPadSize)}
+                    shape="rect"
+                  />
+                  <smtpad
+                    portHints={[patchPortHint]}
+                    pcbX={mm(derived.phaseFeedPeakX)}
+                    pcbY={mm(derived.phaseFeedMidY)}
+                    width={mm(phaseJunctionPadSize)}
+                    height={mm(phaseJunctionPadSize)}
+                    shape="rect"
+                  />
+                  <smtpad
+                    portHints={[patchPortHint]}
+                    pcbX="0mm"
+                    pcbY={mm(derived.phaseFeedEndY)}
+                    width={mm(phaseJunctionPadSize)}
+                    height={mm(phaseJunctionPadSize)}
+                    shape="rect"
                   />
                 </>
               )}
