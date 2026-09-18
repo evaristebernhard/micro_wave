@@ -164,7 +164,7 @@ For pre-HFSS phase synthesis, A/B/C use a common target branch phase of approxim
 
 The PCB project now exports a second A/B/C/D topology based on analytically matched extraction T-cells.
 
-- Board envelope: 50 × 60 mm; horizontal Patch pitch remains 50 mm.
+- Board envelope: 50 × 70 mm; horizontal Patch pitch remains 50 mm.
 - A: κ≈0.224, Zt≈44.05 Ω / 3.82 mm, Zb≈93.06 Ω / 0.88 mm.
 - B: κ≈0.316, Zt≈41.35 Ω / 4.21 mm, Zb≈73.56 Ω / 1.52 mm.
 - C: κ≈0.501, Zt≈35.32 Ω / 5.32 mm, Zb≈49.90 Ω / 3.13 mm.
