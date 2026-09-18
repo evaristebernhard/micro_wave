@@ -45,6 +45,7 @@ const RfGeometry = ({ boardClass }: VariantProps) => {
 
   const terminalInputLength = pcb.rfContactX
   const terminalInputCenterX = -terminalInputLength / 2
+  const patchPortHint = boardClass === "D" ? "pin1" : "pin2"
 
   return (
     <chip
@@ -54,8 +55,7 @@ const RfGeometry = ({ boardClass }: VariantProps) => {
       pinLabels={
         boardClass === "D"
           ? {
-              pin1: "RF_IN",
-              pin2: "PATCH",
+              pin1: "RF_IN_PATCH",
               pin3: "GND"
             }
           : {
@@ -146,7 +146,7 @@ const RfGeometry = ({ boardClass }: VariantProps) => {
 
           {/* Vertical Patch feed inside the inset notch. */}
           <smtpad
-            portHints={["pin2"]}
+            portHints={[patchPortHint]}
             pcbX="0mm"
             pcbY={mm(feedCenterY)}
             width={mm(pcb.rfTraceW)}
@@ -156,7 +156,7 @@ const RfGeometry = ({ boardClass }: VariantProps) => {
 
           {/* Patch upper body. */}
           <smtpad
-            portHints={["pin2"]}
+            portHints={[patchPortHint]}
             pcbX={mm(pcb.patchCenterX)}
             pcbY={mm(patchTopCenterY)}
             width={mm(pcb.patchW)}
@@ -166,7 +166,7 @@ const RfGeometry = ({ boardClass }: VariantProps) => {
 
           {/* Patch lower legs around the inset feed. */}
           <smtpad
-            portHints={["pin2"]}
+            portHints={[patchPortHint]}
             pcbX={mm(-patchLegCenterOffset)}
             pcbY={mm(patchLegCenterY)}
             width={mm(patchLegWidth)}
@@ -174,7 +174,7 @@ const RfGeometry = ({ boardClass }: VariantProps) => {
             shape="rect"
           />
           <smtpad
-            portHints={["pin2"]}
+            portHints={[patchPortHint]}
             pcbX={mm(patchLegCenterOffset)}
             pcbY={mm(patchLegCenterY)}
             width={mm(patchLegWidth)}
