@@ -140,3 +140,19 @@ The reduced-order transmission-line model gives a natural 50 mm cell progression
 - D: solve independently as a terminal/direct-fed radiator
 
 These values are stored as metadata in `src/geometry.ts` under `phaseDesignSeed`; they are not yet routed as copper meanders. See `docs/12_pre_simulation_phase_trim_estimate_v1.md`.
+
+
+## Complete complex-taper copper seed
+
+The PCB geometry now implements the first reduced-order complex-taper seed rather than storing phase only as metadata:
+
+- A: 6.5 dB amplitude seed, 0 mm branch phase trim;
+- B: 5.0 dB amplitude seed, +0.66 mm path added by a short V-shaped feed transition;
+- C: 3.0 dB amplitude seed, +1.41 mm V-shaped feed transition, with the Patch port assigned to the lagging quadrature branch in the analytical convention;
+- D: direct terminal feed replaced by a shortened phase route with about 35.34 mm centerline length (7.29 mm horizontal + 17.55 mm diagonal at ~29.91° + 10.5 mm inset).
+
+Under the current reduced-order model this gives an equivalent four-Patch phase seed close to 0° / 90° / 180° / 270° up to a common phase offset.
+
+These are pre-HFSS copper seeds, not frozen manufacturing dimensions. HFSS/openEMS should calibrate the actual coupled-port phase, effective permittivity and loaded propagation phase, after which the trim lengths can be corrected using approximately 5.30°/mm at the present analytical baseline.
+
+See `docs/13_coupler_terminal_phase_closure_v1.md`.
