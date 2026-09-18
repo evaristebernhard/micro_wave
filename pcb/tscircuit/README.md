@@ -110,7 +110,7 @@ After Gerber generation, HFSS must add the real material stack and external stru
 - magnetic interface parasitics
 - representative / actual workpiece
 
-The first HFSS pass should determine 50 mm through-line loss and phase before multi-board cascade optimization. After that, solve A/B/C coupling and board return loss as complex S-parameters, then cascade the loaded cells with S/ABCD matrices. C should fall back to a matched 3 dB hybrid/power-divider topology if the simple side-coupled seed cannot reach ~50% extraction with adequate return loss.
+The first HFSS pass should determine 50 mm through-line loss and phase before multi-board cascade optimization. After that, solve A/B/C coupling and board return loss as complex S-parameters, then cascade the loaded cells with S/ABCD matrices. C should not fall back blindly to a full-size standard branch-line hybrid: the analytical footprint audit shows that topology does not fit the current same-layer 50 × 50 mm Patch layout. If the compact side-coupled seed fails, use a compact quadrature family (miniaturized/loaded coupled-line, process-appropriate Lange/interdigital, multilayer broadside, or an external/SMD hybrid).
 
 ## Phase-synthesis design gate
 
@@ -156,3 +156,6 @@ Under the current reduced-order model this gives an equivalent four-Patch phase 
 These are pre-HFSS copper seeds, not frozen manufacturing dimensions. HFSS/openEMS should calibrate the actual coupled-port phase, effective permittivity and loaded propagation phase, after which the trim lengths can be corrected using approximately 5.30°/mm at the present analytical baseline.
 
 See `docs/13_coupler_terminal_phase_closure_v1.md`.
+
+
+For pre-HFSS phase synthesis, A/B/C use a common target branch phase of approximately -90° relative to the local through reference; D is direct-fed at 0°. This convention is parameterized in `src/geometry.ts` and must be recalibrated from the final complex S-parameters.
