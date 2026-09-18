@@ -95,7 +95,7 @@ const TCellRfGeometry = ({ boardClass }: VariantProps) => {
             shape="rect"
           />
 
-          {/* Extended bottom ground plane follows the 50 x 70 mm board. */}
+          {/* Extended bottom ground plane follows the 50 x 60 mm board. */}
           <smtpad
             portHints={["pin3"]}
             pcbX="0mm"
