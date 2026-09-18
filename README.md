@@ -19,6 +19,7 @@
 - `docs/07_theory_gap_closure_v1.md`：闭合长串 FR4 损耗上限、灰板 raw S21 指标冲突、强耦合器可实现性、D 终端板与两层梯度分配等剩余理论问题
 - `docs/08_original_requirements_feasibility_audit_v1.md`：原始客户需求可行性审计；逐项记录已证明不可同时满足或不能按原样验收的指标
 - `docs/09_current_patch_smatrix_parameter_design_v1.md`：设计思想下的第一轮参数实现；建立复数 S/ABCD 级联与 A/B/C/D seed，但 6.5/5/3 dB 只作为 scalar-budget 起点，不作为最终场最优解
+- `docs/10_zone_complex_phase_synthesis_v1.md`：四板 Zone 复相位综合；由目标 Patch 复激励反推 coupling magnitude、coupled-port phase 与 through phase，并给出 0/±90/180° canonical mode 扫描方案
 
 ## V3 当前工程口径
 
