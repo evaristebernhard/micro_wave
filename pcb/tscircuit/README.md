@@ -24,6 +24,24 @@ npm run dev
 
 Open the local tscircuit preview shown by the CLI.
 
+### WSL2 / local proxy
+
+If `tsci dev` fails while polling `/api/events/list` with HTTP 502, a local HTTP proxy (for example Clash) may be intercepting the CLI's own localhost traffic. Use:
+
+```bash
+npm run dev:wsl
+```
+
+This bypasses proxies for `localhost`, `127.0.0.1`, and `::1` and pins the preview server to port 3020.
+
+You can inspect proxy variables with:
+
+```bash
+env | grep -i proxy
+```
+
+The npm "new major version available" notice is unrelated to this issue.
+
 ## Build Circuit JSON
 
 ```bash
