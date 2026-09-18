@@ -34,17 +34,15 @@
 \boxed{[-35,+25]\ {\rm mm}}.
 \]
 
-也就是说额外 10 mm 全部增加在下方 RF/控制网络一侧。Patch、RF IN/OUT、磁吸接口及顶部边界均保持原参考坐标。
+额外 10 mm 全部增加在下方 RF/控制网络一侧。Patch、RF IN/OUT、磁吸接口及顶部边界保持原参考坐标。
 
-最重要的是板宽仍为：
+板宽仍为：
 
 \[
 \boxed{50\ {\rm mm}},
 \]
 
-所以相邻 Patch 的水平节距仍是 50 mm，不改变之前的 progressive-phase 参考。
-
-这比 50×60、center=0 更节省面积，同时提供同样的 -35 mm 下边界。
+所以相邻 Patch 的水平节距仍是 50 mm，不改变 progressive-phase 参考。这个方案与 50×60、center=0 具有相同的 -35 mm 下边界，但总高度少 10 mm。
 
 ## 2. 扩板以后标准 C branch-line hybrid 已经从“放不下”变成“可以作为真实候选”
 
