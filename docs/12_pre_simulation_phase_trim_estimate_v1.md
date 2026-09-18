@@ -464,3 +464,54 @@ D 由于是 terminal direct-feed，必须单独做 phase matching，不应强行
 \]
 
 从近似值替换成真实值，再对上述解析 seed 做一次校正。
+---
+
+## 13. coarse + fine phase 综合
+
+传统微波网络设计不要求所有相位都靠长传输线实现。
+
+当前导波波长约：
+
+\[\lambda_g\approx67.88\ {\rm mm},\]
+
+所以：
+
+\[\boxed{1\ {\rm mm}\approx5.30^\circ}\]
+
+\[\boxed{0.5\ {\rm mm}\approx2.65^\circ}.\]
+
+理想 directional coupler / branch-line hybrid 在中心频率附近天然提供 quadrature phase。若通过 topology / port orientation 能提供接近：
+
+\[0^\circ,\ \pm90^\circ,\ 180^\circ\]
+
+的 coarse phase 选择，则任意目标相位都可以先选最近象限，再用短线补残差。
+
+若可以覆盖四个象限，最坏 fine-phase residual 不超过：
+
+\[45^\circ,\]
+
+对应最大 fine trim：
+
+\[
+\boxed{
+L_{\rm fine,max}
+\approx
+\lambda_g\frac{45^\circ}{360^\circ}
+\approx8.48\ {\rm mm}.
+}
+\]
+
+即便只做到 90° 级 coarse resolution，fine trim 也只需约：
+
+\[\lambda_g/4\approx16.97\ {\rm mm}.\]
+
+因此后续 PCB 更合理的 phase-control architecture 是：
+
+1. coupler / hybrid topology 决定 coarse quadrant；
+2. 0–8.5 mm 左右的 branch trim 区域做 fine phase；
+3. 0.5 mm 级参数步进即可提供约 2.65° 的一阶相位分辨率；
+4. 不默认使用几十毫米长 meander。
+
+这也给 D terminal 一个明确的预设计原则：D 不必复制 A/B/C 的 coupler，但应该保留一个 terminal phase-tuning section。若前级拓扑能先把 D 所需相位放到正确象限，D 的 fine tuning 区域约 0–8.5 mm 就有机会覆盖所需残差。
+
+这仍然是预仿真近似值；最终相位长度按 loaded \(\beta\) 校正。
