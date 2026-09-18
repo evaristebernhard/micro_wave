@@ -13,6 +13,9 @@
 - `docs/02_system_theory_analysis_v1.md`：系统拓扑、功率预算、级联均匀性、WR340/50 Ω、磁吸接口等理论分析
 - `docs/03_patch_antenna_theory_v1.md`：2.45 GHz 前向辐射矩形 Patch 的尺寸、弱耦合、馈电、功率守恒与 tscircuit/HFSS 参数化基线
 - `docs/04_pcb_design_manual_v1.md`：第一版 tscircuit PCB 的执行手册，含坐标、尺寸、层叠、Patch/主线/耦合/识别线/磁吸接口规则和 HFSS 交接清单
+- `docs/05_gradient_coupling_system_architecture_v1.md`：梯度耦合分区架构、等功率递推、A/B/C/D 四类板、500 W 系统功率边界和分配网络约束
+- `docs/06_patch_design_rationale_v1.md`：解释矩形 Patch 是什么、如何向工件输送微波能量、原方形螺旋方案的高频/级联问题，以及为什么当前把 Patch 作为优化主基线
+- `docs/07_theory_gap_closure_v1.md`：闭合长串 FR4 损耗上限、灰板 raw S21 指标冲突、强耦合器可实现性、D 终端板与两层梯度分配等剩余理论问题
 
 ## V2 主要修订
 
@@ -30,20 +33,23 @@
 
 系统仍支持总计 1–100 块，但不再默认全部串在一条连续 FR4 主线上。
 
-初始工程基线：
+当前工程基线：
 
 ```text
 磁控管
   → WR340 / 匹配
   → WR340→N
-  → 低损耗 50 Ω 馈线
-  → RF 分区
-       ├─ 每区 4 块推荐
-       └─ 每区 5 块作为当前上限候选
-  → 分区/末端负载
+  → 低损耗分配主干
+  → 梯度耦合 RF Zone
+       ├─ 4 块：A → B → C → D_term
+       ├─ 3 块：B → C → D_term
+       ├─ 2 块：C → D_term
+       └─ 1 块：D_term
 ```
 
-25/100 块优先使用局部全波模型 + 复数 S 参数网络级联。
+按当前 0.42 dB/cell 理论值，4 板等功率梯度目标约为 **21.5% / 30.2% / 47.6% / 100%**。D 板是终端辐射板，不再把所有板都按固定 10% 弱耦合同构板处理。
+
+25/100 块优先使用局部全波模型 + 复数 S 参数网络级联。梯度比例必须在 HFSS/openEMS 得到真实 through-line 传输系数后重新标定。
 
 ### 50 Ω 主线
 
