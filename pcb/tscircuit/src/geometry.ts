@@ -172,3 +172,32 @@ export const phaseDesignSeed = {
   // D is terminal/direct-fed and must be phase-matched separately.
   terminalPhaseNeedsIndependentSolve: true
 } as const
+
+/**
+ * Analytical D-terminal feed route for the +90 degree progressive-phase seed.
+ *
+ * Phase convention: A/B/C use the lagging quadrature coupled port
+ * (approximately -90 deg intrinsic branch phase). D is direct-fed.
+ * The reduced-order model then requires about 35.34 mm total centerline
+ * path from the D RF input reference to the Patch inset reference.
+ */
+export const terminalPhaseRouteSeed = {
+  targetProgressionDeg: 90,
+  cCouplerIntrinsicBranchPhaseDeg: -90,
+  targetTotalElectricalPathMm: 35.34,
+  currentOrthogonalPathMm: 41.75,
+  pathReductionMm: 6.41,
+  inputX: -22.5,
+  inputY: -18.0,
+  horizontalLengthMm: 7.29,
+  junctionX: -15.21,
+  junctionY: -18.0,
+  diagonalLengthMm: 17.55,
+  diagonalAngleDeg: 29.91,
+  diagonalCenterX: -7.61,
+  diagonalCenterY: -13.625,
+  patchEntryX: 0,
+  patchEntryY: -9.25,
+  insetLengthMm: 10.5,
+  insetCenterY: -4.0
+} as const
