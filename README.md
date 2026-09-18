@@ -161,3 +161,5 @@ micro_wave/
 
 - `docs/17_tcell_reference_plane_layout_v1.md`：50×60 T-cell 正确 reference plane、T-junction 坐标、inter-cell 37–39° phase target 与 D 半波 V-feed。
 - `docs/18_tcell_bandwidth_load_sensitivity_v1.md`：理想传输线频带与 loaded-Patch reflection 敏感性；给出 T-cell / isolated-topology 的定量切换判据。
+
+- `docs/19_tcell_exact_equal_power_synthesis_v1.md`：按 0.42 dB/cell 精确反解等功率 T-cell；A/B/C 更新为 21.498% / 30.167% / 47.584%，并重新综合线宽、T 点与 inter-cell phase。
