@@ -29,7 +29,7 @@ export const pcb = {
   legacyCouplingLength: 6.0,
 
   idTraceW: 0.30,
-  idTraceY: -23.0,
+  idTraceY: -32.0,
 
   rfPadW: 4.6,
   rfPadH: 4.0,
@@ -396,8 +396,22 @@ export const matchedExtractionTCellSeed = {
   fiftyOhmWidthMm: 3.12,
   fiftyOhmQuarterWaveMm: 16.92,
   fiftyOhmHalfWaveMm: 33.84,
-  assumedInputLeadMm: 0.50,
-  patchReferencePoint: { x: 0, y: 1.25 },
+
+  // T-cell-specific side contacts. Keeping board width at 50 mm preserves
+  // Patch pitch; moving the contact center outward reduces the inter-board
+  // electrical bridge while leaving a manufacturable 3.6 mm contact pad.
+  rfContactX: 23.2,
+  rfContactPadWidthMm: 3.6,
+  rfContactPadHeightMm: 4.0,
+  physicalContactCenterGapMm: 3.6,
+
+  // The Patch branch quarter-wave includes the existing 10.5 mm inset feed.
+  // A common 2.87 mm 50-ohm lead before the series transformer minimizes the
+  // worst A/B/C through-phase residual with the shared mechanical bridge.
+  commonInputLeadMm: 2.87,
+  patchBottomReferencePoint: { x: 0, y: -9.25 },
+  patchModeReferencePoint: { x: 0, y: 1.25 },
+
   variants: {
     A: {
       k: 0.224,
@@ -407,10 +421,12 @@ export const matchedExtractionTCellSeed = {
       branchTransformerOhm: 93.06,
       branchTransformerWidthMm: 0.88,
       branchQuarterWaveMm: 17.65,
-      junctionX: -5.23,
-      junctionY: -15.61,
-      onboardThroughTailMm: 27.73,
-      requiredBridgeElectricalMm: 6.11
+      branchPreInsetMm: 7.15,
+      junctionX: -3.74,
+      junctionY: -15.35,
+      onboardThroughTailMm: 27.07,
+      throughResidualLengthMm: -0.305,
+      throughResidualPhaseDeg: -1.62
     },
     B: {
       k: 0.316,
@@ -420,10 +436,12 @@ export const matchedExtractionTCellSeed = {
       branchTransformerOhm: 73.56,
       branchTransformerWidthMm: 1.52,
       branchQuarterWaveMm: 17.39,
-      junctionX: -5.30,
-      junctionY: -15.31,
-      onboardThroughTailMm: 27.80,
-      requiredBridgeElectricalMm: 6.04
+      branchPreInsetMm: 6.89,
+      junctionX: -3.87,
+      junctionY: -14.95,
+      onboardThroughTailMm: 27.24,
+      throughResidualLengthMm: -0.132,
+      throughResidualPhaseDeg: -0.70
     },
     C: {
       k: 0.501,
@@ -433,19 +451,27 @@ export const matchedExtractionTCellSeed = {
       branchTransformerOhm: 49.90,
       branchTransformerWidthMm: 3.13,
       branchQuarterWaveMm: 16.92,
-      junctionX: -5.48,
-      junctionY: -14.76,
-      onboardThroughTailMm: 27.98,
-      requiredBridgeElectricalMm: 5.87
+      branchPreInsetMm: 6.42,
+      junctionX: -4.20,
+      junctionY: -14.10,
+      onboardThroughTailMm: 27.68,
+      throughResidualLengthMm: 0.305,
+      throughResidualPhaseDeg: 1.62
     }
   },
-  commonBridgeElectricalSeedMm: 6.0,
-  inputToJunctionPhaseDeg: -90,
-  junctionToPatchPhaseDeg: -90,
-  junctionToNextCellPhaseDeg: -180,
+
+  inputLeadPhaseIsCommon: true,
+  inputTransformerPhaseDeg: -90,
+  branchTransformerPhaseDeg: -90,
   targetCellThroughPhaseDeg: -270,
   targetPatchProgressionDeg: 90,
+
+  // D uses a direct 50-ohm half-wave path to the same Patch-bottom reference,
+  // followed by the same inset feed used by A/B/C.
   terminalDHalfWaveFeedSeedMm: 33.84,
-  primaryAdvantage: "ordinary-width-lines-no-micron-coupling-gap",
+  terminalDWaypoint: { x: -10.0, y: -25.19 },
+
+  primaryAdvantage: "ordinary-width-lines-and-analytic-amplitude-phase-closure",
   primaryRisk: "three-port-T-cell-has-no-inherent-output-isolation"
 } as const
+
