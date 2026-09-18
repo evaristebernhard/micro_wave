@@ -201,3 +201,48 @@ L_C^{\rm eff}
 \]
 
 而不是与 C 无关的绝对固定尺寸。
+
+---
+
+## 8. 2026-09-18 更新：允许扩板后，标准 branch-line 重新成为候选
+
+若 PCB 高度从 50 mm 增加到 60 mm，并把板中心设为
+
+\[
+y_c=-5\ {\rm mm},
+\]
+
+则板顶部仍保持 +25 mm，新增的 10 mm 全部向下扩展。
+
+因此 Patch、RF IN/OUT 与水平 50 mm 模块节距全部保持不变，但 Patch 下方空间从：
+
+\[
+15.75\ {\rm mm}
+\]
+
+增加到：
+
+\[
+\boxed{25.75\ {\rm mm}}.
+\]
+
+标准 3 dB branch-line 一阶铜包络高度约 22.25 mm，因此剩余：
+
+\[
+\boxed{25.75-22.25=3.50\ {\rm mm}}.
+\]
+
+所以本文前半部分的“50×50 同层布局放不下”仍然成立，但新的工程结论改为：
+
+\[
+\boxed{
+\text{50×50 不适合标准 branch-line；50×60 可以把它作为真实对照方案。}
+}
+\]
+
+这并不意味着标准 branch-line 自动成为首选。当前 matched-extraction T-cell 的解析几何更简单，而且 A/B/C 所需线宽全部可制造。因此后续应并行比较：
+
+1. 50×60 matched T-cell；
+2. 50×60 standard/miniaturized quadrature hybrid；
+3. 必要时 unequal Wilkinson / isolated divider。
+
