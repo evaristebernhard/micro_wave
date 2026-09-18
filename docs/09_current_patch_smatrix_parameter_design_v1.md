@@ -285,64 +285,81 @@ P_{i+1}
 
 ---
 
-## 6. 建议把 50 mm cell 的目标相位主动调到约 270°
+## 6. 50 mm cell 的 through phase：保留天然值作为 seed，但不再冻结 270°
 
-当前天然值已经接近：
+当前 50 mm cell 的一阶传播相位接近：
 
 \[
-270^\circ.
+-265^\circ\sim-270^\circ.
 \]
 
-因此建议把 A/B/C 的板级 reference-plane through phase 定为：
+这个值作为 HFSS 搜索起点是合理的，因为它接近真实 FR4 through-line 的天然电长度。
+
+但不再以：
+
+\[
+4\times270^\circ\equiv0^\circ
+\pmod{360^\circ}
+\]
+
+作为冻结该相位的理由。
+
+真正决定工件场的是各 Patch 的复激励：
+
+\[
+\mathbf u=(u_A,u_B,u_C,u_D)^T.
+\]
+
+若第 \(i\) 个 cell 的 Patch 抽取系数和 through 系数分别为：
+
+\[
+p_i=|p_i|e^{j\chi_i},
+\qquad
+h_i=|h_i|e^{j\theta_i},
+\]
+
+则：
+
+\[
+u_i=p_iF_i,
+\qquad
+F_{i+1}=h_iF_i,
+\]
+
+从而：
 
 \[
 \boxed{
-\angle S_{21}(2.45{\rm GHz})
-=
--270^\circ\pm10^\circ
+\frac{u_{i+1}}{u_i}=\frac{p_{i+1}h_i}{p_i}.
 }
 \]
 
-并要求 A/B/C 三种板：
+所以相邻 Patch 的目标相位差满足：
 
 \[
-\angle S_{21,A}
-\approx
-\angle S_{21,B}
-\approx
-\angle S_{21,C}.
+\boxed{
+\psi_i=\theta_i+\chi_{i+1}-\chi_i.
+}
 \]
 
-好处：
+若 A/B/C 的 coupled-branch phase 近似相同，则天然 \(\theta_i\approx+90^\circ\sim+95^\circ\) 会直接形成约 \(+90^\circ\) 的 Patch progressive phase。
 
-1. 4 板 Zone 总传播相位接近：
-   \[
-   4\times270^\circ
-   =
-   1080^\circ
-   \equiv0^\circ
-   \pmod{360^\circ};
-   \]
-2. A/B/C 可以作为真正的模块化 cell；
-3. 分区网络的相位预算更容易控制；
-4. 后续 S 参数级联更稳定。
-
-50 mm cell 一阶 group delay：
+因此当前 through-phase 口径改为：
 
 \[
-\tau_g
-\approx0.30\ {\rm ns}.
+\boxed{
+-265^\circ\sim-270^\circ
+\text{ 是 candidate phase state，不是最终固定目标。}
+}
 \]
 
-在 ±50 MHz 频偏下单板额外相位变化约：
+第一轮完整 Zone 必须比较：
 
-\[
-\pm5.5^\circ.
-\]
+- natural \(+90^\circ\) progression；
+- 近同相 progression；
+- \(Q\)-matrix 优化得到的目标 progression。
 
-因此 100 MHz 带宽内把单板相位控制在约 270° 附近是合理的第一轮目标。
-
----
+详细综合公式见 docs/10_zone_complex_phase_synthesis_v1.md。
 
 ## 7. 反射容差应该比原 VSWR≤2 严格
 
@@ -1302,7 +1319,7 @@ D=\text{matched terminal Patch}
 }
 \]
 
-在此基础上，A/B/C/D 才真正具备工程意义。
+在此基础上，A/B/C/D 才真正具备工程意义。\n\n更高一级的设计原则见 docs/06_patch_design_rationale_v1.md 第 19–30 节；复相位综合见 docs/10_zone_complex_phase_synthesis_v1.md。这里的 6.5/5/3 dB 统一解释为第一轮 scalar-budget seed，最终允许为了目标复激励 \\(\\mathbf u_*\\) 改变 coupling magnitude、coupled-port phase 与 through phase。
 
 
 ---

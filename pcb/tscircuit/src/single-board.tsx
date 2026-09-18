@@ -3,6 +3,8 @@ import {
   getVariantDerived,
   patchDerived,
   pcb,
+  terminalPhaseRoutePolygonPoints,
+  terminalPhaseRouteSeed,
   type BoardClass
 } from "./geometry"
 
@@ -13,8 +15,11 @@ type VariantProps = {
 }
 
 /**
- * Parameterized presentation/engineering seed for the 50 mm x 50 mm
- * gradient-coupled Patch boards.
+ * Parameterized presentation/engineering seed for the 50 mm x 70 mm
+ * extended-height gradient-coupled Patch boards.
+ *
+ * The original RF/Patch coordinates are preserved. The added height does not change the 50 mm horizontal Patch pitch. RF and
+ * Patch coordinates remain unchanged; only the board outline/ground area grows.
  *
  * A/B/C are through boards with quarter-wave-scale coupling sections.
  * D is a terminal radiator and deliberately has no RF OUT.
@@ -35,17 +40,9 @@ const RfGeometry = ({ boardClass }: VariantProps) => {
   const patchLegHeight = pcb.insetDepth
   const patchLegCenterY = patchDerived.patchYMin + patchLegHeight / 2
 
-  const feedYMin =
-    boardClass === "D"
-      ? pcb.rfTraceY + pcb.rfTraceW / 2
-      : derived.coupledTraceY + pcb.rfTraceW / 2
-  const feedYMax = patchDerived.notchYMax
-  const feedHeight = feedYMax - feedYMin
-  const feedCenterY = (feedYMax + feedYMin) / 2
-
-  const terminalInputLength = pcb.rfContactX
-  const terminalInputCenterX = -terminalInputLength / 2
   const patchPortHint = boardClass === "D" ? "pin1" : "pin2"
+  const insetFeedCenterY =
+    (patchDerived.patchYMin + patchDerived.notchYMax) / 2
 
   return (
     <chip
@@ -78,14 +75,15 @@ const RfGeometry = ({ boardClass }: VariantProps) => {
         <footprint>
           {boardClass === "D" ? (
             <>
-              {/* Terminal-board input line: no RF OUT after D. */}
+              {/*
+               * One contiguous polygon implements the analytical D phase route:
+               * horizontal -> diagonal -> inset. This is the Gerber-like copper
+               * representation of the ~35.34 mm centerline seed.
+               */}
               <smtpad
                 portHints={["pin1"]}
-                pcbX={mm(terminalInputCenterX)}
-                pcbY={mm(pcb.rfTraceY)}
-                width={mm(terminalInputLength)}
-                height={mm(pcb.rfTraceW)}
-                shape="rect"
+                shape="polygon"
+                points={terminalPhaseRoutePolygonPoints}
               />
               <smtpad
                 portHints={["pin1"]}
@@ -96,8 +94,7 @@ const RfGeometry = ({ boardClass }: VariantProps) => {
                 shape="rect"
               />
             </>
-          ) : (
-            <>
+          ) : (            <>
               {/* 50 ohm through-line seed. */}
               <smtpad
                 portHints={["pin1"]}
@@ -144,15 +141,25 @@ const RfGeometry = ({ boardClass }: VariantProps) => {
             </>
           )}
 
-          {/* Vertical Patch feed inside the inset notch. */}
-          <smtpad
-            portHints={[patchPortHint]}
-            pcbX="0mm"
-            pcbY={mm(feedCenterY)}
-            width={mm(pcb.rfTraceW)}
-            height={mm(feedHeight)}
-            shape="rect"
-          />
+          {/* Patch feed / analytical phase-trim section. */}
+          {boardClass === "D" ? null : derived.branchPhaseTrimLengthSeed === 0 ? (
+            <smtpad
+              portHints={[patchPortHint]}
+              pcbX="0mm"
+              pcbY={mm(
+                (derived.phaseFeedStartY + patchDerived.notchYMax) / 2
+              )}
+              width={mm(pcb.rfTraceW)}
+              height={mm(patchDerived.notchYMax - derived.phaseFeedStartY)}
+              shape="rect"
+            />
+          ) : (
+            <smtpad
+              portHints={[patchPortHint]}
+              shape="polygon"
+              points={derived.phaseFeedPolygonPoints}
+            />
+          )}
 
           {/* Patch upper body. */}
           <smtpad
@@ -186,9 +193,9 @@ const RfGeometry = ({ boardClass }: VariantProps) => {
           <smtpad
             portHints={["pin3"]}
             pcbX="0mm"
-            pcbY="0mm"
-            width="49.6mm"
-            height="49.6mm"
+            pcbY={mm(pcb.boardCenterY)}
+            width={mm(pcb.boardW - 0.4)}
+            height={mm(pcb.boardH - 0.4)}
             shape="rect"
             layer="bottom"
           />
@@ -461,13 +468,13 @@ const PresentationSilkscreen = ({ boardClass }: VariantProps) => {
 
       <silkscreentext
         pcbX="-20.5mm"
-        pcbY="-24mm"
+        pcbY="-33.2mm"
         text="ID IN"
         fontSize="0.65mm"
       />
       <silkscreentext
         pcbX="20.5mm"
-        pcbY="-24mm"
+        pcbY="-33.2mm"
         text="ID OUT"
         fontSize="0.65mm"
       />
@@ -501,7 +508,7 @@ export const GradientPatchBoard = ({ boardClass }: VariantProps) => (
     width={mm(pcb.boardW)}
     height={mm(pcb.boardH)}
     center_x={0}
-    center_y={0}
+    center_y={pcb.boardCenterY}
     routingDisabled
   >
     <net name="GND" />
