@@ -273,7 +273,7 @@ const TCellSilkscreen = ({ boardClass }: VariantProps) => {
         text={
           boardClass === "D"
             ? `L≈${matchedExtractionTCellSeed.terminalD.preInsetHalfWaveMm.toFixed(2)}mm`
-            : `BRIDGE≈${meta.bridgePhaseDeg.toFixed(2)}deg`
+            : `BRIDGE≈${meta.bridgePhaseDeg.toFixed(2)}deg / Δ≈${meta.bridgeResidualPhaseDeg.toFixed(2)}deg`
         }
         fontSize="0.5mm"
       />
