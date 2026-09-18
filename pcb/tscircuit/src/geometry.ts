@@ -19,7 +19,7 @@ export const pcb = {
   idTraceW: 0.30,
   idTraceY: -23.0,
 
-  rfPadW: 5.0,
+  rfPadW: 4.6,
   rfPadH: 4.0
 } as const
 
