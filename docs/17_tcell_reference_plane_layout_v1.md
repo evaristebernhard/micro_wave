@@ -7,13 +7,13 @@
 最终预仿真机械包络取：
 
 \[
-\boxed{50\times60\ {\rm mm}}
+\boxed{50\times70\ {\rm mm}}
 \]
 
 且板中心：
 
 \[
-\boxed{y_c=-5\ {\rm mm}}.
+\boxed{y_c=0}.
 \]
 
 因此边界为：
@@ -21,7 +21,7 @@
 \[
 x\in[-25,25]\ {\rm mm},
 \qquad
-y\in[-35,25]\ {\rm mm}.
+y\in[-35,35]\ {\rm mm}.
 \]
 
 由于当前 tscircuit board outline 以原点居中处理，工程文件采用 50×70 mm 对称外形，以获得 y=-35 mm 的下边界；横向 50 mm 节距和所有 RF/Patch reference 均保持不变。
