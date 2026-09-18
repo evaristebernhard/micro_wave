@@ -206,7 +206,7 @@ L_C^{\rm eff}
 
 ## 8. 2026-09-18 更新：允许扩板后，标准 branch-line 重新成为候选
 
-若 PCB 高度从 50 mm 增加到 70 mm，并把板中心设为
+若 PCB 高度从 50 mm 增加到 60 mm，并把板中心设为
 
 \[
 y_c=0,
@@ -246,3 +246,13 @@ y_c=0,
 2. 50×60 standard/miniaturized quadrature hybrid；
 3. 必要时 unequal Wilkinson / isolated divider。
 
+
+### 当前机械口径
+
+当前工程尺寸最终统一为 50×60 mm，板中心 y=-5 mm，因此边界为：
+
+\[
+\boxed{y\in[-35,25]\ {\rm mm}}.
+\]
+
+这与 50×70、center=0 在 Patch 下方提供相同的 -35 mm 下边界，但少占 10 mm 总高度；同时保持 +25 mm 顶边和原 Patch/RF 坐标不变。
