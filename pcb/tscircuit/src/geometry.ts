@@ -128,6 +128,48 @@ export const patchDerived = {
   notchYMax: pcb.patchCenterY - pcb.patchL / 2 + pcb.insetDepth
 } as const
 
+type PcbPoint = { x: number; y: number }
+
+const strokePolyline = (points: PcbPoint[], width: number): PcbPoint[] => {
+  const half = width / 2
+  const normals = points.slice(0, -1).map((p, i) => {
+    const q = points[i + 1]
+    const dx = q.x - p.x
+    const dy = q.y - p.y
+    const len = Math.hypot(dx, dy)
+    return { x: -dy / len, y: dx / len }
+  })
+
+  const offsetPoint = (i: number, side: 1 | -1): PcbPoint => {
+    const p = points[i]
+    if (i === 0) {
+      const n = normals[0]
+      return { x: p.x + side * half * n.x, y: p.y + side * half * n.y }
+    }
+    if (i === points.length - 1) {
+      const n = normals[normals.length - 1]
+      return { x: p.x + side * half * n.x, y: p.y + side * half * n.y }
+    }
+
+    const n0 = normals[i - 1]
+    const n1 = normals[i]
+    const sx = n0.x + n1.x
+    const sy = n0.y + n1.y
+    const sl = Math.hypot(sx, sy)
+    const mx = sx / sl
+    const my = sy / sl
+    const denom = mx * n0.x + my * n0.y
+    const scale = half / Math.max(Math.abs(denom), 0.25)
+    return { x: p.x + side * scale * mx, y: p.y + side * scale * my }
+  }
+
+  const left = points.map((_, i) => offsetPoint(i, 1))
+  const right = points
+    .map((_, i) => offsetPoint(i, -1))
+    .reverse()
+  return [...left, ...right]
+}
+
 export const getVariantDerived = (boardClass: BoardClass) => {
   const variant = boardVariants[boardClass]
   const coupledTraceY =
@@ -157,6 +199,22 @@ export const getVariantDerived = (boardClass: BoardClass) => {
     branchTrim > 0
       ? (Math.atan2(phaseFeedHalfRise, phaseFeedPeakX) * 180) / Math.PI
       : 90
+  const phaseFeedCenterline: PcbPoint[] =
+    branchTrim > 0
+      ? [
+          { x: 0, y: phaseFeedStartY },
+          { x: phaseFeedPeakX, y: phaseFeedMidY },
+          { x: 0, y: phaseFeedEndY },
+          { x: 0, y: patchDerived.notchYMax + 0.2 }
+        ]
+      : [
+          { x: 0, y: phaseFeedStartY },
+          { x: 0, y: patchDerived.notchYMax + 0.2 }
+        ]
+  const phaseFeedPolygonPoints = strokePolyline(
+    phaseFeedCenterline,
+    pcb.rfTraceW
+  )
 
   return {
     ...patchDerived,
@@ -174,7 +232,9 @@ export const getVariantDerived = (boardClass: BoardClass) => {
     phaseFeedHalfSegmentLength,
     phaseFeedPeakX,
     phaseFeedMidY,
-    phaseFeedAngleDeg
+    phaseFeedAngleDeg,
+    phaseFeedCenterline,
+    phaseFeedPolygonPoints
   } as const
 }
 
@@ -237,3 +297,15 @@ export const terminalPhaseRouteSeed = {
   insetLengthMm: 10.5,
   insetCenterY: -4.0
 } as const
+
+export const terminalPhaseRouteCenterline: PcbPoint[] = [
+  { x: terminalPhaseRouteSeed.inputX, y: terminalPhaseRouteSeed.inputY },
+  { x: terminalPhaseRouteSeed.junctionX, y: terminalPhaseRouteSeed.junctionY },
+  { x: terminalPhaseRouteSeed.patchEntryX, y: terminalPhaseRouteSeed.patchEntryY },
+  { x: terminalPhaseRouteSeed.patchEntryX, y: patchDerived.notchYMax + 0.2 }
+]
+
+export const terminalPhaseRoutePolygonPoints = strokePolyline(
+  terminalPhaseRouteCenterline,
+  pcb.rfTraceW
+)
