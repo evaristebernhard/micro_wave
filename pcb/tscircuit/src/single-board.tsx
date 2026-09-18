@@ -136,8 +136,8 @@ export const SingleBoard = () => (
   <board
     width={mm(pcb.boardW)}
     height={mm(pcb.boardH)}
-    centerX={0}
-    centerY={0}
+    center_x={0}
+    center_y={0}
     routingDisabled
   >
     <RfGeometry />
