@@ -1,10 +1,10 @@
 import { matchedExtractionTCellSeed, type BoardClass } from "./geometry"
 
 export const tCellRfPolygonPoints = {
-  A: [{ x: -20.614, y: -15.719 },{ x: -20.356, y: -17.613 },{ x: -20.567, y: -16.068 },{ x: -23.41, y: -16.455 },{ x: -22.99, y: -19.545 },{ x: -20.146, y: -19.158 },{ x: -20.098, y: -19.507 },{ x: -3.48, y: -17.245 },{ x: -3.521, y: -16.939 },{ x: 23.047, y: -19.552 },{ x: 23.353, y: -16.448 },{ x: -2.346, y: -13.92 },{ x: 0.375, y: -9.48 },{ x: 0, y: -9.25 },{ x: 0.44, y: -9.25 },{ x: 0.44, y: 1.45 },{ x: -0.44, y: 1.45 },{ x: -0.44, y: -9.126 },{ x: -3.318, y: -13.825 },{ x: -3.585, y: -13.799 },{ x: -3.611, y: -14.065 },{ x: -3.738, y: -14.012 },{ x: -3.91, y: -14.084 },{ x: -3.995, y: -13.456 }],
-  B: [{ x: -20.693, y: -15.472 },{ x: -20.365, y: -17.553 },{ x: -20.608, y: -16.013 },{ x: -23.443, y: -16.46 },{ x: -22.957, y: -19.54 },{ x: -20.122, y: -19.093 },{ x: -20.037, y: -19.634 },{ x: -3.541, y: -17.033 },{ x: -3.618, y: -16.549 },{ x: 23.026, y: -19.55 },{ x: 23.374, y: -16.45 },{ x: -2.026, y: -13.59 },{ x: 0.629, y: -9.677 },{ x: 0, y: -9.25 },{ x: 0.76, y: -9.25 },{ x: 0.76, y: 1.45 },{ x: -0.76, y: 1.45 },{ x: -0.76, y: -9.016 },{ x: -3.806, y: -13.504 },{ x: -3.869, y: -13.477 },{ x: -4.088, y: -13.568 },{ x: -4.198, y: -12.871 }],
-  C: [{ x: -23.513, y: -16.472 },{ x: -22.887, y: -19.528 },{ x: -20.075, y: -18.951 },{ x: -19.854, y: -20.027 },{ x: -3.668, y: -16.706 },{ x: -3.85, y: -15.817 },{ x: -3.689, y: -15.75 },{ x: 22.98, y: -19.544 },{ x: 23.42, y: -16.456 },{ x: -1.145, y: -12.962 },{ x: 1.183, y: -10.274 },{ x: 0, y: -9.25 },{ x: 1.565, y: -9.25 },{ x: 1.565, y: 1.45 },{ x: -1.565, y: 1.45 },{ x: -1.565, y: -8.667 },{ x: -4.599, y: -12.17 },{ x: -4.736, y: -11.499 },{ x: -20.923, y: -14.82 },{ x: -20.702, y: -15.896 }],
-  D: [{ x: -10.542, y: -23.115 },{ x: -22.454, y: -16.63 },{ x: -23.946, y: -19.37 },{ x: -9.458, y: -27.256 },{ x: 1.559, y: -9.699 },{ x: 1.559, y: 1.45 },{ x: -1.559, y: 1.45 },{ x: -1.559, y: -8.801 }]
+  A: [{ x: -6.098, y: -27.863 },{ x: -6.491, y: -27.985 },{ x: -6.618, y: -27.580 },{ x: -21.119, y: -19.689 },{ x: -22.807, y: -18.770 },{ x: -20.970, y: -15.393 },{ x: -5.248, y: -23.948 },{ x: -0.933, y: -10.700 },{ x: -1.450, y: -10.700 },{ x: -1.450, y: 1.450 },{ x: -1.450, y: 2.900 },{ x: 1.450, y: 2.900 },{ x: 1.450, y: -9.250 },{ x: 1.450, y: -10.700 },{ x: -0.011, y: -10.700 },{ x: -4.353, y: -24.030 },{ x: 19.732, y: -16.503 },{ x: 21.229, y: -16.035 },{ x: 22.165, y: -19.029 },{ x: -3.902, y: -27.176 },{ x: -4.692, y: -28.628 }],
+  B: [{ x: -6.315, y: -27.685 },{ x: -6.452, y: -27.727 },{ x: -6.493, y: -27.592 },{ x: -21.185, y: -19.875 },{ x: -23.060, y: -18.890 },{ x: -21.090, y: -15.140 },{ x: -5.421, y: -23.370 },{ x: -1.275, y: -10.700 },{ x: -1.450, y: -10.700 },{ x: -1.450, y: 1.450 },{ x: -1.450, y: 2.900 },{ x: 1.450, y: 2.900 },{ x: 1.450, y: -9.250 },{ x: 1.450, y: -10.700 },{ x: 0.326, y: -10.700 },{ x: -3.922, y: -23.681 },{ x: 19.745, y: -16.499 },{ x: 21.245, y: -16.044 },{ x: 22.156, y: -19.045 },{ x: -3.585, y: -26.857 },{ x: -4.516, y: -28.630 }],
+  C: [{ x: 19.769, y: -16.492 },{ x: 21.277, y: -16.061 },{ x: 22.139, y: -19.077 },{ x: -2.828, y: -26.209 },{ x: -4.137, y: -28.871 },{ x: -21.377, y: -20.395 },{ x: -23.772, y: -19.217 },{ x: -21.417, y: -14.428 },{ x: -5.927, y: -22.044 },{ x: -1.493, y: -8.752 },{ x: -1.450, y: -8.624 },{ x: -1.450, y: 1.450 },{ x: -1.450, y: 2.900 },{ x: 1.450, y: 2.900 },{ x: 1.450, y: -8.075 },{ x: 1.991, y: -8.255 },{ x: 1.450, y: -9.876 },{ x: 1.450, y: -10.700 },{ x: 1.175, y: -10.700 },{ x: -2.919, y: -22.973 }],
+  D: [{ x: -1.499, y: -8.787 },{ x: -1.450, y: -8.630 },{ x: -1.450, y: 1.450 },{ x: -1.450, y: 2.900 },{ x: 1.450, y: 2.900 },{ x: 1.450, y: -8.056 },{ x: 1.961, y: -8.214 },{ x: 1.450, y: -9.870 },{ x: 1.450, y: -10.700 },{ x: 1.194, y: -10.700 },{ x: -4.033, y: -27.631 },{ x: -20.888, y: -19.410 },{ x: -22.297, y: -18.722 },{ x: -20.922, y: -15.903 },{ x: -5.950, y: -23.206 }]
 } as const
 
 export const tCellVariantMeta = {
@@ -13,12 +13,9 @@ export const tCellVariantMeta = {
     k: matchedExtractionTCellSeed.variants.A.k,
     junctionX: matchedExtractionTCellSeed.variants.A.junctionX,
     junctionY: matchedExtractionTCellSeed.variants.A.junctionY,
-    seriesTransformerOhm:
-      matchedExtractionTCellSeed.variants.A.seriesTransformerOhm,
-    branchTransformerOhm:
-      matchedExtractionTCellSeed.variants.A.branchTransformerOhm,
-    throughResidualPhaseDeg:
-      matchedExtractionTCellSeed.variants.A.throughResidualPhaseDeg,
+    seriesTransformerOhm: matchedExtractionTCellSeed.variants.A.seriesTransformerOhm,
+    branchTransformerOhm: matchedExtractionTCellSeed.variants.A.branchTransformerOhm,
+    bridgePhaseDeg: matchedExtractionTCellSeed.variants.A.requiredIntercellPhaseDeg,
     hasRfOut: true
   },
   B: {
@@ -26,12 +23,9 @@ export const tCellVariantMeta = {
     k: matchedExtractionTCellSeed.variants.B.k,
     junctionX: matchedExtractionTCellSeed.variants.B.junctionX,
     junctionY: matchedExtractionTCellSeed.variants.B.junctionY,
-    seriesTransformerOhm:
-      matchedExtractionTCellSeed.variants.B.seriesTransformerOhm,
-    branchTransformerOhm:
-      matchedExtractionTCellSeed.variants.B.branchTransformerOhm,
-    throughResidualPhaseDeg:
-      matchedExtractionTCellSeed.variants.B.throughResidualPhaseDeg,
+    seriesTransformerOhm: matchedExtractionTCellSeed.variants.B.seriesTransformerOhm,
+    branchTransformerOhm: matchedExtractionTCellSeed.variants.B.branchTransformerOhm,
+    bridgePhaseDeg: matchedExtractionTCellSeed.variants.B.requiredIntercellPhaseDeg,
     hasRfOut: true
   },
   C: {
@@ -39,12 +33,9 @@ export const tCellVariantMeta = {
     k: matchedExtractionTCellSeed.variants.C.k,
     junctionX: matchedExtractionTCellSeed.variants.C.junctionX,
     junctionY: matchedExtractionTCellSeed.variants.C.junctionY,
-    seriesTransformerOhm:
-      matchedExtractionTCellSeed.variants.C.seriesTransformerOhm,
-    branchTransformerOhm:
-      matchedExtractionTCellSeed.variants.C.branchTransformerOhm,
-    throughResidualPhaseDeg:
-      matchedExtractionTCellSeed.variants.C.throughResidualPhaseDeg,
+    seriesTransformerOhm: matchedExtractionTCellSeed.variants.C.seriesTransformerOhm,
+    branchTransformerOhm: matchedExtractionTCellSeed.variants.C.branchTransformerOhm,
+    bridgePhaseDeg: matchedExtractionTCellSeed.variants.C.requiredIntercellPhaseDeg,
     hasRfOut: true
   },
   D: {
@@ -54,7 +45,7 @@ export const tCellVariantMeta = {
     junctionY: null,
     seriesTransformerOhm: null,
     branchTransformerOhm: 50,
-    throughResidualPhaseDeg: 0,
+    bridgePhaseDeg: 0,
     hasRfOut: false
   }
 } as const satisfies Record<
@@ -66,7 +57,7 @@ export const tCellVariantMeta = {
     junctionY: number | null
     seriesTransformerOhm: number | null
     branchTransformerOhm: number | null
-    throughResidualPhaseDeg: number
+    bridgePhaseDeg: number
     hasRfOut: boolean
   }
 >
