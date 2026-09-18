@@ -13,7 +13,7 @@
     ]
   },
   "include": [
-    "index.tsx",
+    "index*.tsx",
     "src/**/*.ts",
     "src/**/*.tsx"
   ]

@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "tsci dev index.tsx",
-    "build": "tsci build index.tsx --ignore-routing-drc --ignore-netlist-drc --ignore-pin-specification-drc",
-    "export:circuit-json": "mkdir -p dist && tsci export index.tsx -f circuit-json -o dist/single-board.circuit.json",
-    "export:gerbers": "mkdir -p dist && tsci export index.tsx -f gerbers -o dist/single-board.gerbers.zip",
-    "dev:wsl": "NO_PROXY=localhost,127.0.0.1,::1 no_proxy=localhost,127.0.0.1,::1 tsci dev index.tsx -p 3020"
+    "build": "npm run build:variants",
+    "export:circuit-json": "mkdir -p dist && tsci export index-a.tsx -f circuit-json -o dist/board-a.circuit.json && tsci export index-b.tsx -f circuit-json -o dist/board-b.circuit.json && tsci export index-c.tsx -f circuit-json -o dist/board-c.circuit.json && tsci export index-d.tsx -f circuit-json -o dist/board-d.circuit.json",
+    "export:gerbers": "mkdir -p dist && tsci export index-a.tsx -f gerbers -o dist/board-a.gerbers.zip && tsci export index-b.tsx -f gerbers -o dist/board-b.gerbers.zip && tsci export index-c.tsx -f gerbers -o dist/board-c.gerbers.zip && tsci export index-d.tsx -f gerbers -o dist/board-d.gerbers.zip",
+    "dev:wsl": "NO_PROXY=localhost,127.0.0.1,::1 no_proxy=localhost,127.0.0.1,::1 tsci dev index.tsx -p 3020",
+    "build:variants": "tsci build index-a.tsx --ignore-routing-drc --ignore-netlist-drc --ignore-pin-specification-drc && tsci build index-b.tsx --ignore-routing-drc --ignore-netlist-drc --ignore-pin-specification-drc && tsci build index-c.tsx --ignore-routing-drc --ignore-netlist-drc --ignore-pin-specification-drc && tsci build index-d.tsx --ignore-routing-drc --ignore-netlist-drc --ignore-pin-specification-drc"
   },
   "dependencies": {
     "tscircuit": "0.0.2571"

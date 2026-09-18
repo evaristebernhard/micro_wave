@@ -18,6 +18,7 @@
 - `docs/06_patch_design_rationale_v1.md`：解释矩形 Patch 是什么、如何向工件输送微波能量、原方形螺旋方案的高频/级联问题，以及为什么当前把 Patch 作为优化主基线
 - `docs/07_theory_gap_closure_v1.md`：闭合长串 FR4 损耗上限、灰板 raw S21 指标冲突、强耦合器可实现性、D 终端板与两层梯度分配等剩余理论问题
 - `docs/08_original_requirements_feasibility_audit_v1.md`：原始客户需求可行性审计；逐项记录已证明不可同时满足或不能按原样验收的指标
+- `docs/09_current_patch_smatrix_parameter_design_v1.md`：只针对当前 Patch+Zone 方案，建立复数 S/ABCD 级联、A/B/C/D 第一轮耦合等级、相位/反射容差和可实现参数设计
 
 ## V3 当前工程口径
 
