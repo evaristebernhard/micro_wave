@@ -50,19 +50,19 @@ const TCellRfGeometry = ({ boardClass }: VariantProps) => {
           {/* Magnetic RF signal contact(s). */}
           <smtpad
             portHints={["pin1"]}
-            pcbX={mm(-matchedExtractionTCellSeed.rfContactX)}
+            pcbX={mm(-pcb.rfContactX)}
             pcbY={mm(pcb.rfTraceY)}
-            width={mm(matchedExtractionTCellSeed.rfContactPadWidthMm)}
-            height={mm(matchedExtractionTCellSeed.rfContactPadHeightMm)}
+            width={mm(pcb.rfPadW)}
+            height={mm(pcb.rfPadH)}
             shape="rect"
           />
           {meta.hasRfOut && (
             <smtpad
               portHints={["pin1"]}
-              pcbX={mm(matchedExtractionTCellSeed.rfContactX)}
+              pcbX={mm(pcb.rfContactX)}
               pcbY={mm(pcb.rfTraceY)}
-              width={mm(matchedExtractionTCellSeed.rfContactPadWidthMm)}
-              height={mm(matchedExtractionTCellSeed.rfContactPadHeightMm)}
+              width={mm(pcb.rfPadW)}
+              height={mm(pcb.rfPadH)}
               shape="rect"
             />
           )}
@@ -113,9 +113,9 @@ const TCellRfGeometry = ({ boardClass }: VariantProps) => {
 
 const TCellGroundContacts = ({ boardClass }: VariantProps) => {
   const meta = tCellVariantMeta[boardClass]
-  const x = matchedExtractionTCellSeed.rfContactX
+  const x = pcb.rfContactX
   const dx = 0.70
-  const groundPadW = matchedExtractionTCellSeed.rfContactPadWidthMm
+  const groundPadW = pcb.rfPadW
 
   return (
     <>
@@ -272,8 +272,8 @@ const TCellSilkscreen = ({ boardClass }: VariantProps) => {
         pcbY="-30.0mm"
         text={
           boardClass === "D"
-            ? `L≈${matchedExtractionTCellSeed.terminalDHalfWaveFeedSeedMm.toFixed(2)}mm`
-            : `Δφ≈${meta.throughResidualPhaseDeg.toFixed(2)}deg`
+            ? `L≈${matchedExtractionTCellSeed.terminalD.preInsetHalfWaveMm.toFixed(2)}mm`
+            : `BRIDGE≈${meta.bridgePhaseDeg.toFixed(2)}deg`
         }
         fontSize="0.5mm"
       />
