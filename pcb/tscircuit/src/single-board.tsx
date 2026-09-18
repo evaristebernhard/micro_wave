@@ -36,15 +36,9 @@ const RfGeometry = ({ boardClass }: VariantProps) => {
   const patchLegHeight = pcb.insetDepth
   const patchLegCenterY = patchDerived.patchYMin + patchLegHeight / 2
 
-  const feedYMin =
-    boardClass === "D"
-      ? pcb.rfTraceY + pcb.rfTraceW / 2
-      : derived.coupledTraceY + pcb.rfTraceW / 2
-  const feedYMax = patchDerived.notchYMax
-  const feedHeight = feedYMax - feedYMin
-  const feedCenterY = (feedYMax + feedYMin) / 2
-
   const patchPortHint = boardClass === "D" ? "pin1" : "pin2"
+  const insetFeedCenterY =
+    (patchDerived.patchYMin + patchDerived.notchYMax) / 2
 
   return (
     <chip
@@ -163,7 +157,7 @@ const RfGeometry = ({ boardClass }: VariantProps) => {
             </>
           )}
 
-          {/* Patch feed inside the inset notch. */}
+          {/* Patch feed / analytical phase-trim section. */}
           {boardClass === "D" ? (
             <smtpad
               portHints={["pin1"]}
@@ -174,14 +168,53 @@ const RfGeometry = ({ boardClass }: VariantProps) => {
               shape="rect"
             />
           ) : (
-            <smtpad
-              portHints={[patchPortHint]}
-              pcbX="0mm"
-              pcbY={mm(feedCenterY)}
-              width={mm(pcb.rfTraceW)}
-              height={mm(feedHeight)}
-              shape="rect"
-            />
+            <>
+              {derived.branchPhaseTrimLengthSeed === 0 ? (
+                <smtpad
+                  portHints={[patchPortHint]}
+                  pcbX="0mm"
+                  pcbY={mm(
+                    (derived.phaseFeedStartY + derived.phaseFeedEndY) / 2
+                  )}
+                  width={mm(pcb.rfTraceW)}
+                  height={mm(derived.phaseFeedRise)}
+                  shape="rect"
+                />
+              ) : (
+                <>
+                  <smtpad
+                    portHints={[patchPortHint]}
+                    pcbX={mm(derived.phaseFeedPeakX / 2)}
+                    pcbY={mm(
+                      (derived.phaseFeedStartY + derived.phaseFeedMidY) / 2
+                    )}
+                    width={mm(derived.phaseFeedHalfSegmentLength)}
+                    height={mm(pcb.rfTraceW)}
+                    shape="rotated_rect"
+                    ccwRotation={derived.phaseFeedAngleDeg}
+                  />
+                  <smtpad
+                    portHints={[patchPortHint]}
+                    pcbX={mm(derived.phaseFeedPeakX / 2)}
+                    pcbY={mm(
+                      (derived.phaseFeedMidY + derived.phaseFeedEndY) / 2
+                    )}
+                    width={mm(derived.phaseFeedHalfSegmentLength)}
+                    height={mm(pcb.rfTraceW)}
+                    shape="rotated_rect"
+                    ccwRotation={180 - derived.phaseFeedAngleDeg}
+                  />
+                </>
+              )}
+              <smtpad
+                portHints={[patchPortHint]}
+                pcbX="0mm"
+                pcbY={mm(insetFeedCenterY)}
+                width={mm(pcb.rfTraceW)}
+                height={mm(pcb.insetDepth)}
+                shape="rect"
+              />
+            </>
           )}
 
           {/* Patch upper body. */}
