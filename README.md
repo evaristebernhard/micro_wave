@@ -153,3 +153,7 @@ micro_wave/
 \]
 
 因此后续 HFSS/openEMS 与 PCB 优化不再只以 coupling dB 为中心。A/B/C/D 的第一轮 6.5/5/3 dB 参数用于启动搜索，最终应由工件侧目标复激励和无源网络可实现性共同决定。
+
+- `docs/16_extended_board_tcell_design_v1.md`：50×70 工程包络与 matched-extraction T-cell 解析设计。
+
+当前 PCB 工程同时保留原 coupler A/B/C/D 与 matched-extraction T-cell A/B/C/D 两套可导出 topology；板宽保持 50 mm，工程高度扩展到 70 mm。
