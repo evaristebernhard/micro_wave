@@ -448,3 +448,143 @@ Q^{(k)}.
 \]
 
 因此当前设计不是等待仿真，而是已经给 HFSS 一个明确且可制造的近似起点。
+---
+
+## 10. 完整复激励幅相 seed
+
+当前 amplitude seed：
+
+\[
+\kappa_A=10^{-6.5/10}\approx0.22387,
+\]
+
+\[
+\kappa_B=10^{-5/10}\approx0.31623,
+\]
+
+\[
+\kappa_C=10^{-3/10}\approx0.50119.
+\]
+
+取 cell 寄生功率传输：
+
+\[
+\tau=10^{-0.42/10}\approx0.90782.
+\]
+
+则三个 through-wave 幅度为：
+
+\[
+|h_A|=\sqrt{\tau(1-\kappa_A)}\approx0.83940,
+\]
+
+\[
+|h_B|\approx0.78787,
+\qquad
+|h_C|\approx0.67293.
+\]
+
+从一个单位输入波开始，四个 Patch 的一阶幅值为：
+
+\[
+|u_A|=\sqrt{\kappa_A}\approx0.47315,
+\]
+
+\[
+|u_B|=|h_A|\sqrt{\kappa_B}\approx0.47203,
+\]
+
+\[
+|u_C|=|h_Ah_B|\sqrt{\kappa_C}\approx0.46819,
+\]
+
+\[
+|u_D|=|h_Ah_Bh_C|\approx0.44503.
+\]
+
+配合当前 +90° progression seed，并把 A 的公共相位归零，可写成：
+
+\[
+\boxed{
+\mathbf u_{\rm seed}
+\approx
+(0.47315,\ 0.47203j,\ -0.46819,\ -0.44503j)^T.
+}
+\]
+
+归一化到 D 的幅值：
+
+\[
+\boxed{
+|u_A|:|u_B|:|u_C|:|u_D|
+\approx
+1.063:1.061:1.052:1.
+}
+\]
+
+对应功率比约：
+
+\[
+\boxed{
+1.130:1.125:1.107:1.
+}
+\]
+
+所以当前 6.5/5/3 dB 工程化 seed 本身已经非常接近 equal-RF extraction；它不是精确等功率，但只把前级提高约 10–13%。这给后续 Q-matrix 优化留下了可用幅度余量。
+
+---
+
+## 11. 预仿真相位容差
+
+当前：
+
+\[
+\beta\approx5.30^\circ/{\rm mm}.
+\]
+
+因此纯几何线长误差的一阶相位映射为：
+
+\[
+0.10\ {\rm mm}\Rightarrow0.53^\circ,
+\]
+
+\[
+0.25\ {\rm mm}\Rightarrow1.33^\circ,
+\]
+
+\[
+0.50\ {\rm mm}\Rightarrow2.65^\circ.
+\]
+
+另一方面，50 mm cell 的传播相位对有效介电常数满足近似：
+
+\[
+\phi(\varepsilon_{\rm eff})
+\propto
+\sqrt{\varepsilon_{\rm eff}},
+\]
+
+所以在 \(\varepsilon_{\rm eff}=3.25\) 附近：
+
+\[
+\frac{d\phi}{d\varepsilon_{\rm eff}}
+\approx
+\frac{265.19^\circ}{2\times3.25}
+\approx40.80^\circ.
+\]
+
+若解析 εeff 误差为 ±0.15，则单 cell phase 不确定度约：
+
+\[
+\boxed{\pm6.1^\circ},
+\]
+
+等效于大约：
+
+\[
+\boxed{\pm1.15\ {\rm mm}}
+\]
+
+的 phase-trim 校正量。
+
+因此当前 PCB 把 0.5–1.5 mm 级 trim 作为参数化自由度是合理的；真正需要 HFSS 校正的主误差源不是 PCB 0.1 mm 级加工误差，而是 loaded εeff 与 coupler intrinsic phase。
