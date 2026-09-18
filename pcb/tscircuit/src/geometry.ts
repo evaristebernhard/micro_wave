@@ -4,7 +4,12 @@ export type CouplerTopology = "edge-coupled-quarter-wave" | "strong-coupler-seed
 
 export const pcb = {
   boardW: 50,
-  boardH: 50,
+  // Keep the 50 mm horizontal pitch that controls inter-Patch phase.
+  // The extra 10 mm is added only below the original board outline so the
+  // RF/Patch coordinates and left-right magnetic pitch remain unchanged.
+  boardH: 60,
+  boardCenterY: -5,
+  originalBoardH: 50,
 
   patchW: 37.5,
   patchL: 28.5,
@@ -370,4 +375,77 @@ export const cCouplerFeasibilitySeed = {
     "multilayer-broadside",
     "external-or-smd-hybrid"
   ]
+} as const
+
+/**
+ * Matched-extraction T-cell analytical alternative.
+ *
+ * At f0, a quarter-wave series transformer matches a T junction whose
+ * downstream arm is 50 ohm and whose Patch branch is transformed to the
+ * effective resistance needed for the requested extraction fraction.
+ *
+ * Zt = 50*sqrt(1-k)
+ * Zb = 50*sqrt((1-k)/k)
+ *
+ * The input transformer contributes about -90 deg; the Patch branch adds
+ * another -90 deg. A 50-ohm half-wave tail to the next cell therefore gives
+ * an overall through phase near -270 deg and Patch progression near +90 deg.
+ */
+export const matchedExtractionTCellSeed = {
+  referenceOhm: 50,
+  fiftyOhmWidthMm: 3.12,
+  fiftyOhmQuarterWaveMm: 16.92,
+  fiftyOhmHalfWaveMm: 33.84,
+  assumedInputLeadMm: 0.50,
+  patchReferencePoint: { x: 0, y: 1.25 },
+  variants: {
+    A: {
+      k: 0.224,
+      seriesTransformerOhm: 44.05,
+      seriesTransformerWidthMm: 3.82,
+      seriesQuarterWaveMm: 16.77,
+      branchTransformerOhm: 93.06,
+      branchTransformerWidthMm: 0.88,
+      branchQuarterWaveMm: 17.65,
+      junctionX: -5.23,
+      junctionY: -15.61,
+      onboardThroughTailMm: 27.73,
+      requiredBridgeElectricalMm: 6.11
+    },
+    B: {
+      k: 0.316,
+      seriesTransformerOhm: 41.35,
+      seriesTransformerWidthMm: 4.21,
+      seriesQuarterWaveMm: 16.70,
+      branchTransformerOhm: 73.56,
+      branchTransformerWidthMm: 1.52,
+      branchQuarterWaveMm: 17.39,
+      junctionX: -5.30,
+      junctionY: -15.31,
+      onboardThroughTailMm: 27.80,
+      requiredBridgeElectricalMm: 6.04
+    },
+    C: {
+      k: 0.501,
+      seriesTransformerOhm: 35.32,
+      seriesTransformerWidthMm: 5.32,
+      seriesQuarterWaveMm: 16.52,
+      branchTransformerOhm: 49.90,
+      branchTransformerWidthMm: 3.13,
+      branchQuarterWaveMm: 16.92,
+      junctionX: -5.48,
+      junctionY: -14.76,
+      onboardThroughTailMm: 27.98,
+      requiredBridgeElectricalMm: 5.87
+    }
+  },
+  commonBridgeElectricalSeedMm: 6.0,
+  inputToJunctionPhaseDeg: -90,
+  junctionToPatchPhaseDeg: -90,
+  junctionToNextCellPhaseDeg: -180,
+  targetCellThroughPhaseDeg: -270,
+  targetPatchProgressionDeg: 90,
+  terminalDHalfWaveFeedSeedMm: 33.84,
+  primaryAdvantage: "ordinary-width-lines-no-micron-coupling-gap",
+  primaryRisk: "three-port-T-cell-has-no-inherent-output-isolation"
 } as const
