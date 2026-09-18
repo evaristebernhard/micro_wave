@@ -7,7 +7,8 @@
     "dev": "tsci dev index.tsx",
     "build": "tsci build index.tsx --ignore-routing-drc --ignore-netlist-drc --ignore-pin-specification-drc",
     "export:circuit-json": "mkdir -p dist && tsci export index.tsx -f circuit-json -o dist/single-board.circuit.json",
-    "export:gerbers": "mkdir -p dist && tsci export index.tsx -f gerbers -o dist/single-board.gerbers.zip"
+    "export:gerbers": "mkdir -p dist && tsci export index.tsx -f gerbers -o dist/single-board.gerbers.zip",
+    "dev:wsl": "NO_PROXY=localhost,127.0.0.1,::1 no_proxy=localhost,127.0.0.1,::1 tsci dev index.tsx -p 3020"
   },
   "dependencies": {
     "tscircuit": "0.0.2571"
