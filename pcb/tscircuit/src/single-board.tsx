@@ -28,7 +28,7 @@ const RfGeometry = () => {
 
   return (
     <chip
-      name="RF1"
+      name="ANT1"
       pcbX={0}
       pcbY={0}
       pinLabels={{
