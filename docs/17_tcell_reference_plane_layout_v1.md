@@ -1,32 +1,75 @@
-# T-cell 正确参考面与可落板几何 V1
+# T-cell 正确参考面与可落板几何 V2
 
-> 本文修正上一版 T-cell 中对 10.5 mm inset feed 的处理：inset feed 是 Patch 自身的 50 Ω feed 段，不能直接并入 A/B/C 的不同阻抗 branch transformer。
+> 本文统一 matched-extraction T-cell 的最终预仿真参考面。关键修正：10.5 mm inset feed 保留为共同的 50 Ω Patch feed；A/B/C 的 unequal branch transformer 只到 inset 底部。磁吸 RF pad 的**内缘**作为传输线 reference plane，使所有合成铜都落在 50 mm 板宽内。
 
-## 1. 参考面定义
+## 1. PCB 外形
 
-统一定义：
-
-- RF IN reference：左侧磁吸 RF 接点附近；
-- input transformer 起点：\((-22.0,-18.0)\) mm；
-- branch transformer 终点：Patch inset 底部 \((0,-9.25)\) mm；
-- inset feed：从 \(y=-9.25\) 到 \(y=1.25\)，长度 10.5 mm，继续保持约 50 Ω；
-- Patch radiator：从 inset feed 末端进入 Patch。
-
-因此 branch transformer 看到的是“50 Ω inset feed + 约匹配 Patch”的 50 Ω 输入。
-
-只要该负载接近 50 Ω，四分之一波 branch transformer 的阻抗变换仍然成立；10.5 mm inset 只额外加入所有 A/B/C 共有的相位。
-
-## 2. inset feed 的公共相位
-
-50 Ω microstrip 的一阶导波半波约：
-
-\[L_{1/2,50}\approx33.842\ {\rm mm}.\]
-
-所以：
+最终预仿真机械包络取：
 
 \[
-\beta_{50}\approx\frac{180^\circ}{33.842}
-\approx5.319^\circ/{\rm mm}.
+\boxed{50\times60\ {\rm mm}}
+\]
+
+且板中心：
+
+\[
+\boxed{y_c=-5\ {\rm mm}}.
+\]
+
+因此边界为：
+
+\[
+x\in[-25,25]\ {\rm mm},
+\qquad
+y\in[-35,25]\ {\rm mm}.
+\]
+
+这相当于在原 50×50 mm 板下方增加 10 mm，不改变 50 mm 水平板距、Patch x 坐标或磁吸 RF 接点节距。
+
+## 2. reference plane
+
+磁吸信号 pad 宽：
+
+\[
+4.6\ {\rm mm},
+\]
+
+中心在：
+
+\[
+x=\pm22.5\ {\rm mm}.
+\]
+
+因此传输线 reference plane 取 pad 内缘：
+
+\[
+P_{\rm in}=(-20.2,-18.0)\ {\rm mm},
+\]
+
+\[
+P_{\rm out}=(20.2,-18.0)\ {\rm mm}.
+\]
+
+Patch branch transformer 的终点取 inset 底部：
+
+\[
+P_{\rm patch}=(0,-9.25)\ {\rm mm}.
+\]
+
+inset feed 从该点继续 10.5 mm 到 Patch 内部，其线宽保持约 50 Ω。
+
+## 3. 公共 inset 相位
+
+50 Ω microstrip 的一阶半波：
+
+\[
+L_{1/2,50}\approx33.842\ {\rm mm}.
+\]
+
+因此：
+
+\[
+\beta_{50}\approx5.319^\circ/{\rm mm}.
 \]
 
 10.5 mm inset 对应：
@@ -37,79 +80,131 @@
 }
 \]
 
-这个相位对 A/B/C 是公共项，因此不会破坏相邻 Patch 的 +90° progression。
+该项对 A/B/C/D 是公共相位，不改变相邻板的 phase progression。
 
-## 3. A/B/C 的几何交点
+## 4. A/B/C T-junction
 
-series transformer 必须满足：
-
-\[|P_{\rm in}-J_i|=L_{t,i},\]
-
-branch transformer 必须满足：
-
-\[|J_i-P_{\rm patch}|=L_{b,i}.\]
-
-取位于板下方的圆交点，得到：
-
-| Board | T 结点 J=(x,y) mm | series λ/4 | branch λ/4 |
-|---|---|---:|---:|
-| A | (-6.967, -25.453) | 16.779 mm | 17.637 mm |
-| B | (-6.919, -25.196) | 16.710 mm | 17.382 mm |
-| C | (-6.878, -24.708) | 16.543 mm | 16.919 mm |
-
-这些点全部位于 50×60 mm 新板的合法区域：
-
-\[y\in[-35,25]\ {\rm mm}.\]
-
-因此新增板高正好把 T-cell 变成无 meander 的直线几何。
-
-## 4. 幅度设计参数
-
-| Board | κ | Zt | Wt | Zb | Wb |
-|---|---:|---:|---:|---:|---:|
-| A | 0.224 | 44.045 Ω | 3.845 mm | 93.063 Ω | 0.877 mm |
-| B | 0.316 | 41.352 Ω | 4.235 mm | 73.562 Ω | 1.521 mm |
-| C | 0.501 | 35.320 Ω | 5.337 mm | 49.900 Ω | 3.147 mm |
-
-这些全部是普通 PCB 线宽；不再需要 0.02–0.06 mm 级 coupled gap。
-
-## 5. through path 与磁吸桥
-
-T 结点到本板 RF OUT 的直线距离为：
-
-| Board | J→RF OUT | 距 50 Ω 半波还差 | 所需 bridge phase |
-|---|---:|---:|---:|
-| A | 30.395 mm | 3.448 mm(eq.) | 18.34° |
-| B | 30.286 mm | 3.556 mm(eq.) | 18.92° |
-| C | 30.134 mm | 3.708 mm(eq.) | 19.72° |
-
-所以统一 bridge target 可先取：
+输入 series transformer 和 Patch branch transformer 分别满足：
 
 \[
-\boxed{\phi_{\rm bridge}\approx19^\circ.}
+|P_{\rm in}-J_i|=L_{t,i},
 \]
 
-两块 50 mm 板贴合时，RF contact center 的物理间距约为 5 mm。
+\[
+|J_i-P_{\rm patch}|=L_{b,i}.
+\]
 
-如果 5 mm magnetic bridge 的有效介电常数处于约 1.55–1.80，则它的相位正好落在上述 18–20° 区间；对空气/PP/fringing 主导的连接结构，这是合理的预仿真数量级。
+取下方圆交点：
 
-因此 bridge 应被视为 cell electrical length 的一部分，而不是零长度理想连接。
+| Board | \(J_i=(x,y)\) mm | \(L_t\) | \(L_b\) |
+|---|---|---:|---:|
+| A | (-5.462, -26.020) | 16.779 mm | 17.637 mm |
+| B | (-5.406, -25.770) | 16.710 mm | 17.382 mm |
+| C | (-5.355, -25.299) | 16.543 mm | 16.919 mm |
 
-## 6. A/B/C 的局部 Patch 相位
+最深铜边界约到：
 
-从 cell input 到 T 结点：
+\[
+y\approx-28.87\ {\rm mm},
+\]
 
-\[-90^\circ.\]
+距离 50×60 mm 板底：
 
-T 结点到 inset 底部：
+\[
+-28.87-(-35)\approx6.13\ {\rm mm},
+\]
 
-\[-90^\circ.\]
+所以 60 mm 板高已经足够，没有必要继续增到 70 mm。
 
-inset feed：
+## 5. amplitude synthesis
 
-\[-55.84^\circ.\]
+目标 extraction：
 
-所以每块 Patch 相对本地 cell input 的相位约：
+\[
+\kappa_A=0.224,
+\qquad
+\kappa_B=0.316,
+\qquad
+\kappa_C=0.501.
+\]
+
+解析式：
+
+\[
+Z_t=50\sqrt{1-\kappa},
+\]
+
+\[
+Z_b=50\sqrt{\frac{1-\kappa}{\kappa}}.
+\]
+
+Hammerstad 微带 seed：
+
+| Board | \(Z_t\) | \(W_t\) | \(Z_b\) | \(W_b\) |
+|---|---:|---:|---:|---:|
+| A | 44.045 Ω | 3.845 mm | 93.063 Ω | 0.877 mm |
+| B | 41.352 Ω | 4.235 mm | 73.562 Ω | 1.521 mm |
+| C | 35.320 Ω | 5.337 mm | 49.900 Ω | 3.147 mm |
+
+这套尺寸不再依赖几十微米 coupled gap。
+
+## 6. through path + 磁吸接口
+
+T 点到本板 RF OUT 内缘的直线长度：
+
+| Board | 板内 T→RF OUT | 距 50 Ω 半波还差 | inter-cell target phase |
+|---|---:|---:|---:|
+| A | 26.886 mm | 6.956 mm(eq.) | 37.00° |
+| B | 26.759 mm | 7.083 mm(eq.) | 37.67° |
+| C | 26.577 mm | 7.266 mm(eq.) | 38.65° |
+
+相邻 50 mm 板贴合时，从本板 RF OUT 内缘到下一板 RF IN 内缘的物理跨度为：
+
+\[
+50-20.2-20.2
+=
+\boxed{9.6\ {\rm mm}}.
+\]
+
+把 pad、磁吸接触、空气/PP/fringing 作为一个统一 inter-cell section，要达到上述 37–39°，其等效介电常数约为：
+
+\[
+\boxed{
+\varepsilon_{\rm eff,link}\approx1.72\sim1.87.
+}
+\]
+
+因此接口设计的第一版目标取：
+
+\[
+\boxed{
+\phi_{\rm intercell}\approx37.8^\circ.
+}
+\]
+
+连接桥不能再被当成零长度理想连接。
+
+## 7. phase closure
+
+从 cell input 到 T 点：
+
+\[
+-90^\circ.
+\]
+
+从 T 点到 inset 底部：
+
+\[
+-90^\circ.
+\]
+
+再加共同 inset：
+
+\[
+-55.84^\circ.
+\]
+
+所以每个 A/B/C Patch 相对本地 input：
 
 \[
 \boxed{
@@ -117,67 +212,93 @@ inset feed：
 }
 \]
 
-而 cell through phase设计为：
-
-\[-270^\circ.\]
-
-因此相邻 Patch：
+而 T 点到下一 cell input 的 through section设计为：
 
 \[
-(-270-235.84)-(-235.84)
-=-270
-\equiv
-\boxed{+90^\circ}.
+-180^\circ,
 \]
 
-## 7. D terminal
-
-D 也保留相同 10.5 mm inset feed。
-
-因此 D 从 RF IN 到 inset 底部只需要 50 Ω 半波：
-
-\[
-\boxed{L_{D,\rm pre-inset}=33.842\ {\rm mm}.}
-\]
-
-从 \((-22.5,-18)\) 到 \((0,-9.25)\) 用一个两段 V 形路径即可实现。取对称等长两段，低点为：
+故整 cell：
 
 \[
 \boxed{
-V_D\approx(-6.952,-24.677)\ {\rm mm}.
+\phi_{\rm through}\approx-270^\circ
+\equiv+90^\circ.
+}
+\]
+
+因此相邻 Patch 仍满足：
+
+\[
+\boxed{
+\Delta\phi_{\rm patch}\approx+90^\circ.
+}
+\]
+
+## 8. D terminal
+
+D 不需要 T-junction。
+
+从左 RF pad 内缘：
+
+\[
+(-20.2,-18.0)
+\]
+
+到 inset 底部：
+
+\[
+(0,-9.25)
+\]
+
+设计一条 50 Ω 半波：
+
+\[
+\boxed{
+L_{D,\rm pre-inset}=33.842\ {\rm mm}.
+}
+\]
+
+用两段等长 V 路径时，下方顶点取：
+
+\[
+\boxed{
+V_D\approx(-4.992,-25.418)\ {\rm mm}.
 }
 \]
 
 两段各约：
 
-\[16.921\ {\rm mm},\]
+\[
+16.921\ {\rm mm}.
+\]
 
-总计：
-
-\[33.842\ {\rm mm}.\]
-
-再接原 10.5 mm inset，D 的局部 Patch 相位同样约为 -235.84°，因此和 A/B/C 完全使用同一相位约定。
-
-## 8. 当前设计结论
-
-在 50×60 mm 外形下，matched T-cell 已经形成一套完整的解析 PCB seed：
+再加共同 10.5 mm inset，D 的 local Patch phase 与 A/B/C 相同，因此整个四板解析 seed 保持：
 
 \[
 \boxed{
-\text{指定抽取率}
-+
-\text{input match}
-+
-\text{+90° Patch progression}
-+
-\text{普通制造线宽}
+0^\circ, 90^\circ, 180^\circ, 270^\circ
 }
 \]
 
-后续 HFSS 的主要任务从“找 topology”缩减为：
+的等价 phase progression。
 
-1. 校正 T-junction discontinuity；
-2. 校正 Patch loaded input impedance；
-3. 校正 magnetic bridge 的 18–20° phase；
-4. 检查 3-port load sensitivity；
-5. 与 enlarged-board quadrature hybrid 做 isolation 对照。
+## 9. 当前设计定位
+
+现在 T-cell PCB 已经是明确的预仿真几何：
+
+- 50×60 mm；
+- 50 mm 水平 Patch pitch；
+- A/B/C 普通可制造阻抗线宽；
+- 解析 T-junction 坐标；
+- 37–39° inter-cell magnetic-interface phase target；
+- D 半波 V-feed；
+- 10.5 mm common inset 明确保留。
+
+HFSS/openEMS 后续只需校正：
+
+1. T-junction discontinuity；
+2. loaded Patch impedance；
+3. inter-cell interface 的真实 complex S；
+4. FR4/PP 下的实际 \(\beta\)；
+5. 3-port load sensitivity 与反射传播。
