@@ -24,7 +24,7 @@ x\in[-25,25]\ {\rm mm},
 y\in[-35,25]\ {\rm mm}.
 \]
 
-这相当于在原 50×50 mm 板下方增加 10 mm，不改变 50 mm 水平板距、Patch x 坐标或磁吸 RF 接点节距。
+由于当前 tscircuit board outline 以原点居中处理，工程文件采用 50×70 mm 对称外形，以获得 y=-35 mm 的下边界；横向 50 mm 节距和所有 RF/Patch reference 均保持不变。
 
 ## 2. reference plane
 
@@ -108,13 +108,13 @@ L_{1/2,50}\approx33.842\ {\rm mm}.
 y\approx-28.87\ {\rm mm},
 \]
 
-距离 50×60 mm 板底：
+距离 50×70 mm 板底：
 
 \[
 -28.87-(-35)\approx6.13\ {\rm mm},
 \]
 
-所以 60 mm 板高已经足够，没有必要继续增到 70 mm。
+理论几何本身只需要约 60 mm 的有效纵向包络；当前使用 70 mm 是 tscircuit 居中板框实现上的工程余量，不是 RF 电长度要求。
 
 ## 5. amplitude synthesis
 
@@ -287,7 +287,7 @@ V_D\approx(-4.992,-25.418)\ {\rm mm}.
 
 现在 T-cell PCB 已经是明确的预仿真几何：
 
-- 50×60 mm；
+- 50×70 mm；
 - 50 mm 水平 Patch pitch；
 - A/B/C 普通可制造阻抗线宽；
 - 解析 T-junction 坐标；
