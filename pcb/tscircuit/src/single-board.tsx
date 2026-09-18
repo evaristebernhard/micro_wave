@@ -3,6 +3,7 @@ import {
   getVariantDerived,
   patchDerived,
   pcb,
+  terminalPhaseRoutePolygonPoints,
   terminalPhaseRouteSeed,
   type BoardClass
 } from "./geometry"
@@ -39,7 +40,6 @@ const RfGeometry = ({ boardClass }: VariantProps) => {
   const patchPortHint = boardClass === "D" ? "pin1" : "pin2"
   const insetFeedCenterY =
     (patchDerived.patchYMin + patchDerived.notchYMax) / 2
-  const phaseJunctionPadSize = pcb.rfTraceW + 0.3
 
   return (
     <chip
@@ -73,33 +73,14 @@ const RfGeometry = ({ boardClass }: VariantProps) => {
           {boardClass === "D" ? (
             <>
               {/*
-               * D-terminal analytical phase route.
-               *
-               * The old orthogonal route was about 41.75 mm centerline.
-               * For the +90 degree progressive-phase seed, the reduced-order
-               * model requires about 35.34 mm. The route below uses a short
-               * horizontal section plus a diagonal section into the inset,
-               * avoiding a long lossy meander.
+               * One contiguous polygon implements the analytical D phase route:
+               * horizontal -> diagonal -> inset. This is the Gerber-like copper
+               * representation of the ~35.34 mm centerline seed.
                */}
               <smtpad
                 portHints={["pin1"]}
-                pcbX={mm(
-                  terminalPhaseRouteSeed.inputX +
-                    terminalPhaseRouteSeed.horizontalLengthMm / 2
-                )}
-                pcbY={mm(terminalPhaseRouteSeed.inputY)}
-                width={mm(terminalPhaseRouteSeed.horizontalLengthMm)}
-                height={mm(pcb.rfTraceW)}
-                shape="rect"
-              />
-              <smtpad
-                portHints={["pin1"]}
-                pcbX={mm(terminalPhaseRouteSeed.diagonalCenterX)}
-                pcbY={mm(terminalPhaseRouteSeed.diagonalCenterY)}
-                width={mm(terminalPhaseRouteSeed.diagonalLengthMm)}
-                height={mm(pcb.rfTraceW)}
-                shape="rotated_rect"
-                ccwRotation={terminalPhaseRouteSeed.diagonalAngleDeg}
+                shape="polygon"
+                points={terminalPhaseRoutePolygonPoints}
               />
               <smtpad
                 portHints={["pin1"]}
@@ -109,26 +90,8 @@ const RfGeometry = ({ boardClass }: VariantProps) => {
                 height={mm(pcb.rfPadH)}
                 shape="rect"
               />
-              {/* D phase-route miter junctions force contiguous copper in Circuit JSON. */}
-              <smtpad
-                portHints={["pin1"]}
-                pcbX={mm(terminalPhaseRouteSeed.junctionX)}
-                pcbY={mm(terminalPhaseRouteSeed.junctionY)}
-                width={mm(phaseJunctionPadSize)}
-                height={mm(phaseJunctionPadSize)}
-                shape="rect"
-              />
-              <smtpad
-                portHints={["pin1"]}
-                pcbX={mm(terminalPhaseRouteSeed.patchEntryX)}
-                pcbY={mm(terminalPhaseRouteSeed.patchEntryY)}
-                width={mm(phaseJunctionPadSize)}
-                height={mm(phaseJunctionPadSize)}
-                shape="rect"
-              />
             </>
-          ) : (
-            <>
+          ) : (            <>
               {/* 50 ohm through-line seed. */}
               <smtpad
                 portHints={["pin1"]}
@@ -176,88 +139,23 @@ const RfGeometry = ({ boardClass }: VariantProps) => {
           )}
 
           {/* Patch feed / analytical phase-trim section. */}
-          {boardClass === "D" ? (
+          {boardClass === "D" ? null : derived.branchPhaseTrimLengthSeed === 0 ? (
             <smtpad
-              portHints={["pin1"]}
+              portHints={[patchPortHint]}
               pcbX="0mm"
-              pcbY={mm(terminalPhaseRouteSeed.insetCenterY)}
+              pcbY={mm(
+                (derived.phaseFeedStartY + patchDerived.notchYMax) / 2
+              )}
               width={mm(pcb.rfTraceW)}
-              height={mm(terminalPhaseRouteSeed.insetLengthMm)}
+              height={mm(patchDerived.notchYMax - derived.phaseFeedStartY)}
               shape="rect"
             />
           ) : (
-            <>
-              {derived.branchPhaseTrimLengthSeed === 0 ? (
-                <smtpad
-                  portHints={[patchPortHint]}
-                  pcbX="0mm"
-                  pcbY={mm(
-                    (derived.phaseFeedStartY + derived.phaseFeedEndY) / 2
-                  )}
-                  width={mm(pcb.rfTraceW)}
-                  height={mm(derived.phaseFeedRise)}
-                  shape="rect"
-                />
-              ) : (
-                <>
-                  <smtpad
-                    portHints={[patchPortHint]}
-                    pcbX={mm(derived.phaseFeedPeakX / 2)}
-                    pcbY={mm(
-                      (derived.phaseFeedStartY + derived.phaseFeedMidY) / 2
-                    )}
-                    width={mm(derived.phaseFeedHalfSegmentLength)}
-                    height={mm(pcb.rfTraceW)}
-                    shape="rotated_rect"
-                    ccwRotation={derived.phaseFeedAngleDeg}
-                  />
-                  <smtpad
-                    portHints={[patchPortHint]}
-                    pcbX={mm(derived.phaseFeedPeakX / 2)}
-                    pcbY={mm(
-                      (derived.phaseFeedMidY + derived.phaseFeedEndY) / 2
-                    )}
-                    width={mm(derived.phaseFeedHalfSegmentLength)}
-                    height={mm(pcb.rfTraceW)}
-                    shape="rotated_rect"
-                    ccwRotation={180 - derived.phaseFeedAngleDeg}
-                  />
-                  {/* V-feed miter junctions: intentional overlap for one RF conductor. */}
-                  <smtpad
-                    portHints={[patchPortHint]}
-                    pcbX="0mm"
-                    pcbY={mm(derived.phaseFeedStartY)}
-                    width={mm(phaseJunctionPadSize)}
-                    height={mm(phaseJunctionPadSize)}
-                    shape="rect"
-                  />
-                  <smtpad
-                    portHints={[patchPortHint]}
-                    pcbX={mm(derived.phaseFeedPeakX)}
-                    pcbY={mm(derived.phaseFeedMidY)}
-                    width={mm(phaseJunctionPadSize)}
-                    height={mm(phaseJunctionPadSize)}
-                    shape="rect"
-                  />
-                  <smtpad
-                    portHints={[patchPortHint]}
-                    pcbX="0mm"
-                    pcbY={mm(derived.phaseFeedEndY)}
-                    width={mm(phaseJunctionPadSize)}
-                    height={mm(phaseJunctionPadSize)}
-                    shape="rect"
-                  />
-                </>
-              )}
-              <smtpad
-                portHints={[patchPortHint]}
-                pcbX="0mm"
-                pcbY={mm(insetFeedCenterY)}
-                width={mm(pcb.rfTraceW)}
-                height={mm(pcb.insetDepth)}
-                shape="rect"
-              />
-            </>
+            <smtpad
+              portHints={[patchPortHint]}
+              shape="polygon"
+              points={derived.phaseFeedPolygonPoints}
+            />
           )}
 
           {/* Patch upper body. */}
