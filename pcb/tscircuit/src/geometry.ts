@@ -400,10 +400,12 @@ export const matchedExtractionTCellSeed = {
   fiftyOhmHalfWaveMm: 33.842,
   fiftyOhmInsetFeedMm: 10.5,
   insetCommonPhaseDeg: 55.84,
-  inputTransformerStart: { x: -22.0, y: -18.0 },
+  // Transformer reference planes are the INNER edges of the 4.6 mm magnetic
+  // signal pads. This keeps all synthesized copper inside the 50 mm board.
+  inputTransformerStart: { x: -20.2, y: -18.0 },
   patchBranchEndpoint: { x: 0.0, y: -9.25 },
-  rfOutReference: { x: 22.5, y: -18.0 },
-  physicalInterboardContactSpanMm: 5.0,
+  rfOutTransformerEnd: { x: 20.2, y: -18.0 },
+  intercellInnerEdgeSpanMm: 9.6,
   variants: {
     A: {
       k: 0.224,
@@ -413,12 +415,12 @@ export const matchedExtractionTCellSeed = {
       branchTransformerOhm: 93.063,
       branchTransformerWidthMm: 0.877,
       branchQuarterWaveMm: 17.637,
-      junctionX: -6.967,
-      junctionY: -25.453,
-      onboardThroughTailMm: 30.395,
-      requiredBridgeEquivalent50OhmMm: 3.448,
-      requiredBridgePhaseDeg: 18.34,
-      bridgeEffectivePermittivityFor5mm: 1.554
+      junctionX: -5.462,
+      junctionY: -26.020,
+      onboardThroughTailMm: 26.886,
+      requiredIntercellEquivalent50OhmMm: 6.956,
+      requiredIntercellPhaseDeg: 37.00,
+      intercellEffectivePermittivityFor9p6mm: 1.716
     },
     B: {
       k: 0.316,
@@ -428,12 +430,12 @@ export const matchedExtractionTCellSeed = {
       branchTransformerOhm: 73.562,
       branchTransformerWidthMm: 1.521,
       branchQuarterWaveMm: 17.382,
-      junctionX: -6.919,
-      junctionY: -25.196,
-      onboardThroughTailMm: 30.286,
-      requiredBridgeEquivalent50OhmMm: 3.556,
-      requiredBridgePhaseDeg: 18.92,
-      bridgeEffectivePermittivityFor5mm: 1.654
+      junctionX: -5.406,
+      junctionY: -25.770,
+      onboardThroughTailMm: 26.759,
+      requiredIntercellEquivalent50OhmMm: 7.083,
+      requiredIntercellPhaseDeg: 37.67,
+      intercellEffectivePermittivityFor9p6mm: 1.779
     },
     C: {
       k: 0.501,
@@ -443,16 +445,15 @@ export const matchedExtractionTCellSeed = {
       branchTransformerOhm: 49.900,
       branchTransformerWidthMm: 3.147,
       branchQuarterWaveMm: 16.919,
-      junctionX: -6.878,
-      junctionY: -24.708,
-      onboardThroughTailMm: 30.134,
-      requiredBridgeEquivalent50OhmMm: 3.708,
-      requiredBridgePhaseDeg: 19.72,
-      bridgeEffectivePermittivityFor5mm: 1.798
+      junctionX: -5.355,
+      junctionY: -25.299,
+      onboardThroughTailMm: 26.577,
+      requiredIntercellEquivalent50OhmMm: 7.266,
+      requiredIntercellPhaseDeg: 38.65,
+      intercellEffectivePermittivityFor9p6mm: 1.872
     }
   },
-  commonBridgePhaseSeedDeg: 19.0,
-  commonBridgePhysicalSeedMm: 5.0,
+  commonIntercellPhaseSeedDeg: 37.8,
   inputToJunctionPhaseDeg: -90,
   junctionToPatchBottomPhaseDeg: -90,
   insetFeedCommonPhaseDeg: -55.84,
@@ -460,8 +461,8 @@ export const matchedExtractionTCellSeed = {
   targetCellThroughPhaseDeg: -270,
   targetPatchProgressionDeg: 90,
   terminalD: {
-    input: { x: -22.5, y: -18.0 },
-    vertex: { x: -6.952, y: -24.677 },
+    inputTransformerStart: { x: -20.2, y: -18.0 },
+    vertex: { x: -4.992, y: -25.418 },
     patchBranchEndpoint: { x: 0.0, y: -9.25 },
     preInsetHalfWaveMm: 33.842,
     insetFeedMm: 10.5,
