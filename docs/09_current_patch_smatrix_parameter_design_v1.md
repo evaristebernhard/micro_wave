@@ -1303,3 +1303,48 @@ D=\text{matched terminal Patch}
 \]
 
 在此基础上，A/B/C/D 才真正具备工程意义。
+
+
+---
+
+## 25. PCB 代码落地状态
+
+本理论已在 `pcb/tscircuit` 中落地为四个独立导出入口：
+
+- `index-a.tsx`
+- `index-b.tsx`
+- `index-c.tsx`
+- `index-d.tsx`
+
+当前代码实现：
+
+- A：6.5 dB 目标，17 mm quarter-wave-scale side-coupler seed；
+- B：5.0 dB 目标，17 mm quarter-wave-scale side-coupler seed；
+- C：3.0 dB 目标，17 mm strong-coupler seed；
+- D：取消 RF OUT，作为 terminal Patch seed；
+- A/B/C 增加 isolated-end 50 Ω termination placement seed；
+- 四种板继续共用 37.5 × 28.5 mm Patch 和 10.5 mm inset 基线。
+
+必须强调：
+
+[
+oxed{
+g_A=0.70 {m mm},
+quad
+g_B=0.45 {m mm},
+quad
+g_C=0.30 {m mm}
+}
+]
+
+目前只是 HFSS 搜索初值，不是由 modal solver 得出的最终 gap。
+
+特别是 C：
+
+[
+oxed{
+	ext{若 side-coupled seed 无法同时达到约 3 dB coupling 和高 return loss，直接切换 hybrid / matched divider。}
+}
+]
+
+PCB 代码现在的任务是让 A/B/C/D 设计空间、端口角色和 Gerber/Circuit JSON 交付链路先一致，不能把代码里的 seed 尺寸写成已经完成的电磁优化结果。
