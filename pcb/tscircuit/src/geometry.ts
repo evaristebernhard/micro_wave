@@ -58,6 +58,7 @@ export const boardVariants = {
     couplingGapSeed: 0.70,
     targetEvenModeOhm: 83.6,
     targetOddModeOhm: 29.9,
+    branchPhaseTrimLengthSeed: 0.0,
     needsIsolationTermination: true,
     hasRfOut: true
   },
@@ -70,6 +71,7 @@ export const boardVariants = {
     couplingGapSeed: 0.45,
     targetEvenModeOhm: 94.5,
     targetOddModeOhm: 26.5,
+    branchPhaseTrimLengthSeed: 0.66,
     needsIsolationTermination: true,
     hasRfOut: true
   },
@@ -82,6 +84,7 @@ export const boardVariants = {
     couplingGapSeed: 0.30,
     targetEvenModeOhm: 120.9,
     targetOddModeOhm: 20.7,
+    branchPhaseTrimLengthSeed: 1.41,
     needsIsolationTermination: true,
     hasRfOut: true
   },
@@ -94,6 +97,7 @@ export const boardVariants = {
     couplingGapSeed: 0,
     targetEvenModeOhm: null,
     targetOddModeOhm: null,
+    branchPhaseTrimLengthSeed: null,
     needsIsolationTermination: false,
     hasRfOut: false
   }
@@ -108,6 +112,7 @@ export const boardVariants = {
     couplingGapSeed: number
     targetEvenModeOhm: number | null
     targetOddModeOhm: number | null
+    branchPhaseTrimLengthSeed: number | null
     needsIsolationTermination: boolean
     hasRfOut: boolean
   }
@@ -131,6 +136,28 @@ export const getVariantDerived = (boardClass: BoardClass) => {
     variant.couplingGapSeed +
     pcb.rfTraceW / 2
 
+  const branchTrim = variant.branchPhaseTrimLengthSeed ?? 0
+  const phaseFeedStartY = coupledTraceY + pcb.rfTraceW / 2
+  const phaseFeedEndY = patchDerived.patchYMin
+  const phaseFeedRise = phaseFeedEndY - phaseFeedStartY
+  const phaseFeedTargetLength = phaseFeedRise + branchTrim
+  const phaseFeedHalfSegmentLength = phaseFeedTargetLength / 2
+  const phaseFeedHalfRise = phaseFeedRise / 2
+  const phaseFeedPeakX =
+    branchTrim > 0
+      ? Math.sqrt(
+          Math.max(
+            0,
+            phaseFeedHalfSegmentLength ** 2 - phaseFeedHalfRise ** 2
+          )
+        )
+      : 0
+  const phaseFeedMidY = (phaseFeedStartY + phaseFeedEndY) / 2
+  const phaseFeedAngleDeg =
+    branchTrim > 0
+      ? (Math.atan2(phaseFeedHalfRise, phaseFeedPeakX) * 180) / Math.PI
+      : 90
+
   return {
     ...patchDerived,
     coupledTraceY,
@@ -138,7 +165,16 @@ export const getVariantDerived = (boardClass: BoardClass) => {
     // feed. This creates an explicit isolated-end location on A/B/C.
     coupledTraceXMin: -variant.couplingLengthSeed,
     coupledTraceXMax: 0,
-    coupledTraceCenterX: -variant.couplingLengthSeed / 2
+    coupledTraceCenterX: -variant.couplingLengthSeed / 2,
+    branchPhaseTrimLengthSeed: branchTrim,
+    phaseFeedStartY,
+    phaseFeedEndY,
+    phaseFeedRise,
+    phaseFeedTargetLength,
+    phaseFeedHalfSegmentLength,
+    phaseFeedPeakX,
+    phaseFeedMidY,
+    phaseFeedAngleDeg
   } as const
 }
 
