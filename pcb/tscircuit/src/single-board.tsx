@@ -3,6 +3,7 @@ import {
   getVariantDerived,
   patchDerived,
   pcb,
+  terminalPhaseRouteSeed,
   type BoardClass
 } from "./geometry"
 
@@ -43,8 +44,6 @@ const RfGeometry = ({ boardClass }: VariantProps) => {
   const feedHeight = feedYMax - feedYMin
   const feedCenterY = (feedYMax + feedYMin) / 2
 
-  const terminalInputLength = pcb.rfContactX
-  const terminalInputCenterX = -terminalInputLength / 2
   const patchPortHint = boardClass === "D" ? "pin1" : "pin2"
 
   return (
@@ -78,14 +77,34 @@ const RfGeometry = ({ boardClass }: VariantProps) => {
         <footprint>
           {boardClass === "D" ? (
             <>
-              {/* Terminal-board input line: no RF OUT after D. */}
+              {/*
+               * D-terminal analytical phase route.
+               *
+               * The old orthogonal route was about 41.75 mm centerline.
+               * For the +90 degree progressive-phase seed, the reduced-order
+               * model requires about 35.34 mm. The route below uses a short
+               * horizontal section plus a diagonal section into the inset,
+               * avoiding a long lossy meander.
+               */}
               <smtpad
                 portHints={["pin1"]}
-                pcbX={mm(terminalInputCenterX)}
-                pcbY={mm(pcb.rfTraceY)}
-                width={mm(terminalInputLength)}
+                pcbX={mm(
+                  terminalPhaseRouteSeed.inputX +
+                    terminalPhaseRouteSeed.horizontalLengthMm / 2
+                )}
+                pcbY={mm(terminalPhaseRouteSeed.inputY)}
+                width={mm(terminalPhaseRouteSeed.horizontalLengthMm)}
                 height={mm(pcb.rfTraceW)}
                 shape="rect"
+              />
+              <smtpad
+                portHints={["pin1"]}
+                pcbX={mm(terminalPhaseRouteSeed.diagonalCenterX)}
+                pcbY={mm(terminalPhaseRouteSeed.diagonalCenterY)}
+                width={mm(terminalPhaseRouteSeed.diagonalLengthMm)}
+                height={mm(pcb.rfTraceW)}
+                shape="rotated_rect"
+                ccwRotation={terminalPhaseRouteSeed.diagonalAngleDeg}
               />
               <smtpad
                 portHints={["pin1"]}
@@ -144,15 +163,26 @@ const RfGeometry = ({ boardClass }: VariantProps) => {
             </>
           )}
 
-          {/* Vertical Patch feed inside the inset notch. */}
-          <smtpad
-            portHints={[patchPortHint]}
-            pcbX="0mm"
-            pcbY={mm(feedCenterY)}
-            width={mm(pcb.rfTraceW)}
-            height={mm(feedHeight)}
-            shape="rect"
-          />
+          {/* Patch feed inside the inset notch. */}
+          {boardClass === "D" ? (
+            <smtpad
+              portHints={["pin1"]}
+              pcbX="0mm"
+              pcbY={mm(terminalPhaseRouteSeed.insetCenterY)}
+              width={mm(pcb.rfTraceW)}
+              height={mm(terminalPhaseRouteSeed.insetLengthMm)}
+              shape="rect"
+            />
+          ) : (
+            <smtpad
+              portHints={[patchPortHint]}
+              pcbX="0mm"
+              pcbY={mm(feedCenterY)}
+              width={mm(pcb.rfTraceW)}
+              height={mm(feedHeight)}
+              shape="rect"
+            />
+          )}
 
           {/* Patch upper body. */}
           <smtpad
