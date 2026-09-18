@@ -23,6 +23,7 @@
 - `docs/11_qmatrix_phase_dof_design_v1.md`：给出 Q 矩阵最小提取流程、phase-DOF 设计 gate、约 18 mm 相位补偿的损耗代价，以及从理想场解反推 PCB 的执行顺序
 - `docs/12_pre_simulation_phase_trim_estimate_v1.md`：在无全波仿真前给出解析 phase-trim 近似解；当前 +90° progressive mode seed，以及 A/B/C = 0 / 0.66 / 1.41 mm 的第一阶 branch trim
 - `docs/13_coupler_terminal_phase_closure_v1.md`：闭合 C 的 quadrature phase 约定与 D terminal 相位；给出完整四板约 0/90/180/270° seed，并落实 B/C V-feed 与 D 35.34 mm 斜向 phase route
+- `docs/14_c_coupler_footprint_feasibility_v1.md`：审计 C 的 3 dB quadrature coupler footprint；证明标准 full-size branch-line 在当前 50×50 mm 同层 Patch 布局中无空间，保留 compact quadrature 路线
 
 ## V3 当前工程口径
 
