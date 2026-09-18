@@ -363,11 +363,13 @@ export const cCouplerFeasibilitySeed = {
     width: 19.68,
     height: 22.25
   },
-  currentPatchLowerFreeHeightMm: 15.75,
-  absoluteMaxLowerFreeHeightMm: 21.5,
-  standardBranchLineFitsSameLayer: false,
+  originalPatchLowerFreeHeightMm: 15.75,
+  currentPatchLowerFreeHeightMm: 25.75,
+  originalAbsoluteMaxLowerFreeHeightMm: 21.5,
+  extendedBoardHeightMm: 60,
+  standardBranchLineFitsSameLayer: true,
   preferredPhaseConventionDeg: -90,
-  fallbackClass: "compact-quadrature",
+  fallbackClass: "extended-standard-or-compact-quadrature",
   candidateFamilies: [
     "miniaturized-branch-line",
     "loaded-coupled-line",
