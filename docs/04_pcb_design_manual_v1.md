@@ -352,7 +352,7 @@ Bottom copper 使用：
 
 左右各一个 signal pad：
 
-- 初始 pad：**5.0 mm × 4.0 mm**
+- 初始 pad：**4.6 mm × 4.0 mm**（板边保留 0.2 mm copper clearance）
 - pad 中心 y 与主线一致：
 
 [
