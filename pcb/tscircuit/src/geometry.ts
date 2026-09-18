@@ -58,6 +58,7 @@ export const boardVariants = {
     couplingGapSeed: 0.70,
     targetEvenModeOhm: 83.6,
     targetOddModeOhm: 29.9,
+    targetBranchPhaseDeg: -90,
     branchPhaseTrimLengthSeed: 0.0,
     needsIsolationTermination: true,
     hasRfOut: true
@@ -71,6 +72,7 @@ export const boardVariants = {
     couplingGapSeed: 0.45,
     targetEvenModeOhm: 94.5,
     targetOddModeOhm: 26.5,
+    targetBranchPhaseDeg: -90,
     branchPhaseTrimLengthSeed: 0.66,
     needsIsolationTermination: true,
     hasRfOut: true
@@ -84,6 +86,7 @@ export const boardVariants = {
     couplingGapSeed: 0.30,
     targetEvenModeOhm: 120.9,
     targetOddModeOhm: 20.7,
+    targetBranchPhaseDeg: -90,
     branchPhaseTrimLengthSeed: 1.41,
     needsIsolationTermination: true,
     hasRfOut: true
@@ -97,6 +100,7 @@ export const boardVariants = {
     couplingGapSeed: 0,
     targetEvenModeOhm: null,
     targetOddModeOhm: null,
+    targetBranchPhaseDeg: 0,
     branchPhaseTrimLengthSeed: null,
     needsIsolationTermination: false,
     hasRfOut: false
@@ -112,6 +116,7 @@ export const boardVariants = {
     couplingGapSeed: number
     targetEvenModeOhm: number | null
     targetOddModeOhm: number | null
+    targetBranchPhaseDeg: number
     branchPhaseTrimLengthSeed: number | null
     needsIsolationTermination: boolean
     hasRfOut: boolean
@@ -341,4 +346,28 @@ export const complexExcitationSeed = {
   epsilonEffPhaseSensitivityDegPerUnit: 40.80,
   epsilonEffUncertaintyExample: 0.15,
   equivalentTrimUncertaintyMm: 1.15
+} as const
+
+/**
+ * C-board topology decision from the pre-HFSS footprint audit.
+ * A full-size single-section branch-line hybrid is not treated as a direct
+ * fallback on the current 50 mm x 50 mm / same-layer Patch layout.
+ */
+export const cCouplerFeasibilitySeed = {
+  standardBranchLineEnvelopeMm: {
+    width: 19.68,
+    height: 22.25
+  },
+  currentPatchLowerFreeHeightMm: 15.75,
+  absoluteMaxLowerFreeHeightMm: 21.5,
+  standardBranchLineFitsSameLayer: false,
+  preferredPhaseConventionDeg: -90,
+  fallbackClass: "compact-quadrature",
+  candidateFamilies: [
+    "miniaturized-branch-line",
+    "loaded-coupled-line",
+    "lange-interdigital",
+    "multilayer-broadside",
+    "external-or-smd-hybrid"
+  ]
 } as const
