@@ -2,7 +2,7 @@
 
 > 目标：允许 PCB 尺寸增大后，重新比较标准 quadrature coupler 与 matched extraction T-cell。核心约束是不改变 50 mm 水平 Patch 节距，因此只增加板高。
 
-## 1. 当前工程包络：50×60 mm，单侧向下扩展
+## 1. 当前工程包络：RF 约需 50×60 mm；tscircuit 工程板采用 50×70 mm 居中外形
 
 原始机械目标是：
 
@@ -13,13 +13,13 @@
 当前预仿真工程包络采用：
 
 \[
-\boxed{50\times60\ {\rm mm}}.
+\boxed{50\times70\ {\rm mm}}.
 \]
 
 板中心设为：
 
 \[
-\boxed{y_c=-5\ {\rm mm}}.
+\boxed{y_c=0}.
 \]
 
 因此 y 边界由原来的：
@@ -31,7 +31,7 @@
 变为：
 
 \[
-\boxed{[-35,+25]\ {\rm mm}}.
+\boxed{[-35,+35]\ {\rm mm}}.
 \]
 
 额外 10 mm 全部增加在下方 RF/控制网络一侧。Patch、RF IN/OUT、磁吸接口及顶部边界保持原参考坐标。
