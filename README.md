@@ -11,6 +11,7 @@
 - `docs/01_rf_simulation_requirements_v1.md`：原始需求冻结版，仅保留追踪
 - `docs/01_rf_simulation_requirements_v2.md`：修正功率、线宽、桥损耗、长馈线、板数识别和分区架构后的当前版本
 - `docs/02_system_theory_analysis_v1.md`：系统拓扑、功率预算、级联均匀性、WR340/50 Ω、磁吸接口等理论分析
+- `docs/03_patch_antenna_theory_v1.md`：2.45 GHz 前向辐射矩形 Patch 的尺寸、弱耦合、馈电、功率守恒与 tscircuit/HFSS 参数化基线
 
 ## V2 主要修订
 
