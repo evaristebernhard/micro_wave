@@ -1,6 +1,6 @@
 # micro_wave tscircuit PCB
 
-This subproject generates the first 50 mm × 50 mm parameterized Patch PCB seed described in `docs/04_pcb_design_manual_v1.md`.
+This subproject generates the current 50 mm × 50 mm gradient-coupled Patch PCB seeds. It now exports four position classes: A / B / C through boards and the D terminal radiator.
 
 ## Requirements
 
@@ -58,21 +58,42 @@ npm run export:gerbers
 Output:
 
 ```text
-dist/single-board.gerbers.zip
+dist/board-a.gerbers.zip
+dist/board-b.gerbers.zip
+dist/board-c.gerbers.zip
+dist/board-d.gerbers.zip
+
+dist/board-a.circuit.json
+dist/board-b.circuit.json
+dist/board-c.circuit.json
+dist/board-d.circuit.json
 ```
 
 ## Current geometry seed
 
+Common geometry:
+
 - PCB: 50 × 50 mm
 - Patch: 37.5 × 28.5 mm
 - Patch center: (0, 5 mm)
-- RF through-line: 2.9 mm wide at y = -18 mm
+- RF through-line seed: 2.9 mm wide at y = -18 mm
 - Inset depth: 10.5 mm
 - Inset side gap: 0.5 mm
-- Parallel coupling gap: 0.5 mm
-- Parallel coupling length: 6 mm
 - Bottom: nearly full continuous copper ground
 - Board-count resistor: 100 Ω / 0603 placement seed
+
+Variant targets:
+
+| Board | RF role | Target coupling | Current geometry seed |
+|---|---|---:|---|
+| A | through + Patch tap | 6.5 dB (~22.4%) | 17 mm quarter-wave-scale side-coupler, 0.70 mm gap seed |
+| B | through + Patch tap | 5.0 dB (~31.6%) | 17 mm quarter-wave-scale side-coupler, 0.45 mm gap seed |
+| C | strong tap | 3.0 dB (~50%) | 17 mm strong-coupler seed, 0.30 mm gap seed; hybrid fallback expected |
+| D | Zone terminal radiator | no RF OUT | direct terminal feed into the Patch |
+
+A/B/C include an isolated-end 50 Ω termination placement seed. The exact coupling gaps are **not validated RF dimensions**; they are starting points for HFSS/openEMS.
+
+The historical 6 mm / 0.5 mm coupler is retained only in the source as a calibration reference.
 
 All RF dimensions live in `src/geometry.ts`; do not scatter RF dimensions through the JSX.
 
@@ -89,4 +110,4 @@ After Gerber generation, HFSS must add the real material stack and external stru
 - magnetic interface parasitics
 - representative / actual workpiece
 
-The first HFSS pass should determine 50 mm through-line loss before multi-board cascade optimization.
+The first HFSS pass should determine 50 mm through-line loss and phase before multi-board cascade optimization. After that, solve A/B/C coupling and board return loss as complex S-parameters, then cascade the loaded cells with S/ABCD matrices. C should fall back to a matched 3 dB hybrid/power-divider topology if the simple side-coupled seed cannot reach ~50% extraction with adequate return loss.
