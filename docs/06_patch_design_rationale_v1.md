@@ -1545,3 +1545,6 @@ C=3{\rm dB}
 \]
 
 这条原则从现在起应作为 Patch、coupler、Zone、HFSS/openEMS 和 PCB 代码继续推进时的统一设计思想。
+
+
+> 复相位综合与四板 canonical phase-mode 扫描方案见 `docs/10_zone_complex_phase_synthesis_v1.md`。
