@@ -2,7 +2,7 @@
 
 > 本手册是当前 **tscircuit 画板 + HFSS 验证** 的执行基线。  
 > 适用对象：50 mm × 50 mm 磁吸模块化微波加热天线板。  
-> 当前路线：**50 Ω 贯通主线 + 弱耦合支路 + 前向矩形 Patch + 背面完整 Ground**。
+> 当前路线：**低损耗分配主干 + 梯度耦合 Zone + 前向矩形 Patch + 背面完整 Ground**。A/B/C 为 through-board，D 为终端辐射板。当前 tscircuit 单板仍作为几何/耦合校准 seed，不代表四类板最终共用同一 coupler。
 >
 > 本手册解决的是“PCB 第一版到底怎么画”。未冻结的机械细节继续参数化，不允许用未知参数阻塞第一版 PCB。
 
@@ -769,56 +769,70 @@ g_c, l_c
 
 ## 16. 当前 Zone 设计规则
 
-按理论单 cell：
+固定 10% tap 的同构 4 板链不再作为默认方案。
 
-[
-L_sapprox0.42	ext{ dB}
-]
+新的系统基线见 \`docs/05_gradient_coupling_system_architecture_v1.md\`。若 through-line 单 cell 寄生损耗先采用：
 
-且单板 Patch 抽取：
+\[
+L_s\approx0.42\text{ dB},
+\]
 
-[
-kappaapprox10%
-]
+则：
 
-则相邻 Patch 可用功率大约下降：
+\[
+\tau=10^{-L_s/10}\approx0.90782.
+\]
 
-[
-0.42+0.46
-approx0.88	ext{ dB/板}.
-]
+要求 4 块板抽取相同绝对 RF 功率 \(E\)，且第 4 块作为终端辐射板，则由反向递推：
 
-因此：
+\[
+P_i=E+\frac{P_{i+1}}{\tau}
+\]
 
-| Zone 板数 | 首尾功率差估计 |
+得到四类板：
+
+| 板型 | 位置 | 目标抽取比例 |
+|---|---|---:|
+| A | Zone 第 1 块 | 21.5% |
+| B | Zone 第 2 块 | 30.2% |
+| C | Zone 第 3 块 | 47.6% |
+| D | Zone 末端 | 100%（终端匹配目标） |
+
+Zone 组合规则：
+
+| Zone 板数 | 组合 |
+|---:|---|
+| 1 | D |
+| 2 | C → D |
+| 3 | B → C → D |
+| 4 | A → B → C → D |
+
+因此第一版 PCB 代码的 0.5 mm gap / 6 mm coupling length 只作为**coupler calibration seed**。后续要生成 A/B/C/D 四套参数化几何，而不是复制四块完全相同的 PCB。
+
+4 板 Zone 的理论 RF 抽取效率约为：
+
+\[
+\eta_{\rm zone}\approx85.99\%.
+\]
+
+若每块 RF 抽取目标为 \(E\)，Zone 输入约为：
+
+\[
+P_{\rm zone}\approx4.6515E.
+\]
+
+例如：
+
+| \(E\) | \(P_{\rm zone}\) |
 |---:|---:|
-| 2 | 0.88 dB |
-| 3 | 1.76 dB |
-| 4 | 2.63 dB |
-| 5 | 3.51 dB |
-| 8 | 6.14 dB |
+| 4 W | 18.61 W |
+| 5 W | 23.26 W |
+| 6 W | 27.91 W |
+| 8 W | 37.21 W |
 
-当前设计口径：
+真实 HFSS/openEMS 得到 through-line 的 \(\tau(f)\) 后，必须重新计算 A/B/C/D 的耦合目标，不能把上表作为最终制造值。
 
-[
-oxed{4	ext{ 块/Zone 推荐}}
-]
-
-[
-oxed{5	ext{ 块/Zone 可尝试上限}}
-]
-
-[
-oxed{8	ext{ 块仅对照}}
-]
-
-如果 HFSS 实际得到：
-
-[
-L_sle0.25	ext{ dB},
-]
-
-才重新考虑 6–8 块 Zone。
+5 块和 8 块只保留为损耗/架构对照，不再作为当前普通 FR4 的默认 Zone。
 
 ---
 
@@ -896,8 +910,10 @@ L_sle0.25	ext{ dB},
 - [ ] through-line y = -18 mm
 - [ ] inset depth = 10.5 mm
 - [ ] inset side gap = 0.5 mm
-- [ ] coupling gap = 0.5 mm
-- [ ] coupling length = 6 mm
+- [ ] calibration seed: coupling gap = 0.5 mm
+- [ ] calibration seed: coupling length = 6 mm
+- [ ] A/B/C coupler 目标已按真实 through-line 损耗重算
+- [ ] D 终端辐射板已单独定义，不与 A/B/C 共用普通 through topology
 - [ ] 100 Ω identification resistor
 - [ ] 0.3 mm identification trace
 - [ ] RF 区无无关顶层铜
