@@ -157,3 +157,6 @@ micro_wave/
 - `docs/16_extended_board_tcell_design_v1.md`：50×60 工程包络与 matched-extraction T-cell 解析设计。
 
 当前 PCB 工程同时保留原 coupler A/B/C/D 与 matched-extraction T-cell A/B/C/D 两套可导出 topology；板宽保持 50 mm，工程高度扩展到 60 mm，并仅向下扩展，保持原 50 mm 横向节距和顶部 reference 不变。
+
+- `docs/17_tcell_reference_plane_layout_v1.md`：50×60 T-cell 正确 reference plane、T-junction 坐标、inter-cell 37–39° phase target 与 D 半波 V-feed。
+- `docs/18_tcell_bandwidth_load_sensitivity_v1.md`：理想传输线频带与 loaded-Patch reflection 敏感性；给出 T-cell / isolated-topology 的定量切换判据。
