@@ -7,8 +7,8 @@ export const pcb = {
   // Keep the 50 mm horizontal pitch that controls inter-Patch phase.
   // The extra 10 mm is added only below the original board outline so the
   // RF/Patch coordinates and left-right magnetic pitch remain unchanged.
-  boardH: 70,
-  boardCenterY: 0,
+  boardH: 60,
+  boardCenterY: -5,
   originalBoardH: 50,
 
   patchW: 37.5,
