@@ -355,8 +355,9 @@ export const complexExcitationSeed = {
 
 /**
  * C-board topology decision from the pre-HFSS footprint audit.
- * A full-size single-section branch-line hybrid is not treated as a direct
- * fallback on the current 50 mm x 50 mm / same-layer Patch layout.
+ * A full-size single-section branch-line hybrid did not fit the historical
+ * 50 mm x 50 mm layout, but becomes a valid comparison candidate after the
+ * current one-sided extension to 50 mm x 60 mm (board center y = -5 mm).
  */
 export const cCouplerFeasibilitySeed = {
   standardBranchLineEnvelopeMm: {
@@ -366,7 +367,7 @@ export const cCouplerFeasibilitySeed = {
   originalPatchLowerFreeHeightMm: 15.75,
   currentPatchLowerFreeHeightMm: 25.75,
   originalAbsoluteMaxLowerFreeHeightMm: 21.5,
-  extendedBoardHeightMm: 70,
+  extendedBoardHeightMm: 60,
   standardBranchLineFitsSameLayer: true,
   preferredPhaseConventionDeg: -90,
   fallbackClass: "extended-standard-or-compact-quadrature",
