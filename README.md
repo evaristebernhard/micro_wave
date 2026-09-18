@@ -15,10 +15,10 @@
 - `docs/03_patch_antenna_theory_v1.md`：2.45 GHz 前向辐射矩形 Patch 的尺寸、弱耦合、馈电、功率守恒与 tscircuit/HFSS 参数化基线
 - `docs/04_pcb_design_manual_v1.md`：第一版 tscircuit PCB 的执行手册，含坐标、尺寸、层叠、Patch/主线/耦合/识别线/磁吸接口规则和 HFSS 交接清单
 - `docs/05_gradient_coupling_system_architecture_v1.md`：梯度耦合分区架构、等功率递推、A/B/C/D 四类板、500 W 系统功率边界和分配网络约束
-- `docs/06_patch_design_rationale_v1.md`：解释矩形 Patch 是什么、如何向工件输送微波能量、原方形螺旋方案的高频/级联问题，以及为什么当前把 Patch 作为优化主基线
+- `docs/06_patch_design_rationale_v1.md`：当前设计思想主文档；从“为什么采用 Patch”进一步升级到“几何 → 复数 S 参数 → Patch 复激励 → 工件功率沉积 → 无源网络反综合”的统一设计链
 - `docs/07_theory_gap_closure_v1.md`：闭合长串 FR4 损耗上限、灰板 raw S21 指标冲突、强耦合器可实现性、D 终端板与两层梯度分配等剩余理论问题
 - `docs/08_original_requirements_feasibility_audit_v1.md`：原始客户需求可行性审计；逐项记录已证明不可同时满足或不能按原样验收的指标
-- `docs/09_current_patch_smatrix_parameter_design_v1.md`：只针对当前 Patch+Zone 方案，建立复数 S/ABCD 级联、A/B/C/D 第一轮耦合等级、相位/反射容差和可实现参数设计
+- `docs/09_current_patch_smatrix_parameter_design_v1.md`：设计思想下的第一轮参数实现；建立复数 S/ABCD 级联与 A/B/C/D seed，但 6.5/5/3 dB 只作为 scalar-budget 起点，不作为最终场最优解
 
 ## V3 当前工程口径
 
@@ -127,3 +127,24 @@ micro_wave/
 │   └── measurements/
 └── results/
 ```
+
+
+## 当前设计方法
+
+当前 Patch+Zone 路线统一按以下顺序推进：
+
+\[
+\boxed{
+\text{Geometry}
+\rightarrow
+\text{Complex }S
+\rightarrow
+\text{Patch excitation }\mathbf u
+\rightarrow
+\text{Workpiece deposition }Q
+\rightarrow
+\text{Passive synthesis}
+}
+\]
+
+因此后续 HFSS/openEMS 与 PCB 优化不再只以 coupling dB 为中心。A/B/C/D 的第一轮 6.5/5/3 dB 参数用于启动搜索，最终应由工件侧目标复激励和无源网络可实现性共同决定。
