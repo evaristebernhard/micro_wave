@@ -1,0 +1,49 @@
+name: tscircuit PCB
+
+on:
+  push:
+    paths:
+      - "pcb/tscircuit/**"
+      - ".github/workflows/tscircuit-pcb.yml"
+  pull_request:
+    paths:
+      - "pcb/tscircuit/**"
+      - ".github/workflows/tscircuit-pcb.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pcb/tscircuit
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: pcb/tscircuit/package.json
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build circuit
+        run: npm run build
+
+      - name: Export Circuit JSON
+        run: npm run export:circuit-json
+
+      - name: Export Gerbers
+        run: npm run export:gerbers
+
+      - name: Upload PCB artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: tscircuit-pcb
+          path: pcb/tscircuit/dist/
