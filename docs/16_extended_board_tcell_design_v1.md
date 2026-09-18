@@ -2,7 +2,7 @@
 
 > 目标：允许 PCB 尺寸增大后，重新比较标准 quadrature coupler 与 matched extraction T-cell。核心约束是不改变 50 mm 水平 Patch 节距，因此只增加板高。
 
-## 1. 为什么优先从 50×50 改为 50×60 mm
+## 1. 为什么优先从 50×50 改为 50×70 mm
 
 原设计：
 
@@ -13,7 +13,7 @@
 当前把板改为：
 
 \[
-\boxed{50\times60\ {\rm mm}}.
+\boxed{50\\times70\ {\rm mm}}.
 \]
 
 但板中心从：
@@ -22,7 +22,7 @@
 
 改为：
 
-\[\boxed{y_c=-5\ {\rm mm}}.\]
+\[\boxed{y_c=0}.\]
 
 所以顶部边界仍然保持：
 
@@ -84,7 +84,7 @@ H_{\rm env}\approx22.25\ {\rm mm}.
 
 \[
 \boxed{
-\text{50×50 下放不下；50×60 下重新成为可实现候选。}
+\text{50×50 下放不下；50×70 下重新成为可实现候选。}
 }
 \]
 
@@ -337,7 +337,7 @@ T-cell 是一个 reciprocal 3-port junction。
 PCB 基准机械外形更新为：
 
 \[
-\boxed{50\times60\ {\rm mm}}
+\boxed{50\\times70\ {\rm mm}}
 \]
 
 且向下单侧扩展，以保持全部已有 RF phase reference。
