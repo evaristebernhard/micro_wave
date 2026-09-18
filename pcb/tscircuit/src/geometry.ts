@@ -395,85 +395,79 @@ export const cCouplerFeasibilitySeed = {
  */
 export const matchedExtractionTCellSeed = {
   referenceOhm: 50,
-  fiftyOhmWidthMm: 3.12,
-  fiftyOhmQuarterWaveMm: 16.92,
-  fiftyOhmHalfWaveMm: 33.84,
-
-  // T-cell-specific side contacts. Keeping board width at 50 mm preserves
-  // Patch pitch; moving the contact center outward reduces the inter-board
-  // electrical bridge while leaving a manufacturable 3.6 mm contact pad.
-  rfContactX: 23.2,
-  rfContactPadWidthMm: 3.6,
-  rfContactPadHeightMm: 4.0,
-  physicalContactCenterGapMm: 3.6,
-
-  // The Patch branch quarter-wave includes the existing 10.5 mm inset feed.
-  // A common 2.87 mm 50-ohm lead before the series transformer minimizes the
-  // worst A/B/C through-phase residual with the shared mechanical bridge.
-  commonInputLeadMm: 2.87,
-  patchBottomReferencePoint: { x: 0, y: -9.25 },
-  patchModeReferencePoint: { x: 0, y: 1.25 },
-
+  fiftyOhmWidthMm: 3.137,
+  fiftyOhmQuarterWaveMm: 16.921,
+  fiftyOhmHalfWaveMm: 33.842,
+  fiftyOhmInsetFeedMm: 10.5,
+  insetCommonPhaseDeg: 55.84,
+  inputTransformerStart: { x: -22.0, y: -18.0 },
+  patchBranchEndpoint: { x: 0.0, y: -9.25 },
+  rfOutReference: { x: 22.5, y: -18.0 },
+  physicalInterboardContactSpanMm: 5.0,
   variants: {
     A: {
       k: 0.224,
-      seriesTransformerOhm: 44.05,
-      seriesTransformerWidthMm: 3.82,
-      seriesQuarterWaveMm: 16.77,
-      branchTransformerOhm: 93.06,
-      branchTransformerWidthMm: 0.88,
-      branchQuarterWaveMm: 17.65,
-      branchPreInsetMm: 7.15,
-      junctionX: -3.74,
-      junctionY: -15.35,
-      onboardThroughTailMm: 27.07,
-      throughResidualLengthMm: -0.305,
-      throughResidualPhaseDeg: -1.62
+      seriesTransformerOhm: 44.045,
+      seriesTransformerWidthMm: 3.845,
+      seriesQuarterWaveMm: 16.779,
+      branchTransformerOhm: 93.063,
+      branchTransformerWidthMm: 0.877,
+      branchQuarterWaveMm: 17.637,
+      junctionX: -6.967,
+      junctionY: -25.453,
+      onboardThroughTailMm: 30.395,
+      requiredBridgeEquivalent50OhmMm: 3.448,
+      requiredBridgePhaseDeg: 18.34,
+      bridgeEffectivePermittivityFor5mm: 1.554
     },
     B: {
       k: 0.316,
-      seriesTransformerOhm: 41.35,
-      seriesTransformerWidthMm: 4.21,
-      seriesQuarterWaveMm: 16.70,
-      branchTransformerOhm: 73.56,
-      branchTransformerWidthMm: 1.52,
-      branchQuarterWaveMm: 17.39,
-      branchPreInsetMm: 6.89,
-      junctionX: -3.87,
-      junctionY: -14.95,
-      onboardThroughTailMm: 27.24,
-      throughResidualLengthMm: -0.132,
-      throughResidualPhaseDeg: -0.70
+      seriesTransformerOhm: 41.352,
+      seriesTransformerWidthMm: 4.235,
+      seriesQuarterWaveMm: 16.710,
+      branchTransformerOhm: 73.562,
+      branchTransformerWidthMm: 1.521,
+      branchQuarterWaveMm: 17.382,
+      junctionX: -6.919,
+      junctionY: -25.196,
+      onboardThroughTailMm: 30.286,
+      requiredBridgeEquivalent50OhmMm: 3.556,
+      requiredBridgePhaseDeg: 18.92,
+      bridgeEffectivePermittivityFor5mm: 1.654
     },
     C: {
       k: 0.501,
-      seriesTransformerOhm: 35.32,
-      seriesTransformerWidthMm: 5.32,
-      seriesQuarterWaveMm: 16.52,
-      branchTransformerOhm: 49.90,
-      branchTransformerWidthMm: 3.13,
-      branchQuarterWaveMm: 16.92,
-      branchPreInsetMm: 6.42,
-      junctionX: -4.20,
-      junctionY: -14.10,
-      onboardThroughTailMm: 27.68,
-      throughResidualLengthMm: 0.305,
-      throughResidualPhaseDeg: 1.62
+      seriesTransformerOhm: 35.320,
+      seriesTransformerWidthMm: 5.337,
+      seriesQuarterWaveMm: 16.543,
+      branchTransformerOhm: 49.900,
+      branchTransformerWidthMm: 3.147,
+      branchQuarterWaveMm: 16.919,
+      junctionX: -6.878,
+      junctionY: -24.708,
+      onboardThroughTailMm: 30.134,
+      requiredBridgeEquivalent50OhmMm: 3.708,
+      requiredBridgePhaseDeg: 19.72,
+      bridgeEffectivePermittivityFor5mm: 1.798
     }
   },
-
-  inputLeadPhaseIsCommon: true,
-  inputTransformerPhaseDeg: -90,
-  branchTransformerPhaseDeg: -90,
+  commonBridgePhaseSeedDeg: 19.0,
+  commonBridgePhysicalSeedMm: 5.0,
+  inputToJunctionPhaseDeg: -90,
+  junctionToPatchBottomPhaseDeg: -90,
+  insetFeedCommonPhaseDeg: -55.84,
+  junctionToNextCellPhaseDeg: -180,
   targetCellThroughPhaseDeg: -270,
   targetPatchProgressionDeg: 90,
-
-  // D uses a direct 50-ohm half-wave path to the same Patch-bottom reference,
-  // followed by the same inset feed used by A/B/C.
-  terminalDHalfWaveFeedSeedMm: 33.84,
-  terminalDWaypoint: { x: -10.0, y: -25.19 },
-
-  primaryAdvantage: "ordinary-width-lines-and-analytic-amplitude-phase-closure",
+  terminalD: {
+    input: { x: -22.5, y: -18.0 },
+    vertex: { x: -6.952, y: -24.677 },
+    patchBranchEndpoint: { x: 0.0, y: -9.25 },
+    preInsetHalfWaveMm: 33.842,
+    insetFeedMm: 10.5,
+    localPatchPhaseDeg: -235.84
+  },
+  primaryAdvantage: "ordinary-width-lines-no-micron-coupling-gap",
   primaryRisk: "three-port-T-cell-has-no-inherent-output-isolation"
 } as const
 
