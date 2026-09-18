@@ -2,47 +2,54 @@
 
 > 目标：允许 PCB 尺寸增大后，重新比较标准 quadrature coupler 与 matched extraction T-cell。核心约束是不改变 50 mm 水平 Patch 节距，因此只增加板高。
 
-## 1. 为什么优先从 50×50 改为 50×70 mm
+## 1. 为什么把工程包络从 50×50 扩到 50×70 mm
 
-原设计：
+原始机械目标是：
 
 \[
 50\times50\ {\rm mm}.
 \]
 
-当前把板改为：
+当前预仿真工程包络改为：
 
 \[
-\boxed{50\\times70\ {\rm mm}}.
+\boxed{50\times70\ {\rm mm}}.
 \]
 
-但板中心从：
+板中心保持：
 
-\[y_c=0\]
+\[
+\boxed{y_c=0}.
+\]
 
-改为：
+因此 y 边界由原来的：
 
-\[\boxed{y_c=0}.\]
+\[
+[-25,+25]\ {\rm mm}
+\]
 
-所以顶部边界仍然保持：
+扩展为：
 
-\[+25\ {\rm mm},\]
+\[
+\boxed{[-35,+35]\ {\rm mm}}.
+\]
 
-底部边界从：
+已有 Patch、RF IN/OUT、ID 与磁吸 RF 参考坐标不因扩板而改变。
 
-\[-25\ {\rm mm}\]
+最重要的是板宽仍为：
 
-扩展到：
+\[
+\boxed{50\ {\rm mm}},
+\]
 
-\[-35\ {\rm mm}.\]
+所以左右拼接时的 Patch 水平物理节距仍是 50 mm，不破坏之前的 progressive-phase 参考。
 
-因此所有已有 Patch、RF IN/OUT、ID、磁吸接口坐标均可保持不变。
+扩大的是 y 向工程空间，用于：
 
-最重要的是水平板宽仍然是：
-
-\[\boxed{50\ {\rm mm}},\]
-
-所以相邻 Patch 的水平物理节距不变，不破坏之前的 +90° progressive-phase 设计。
+- 标准/紧凑 quadrature coupler；
+- T-cell 与隔离网络的布局余量；
+- ID 链与射频网络分区；
+- via fence、调谐段与制造边距。
 
 ## 2. 扩板以后标准 C branch-line hybrid 已经从“放不下”变成“可以作为真实候选”
 
