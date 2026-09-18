@@ -15,6 +15,7 @@
 - `docs/04_pcb_design_manual_v1.md`：第一版 tscircuit PCB 的执行手册，含坐标、尺寸、层叠、Patch/主线/耦合/识别线/磁吸接口规则和 HFSS 交接清单
 - `docs/05_gradient_coupling_system_architecture_v1.md`：梯度耦合分区架构、等功率递推、A/B/C/D 四类板、500 W 系统功率边界和分配网络约束
 - `docs/06_patch_design_rationale_v1.md`：解释矩形 Patch 是什么、如何向工件输送微波能量、原方形螺旋方案的高频/级联问题，以及为什么当前把 Patch 作为优化主基线
+- `docs/07_theory_gap_closure_v1.md`：闭合长串 FR4 损耗上限、灰板 raw S21 指标冲突、强耦合器可实现性、D 终端板与两层梯度分配等剩余理论问题
 
 ## V2 主要修订
 
