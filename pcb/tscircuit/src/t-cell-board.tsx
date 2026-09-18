@@ -126,13 +126,13 @@ const TCellGroundContacts = ({ boardClass }: VariantProps) => {
         width={mm(groundPadW)}
         height={mm(pcb.rfGroundPadH)}
         pcbX={mm(-x)}
-        pcbY={mm(pcb.rfGroundPadY)}
+        pcbY={mm(pcb.tCellGroundPadY)}
         connections={{ pin1: "net.GND" }}
       />
       <via
         name="V_GND_L1"
         pcbX={mm(-x - dx)}
-        pcbY={mm(pcb.rfGroundPadY)}
+        pcbY={mm(pcb.tCellGroundPadY)}
         fromLayer="top"
         toLayer="bottom"
         holeDiameter={mm(pcb.rfGroundViaHole)}
@@ -142,7 +142,7 @@ const TCellGroundContacts = ({ boardClass }: VariantProps) => {
       <via
         name="V_GND_L2"
         pcbX={mm(-x + dx)}
-        pcbY={mm(pcb.rfGroundPadY)}
+        pcbY={mm(pcb.tCellGroundPadY)}
         fromLayer="top"
         toLayer="bottom"
         holeDiameter={mm(pcb.rfGroundViaHole)}
@@ -159,13 +159,13 @@ const TCellGroundContacts = ({ boardClass }: VariantProps) => {
             width={mm(groundPadW)}
             height={mm(pcb.rfGroundPadH)}
             pcbX={mm(x)}
-            pcbY={mm(pcb.rfGroundPadY)}
+            pcbY={mm(pcb.tCellGroundPadY)}
             connections={{ pin1: "net.GND" }}
           />
           <via
             name="V_GND_R1"
             pcbX={mm(x - dx)}
-            pcbY={mm(pcb.rfGroundPadY)}
+            pcbY={mm(pcb.tCellGroundPadY)}
             fromLayer="top"
             toLayer="bottom"
             holeDiameter={mm(pcb.rfGroundViaHole)}
@@ -175,7 +175,7 @@ const TCellGroundContacts = ({ boardClass }: VariantProps) => {
           <via
             name="V_GND_R2"
             pcbX={mm(x + dx)}
-            pcbY={mm(pcb.rfGroundPadY)}
+            pcbY={mm(pcb.tCellGroundPadY)}
             fromLayer="top"
             toLayer="bottom"
             holeDiameter={mm(pcb.rfGroundViaHole)}
