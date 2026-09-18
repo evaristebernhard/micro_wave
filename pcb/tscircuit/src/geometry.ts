@@ -20,7 +20,22 @@ export const pcb = {
   idTraceY: -23.0,
 
   rfPadW: 4.6,
-  rfPadH: 4.0
+  rfPadH: 4.0,
+  rfContactX: 22.5,
+
+  rfGroundPadW: 4.6,
+  rfGroundPadH: 2.4,
+  rfGroundPadY: -13.7,
+  rfGroundViaOffsetX: 0.8,
+  rfGroundViaHole: 0.30,
+  rfGroundViaOuter: 0.60,
+
+  idPadX: 23.5,
+  idPadW: 2.0,
+  idPadH: 1.2,
+
+  magneticOutlineW: 5.0,
+  magneticOutlineH: 9.5
 } as const
 
 export const derived = {
