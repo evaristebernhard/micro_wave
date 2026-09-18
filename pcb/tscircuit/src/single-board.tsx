@@ -3,14 +3,14 @@ import { derived, pcb } from "./geometry"
 const mm = (value: number) => `${value}mm`
 
 /**
- * First tscircuit seed for the 50 mm x 50 mm magnetic patch board.
+ * Presentation/engineering seed for the 50 mm x 50 mm magnetic patch board.
  *
- * RF geometry is deliberately expressed as fixed copper pads inside one custom
- * footprint so the autorouter cannot modify the critical microwave geometry.
+ * Critical microwave geometry stays as fixed copper inside ANT1 so the
+ * autorouter cannot change the RF dimensions.
  *
  * pin1 = THROUGH RF bus
  * pin2 = PATCH branch
- * pin3 = bottom RF ground plane
+ * pin3 = RF ground
  */
 const RfGeometry = () => {
   const patchTopHeight = derived.patchYMax - derived.notchYMax
@@ -36,9 +36,12 @@ const RfGeometry = () => {
         pin2: "PATCH",
         pin3: "GND"
       }}
+      connections={{
+        pin3: "net.GND"
+      }}
       footprint={
         <footprint>
-          {/* 50 ohm through-line seed. Keep this geometry fixed. */}
+          {/* 50 ohm through-line seed. */}
           <smtpad
             portHints={["pin1"]}
             pcbX="0mm"
@@ -51,7 +54,7 @@ const RfGeometry = () => {
           {/* Left / right magnetic RF signal contact placeholders. */}
           <smtpad
             portHints={["pin1"]}
-            pcbX="-22.5mm"
+            pcbX={mm(-pcb.rfContactX)}
             pcbY={mm(pcb.rfTraceY)}
             width={mm(pcb.rfPadW)}
             height={mm(pcb.rfPadH)}
@@ -59,10 +62,28 @@ const RfGeometry = () => {
           />
           <smtpad
             portHints={["pin1"]}
-            pcbX="22.5mm"
+            pcbX={mm(pcb.rfContactX)}
             pcbY={mm(pcb.rfTraceY)}
             width={mm(pcb.rfPadW)}
             height={mm(pcb.rfPadH)}
+            shape="rect"
+          />
+
+          {/* Dedicated top-side RF ground-return contact areas. */}
+          <smtpad
+            portHints={["pin3"]}
+            pcbX={mm(-pcb.rfContactX)}
+            pcbY={mm(pcb.rfGroundPadY)}
+            width={mm(pcb.rfGroundPadW)}
+            height={mm(pcb.rfGroundPadH)}
+            shape="rect"
+          />
+          <smtpad
+            portHints={["pin3"]}
+            pcbX={mm(pcb.rfContactX)}
+            pcbY={mm(pcb.rfGroundPadY)}
+            width={mm(pcb.rfGroundPadW)}
+            height={mm(pcb.rfGroundPadH)}
             shape="rect"
           />
 
@@ -96,7 +117,7 @@ const RfGeometry = () => {
             shape="rect"
           />
 
-          {/* Patch lower left leg around inset feed. */}
+          {/* Patch lower legs around the inset feed. */}
           <smtpad
             portHints={["pin2"]}
             pcbX={mm(-patchLegCenterOffset)}
@@ -105,8 +126,6 @@ const RfGeometry = () => {
             height={mm(patchLegHeight)}
             shape="rect"
           />
-
-          {/* Patch lower right leg around inset feed. */}
           <smtpad
             portHints={["pin2"]}
             pcbX={mm(patchLegCenterOffset)}
@@ -116,7 +135,7 @@ const RfGeometry = () => {
             shape="rect"
           />
 
-          {/* Nearly full bottom copper RF ground plane. */}
+          {/* Nearly full continuous bottom RF ground plane. */}
           <smtpad
             portHints={["pin3"]}
             pcbX="0mm"
@@ -132,6 +151,157 @@ const RfGeometry = () => {
   )
 }
 
+const GroundReturnVias = () => {
+  const leftX = -pcb.rfContactX
+  const rightX = pcb.rfContactX
+  const dx = pcb.rfGroundViaOffsetX
+
+  return (
+    <>
+      <via
+        name="V_GND_L1"
+        pcbX={mm(leftX - dx)}
+        pcbY={mm(pcb.rfGroundPadY)}
+        fromLayer="top"
+        toLayer="bottom"
+        holeDiameter={mm(pcb.rfGroundViaHole)}
+        outerDiameter={mm(pcb.rfGroundViaOuter)}
+        connectsTo="net.GND"
+      />
+      <via
+        name="V_GND_L2"
+        pcbX={mm(leftX + dx)}
+        pcbY={mm(pcb.rfGroundPadY)}
+        fromLayer="top"
+        toLayer="bottom"
+        holeDiameter={mm(pcb.rfGroundViaHole)}
+        outerDiameter={mm(pcb.rfGroundViaOuter)}
+        connectsTo="net.GND"
+      />
+      <via
+        name="V_GND_R1"
+        pcbX={mm(rightX - dx)}
+        pcbY={mm(pcb.rfGroundPadY)}
+        fromLayer="top"
+        toLayer="bottom"
+        holeDiameter={mm(pcb.rfGroundViaHole)}
+        outerDiameter={mm(pcb.rfGroundViaOuter)}
+        connectsTo="net.GND"
+      />
+      <via
+        name="V_GND_R2"
+        pcbX={mm(rightX + dx)}
+        pcbY={mm(pcb.rfGroundPadY)}
+        fromLayer="top"
+        toLayer="bottom"
+        holeDiameter={mm(pcb.rfGroundViaHole)}
+        outerDiameter={mm(pcb.rfGroundViaOuter)}
+        connectsTo="net.GND"
+      />
+    </>
+  )
+}
+
+const IdChain = () => (
+  <>
+    <testpoint
+      name="ID_IN"
+      footprintVariant="pad"
+      padShape="rect"
+      width={mm(pcb.idPadW)}
+      height={mm(pcb.idPadH)}
+      pcbX={mm(-pcb.idPadX)}
+      pcbY={mm(pcb.idTraceY)}
+    />
+
+    <resistor
+      name="R_ID"
+      resistance="100ohm"
+      footprint="0603"
+      pcbX="0mm"
+      pcbY={mm(pcb.idTraceY)}
+    />
+
+    <testpoint
+      name="ID_OUT"
+      footprintVariant="pad"
+      padShape="rect"
+      width={mm(pcb.idPadW)}
+      height={mm(pcb.idPadH)}
+      pcbX={mm(pcb.idPadX)}
+      pcbY={mm(pcb.idTraceY)}
+    />
+
+    <trace
+      from=".ID_IN > .pin1"
+      to=".R_ID > .pin1"
+      pcbPath={["ID_IN.pin1", "R_ID.pin1"]}
+      width={mm(pcb.idTraceW)}
+    />
+    <trace
+      from=".R_ID > .pin2"
+      to=".ID_OUT > .pin1"
+      pcbPath={["R_ID.pin2", "ID_OUT.pin1"]}
+      width={mm(pcb.idTraceW)}
+    />
+  </>
+)
+
+const PresentationSilkscreen = () => (
+  <>
+    <silkscreentext
+      pcbX="0mm"
+      pcbY="22.3mm"
+      text="2.45 GHz PATCH / WORKPIECE +Z"
+      fontSize="0.8mm"
+    />
+    <silkscreentext
+      pcbX="-21.5mm"
+      pcbY="-10.2mm"
+      text="RF IN"
+      fontSize="0.75mm"
+    />
+    <silkscreentext
+      pcbX="21.5mm"
+      pcbY="-10.2mm"
+      text="RF OUT"
+      fontSize="0.75mm"
+    />
+    <silkscreentext
+      pcbX="-20.5mm"
+      pcbY="-24mm"
+      text="ID IN"
+      fontSize="0.65mm"
+    />
+    <silkscreentext
+      pcbX="20.5mm"
+      pcbY="-24mm"
+      text="ID OUT"
+      fontSize="0.65mm"
+    />
+
+    {/* Mechanical/magnetic interface outlines for presentation and placement. */}
+    <silkscreenrect
+      pcbX={mm(-pcb.rfContactX)}
+      pcbY="-16.0mm"
+      width={mm(pcb.magneticOutlineW)}
+      height={mm(pcb.magneticOutlineH)}
+      filled={false}
+      stroke="solid"
+      strokeWidth="0.2mm"
+    />
+    <silkscreenrect
+      pcbX={mm(pcb.rfContactX)}
+      pcbY="-16.0mm"
+      width={mm(pcb.magneticOutlineW)}
+      height={mm(pcb.magneticOutlineH)}
+      filled={false}
+      stroke="solid"
+      strokeWidth="0.2mm"
+    />
+  </>
+)
+
 export const SingleBoard = () => (
   <board
     width={mm(pcb.boardW)}
@@ -140,16 +310,11 @@ export const SingleBoard = () => (
     center_y={0}
     routingDisabled
   >
-    <RfGeometry />
+    <net name="GND" />
 
-    {/* Board-count resistor placement seed. Low-frequency routing is added after
-        the RF geometry is validated. */}
-    <resistor
-      name="R_ID"
-      resistance="100ohm"
-      footprint="0603"
-      pcbX="0mm"
-      pcbY={mm(pcb.idTraceY)}
-    />
+    <RfGeometry />
+    <GroundReturnVias />
+    <IdChain />
+    <PresentationSilkscreen />
   </board>
 )
