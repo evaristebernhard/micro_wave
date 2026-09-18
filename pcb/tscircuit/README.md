@@ -159,3 +159,20 @@ See `docs/13_coupler_terminal_phase_closure_v1.md`.
 
 
 For pre-HFSS phase synthesis, A/B/C use a common target branch phase of approximately -90° relative to the local through reference; D is direct-fed at 0°. This convention is parameterized in `src/geometry.ts` and must be recalibrated from the final complex S-parameters.
+
+## Matched-extraction T-cell variants
+
+The PCB project now exports a second A/B/C/D topology based on analytically matched extraction T-cells.
+
+- Board envelope: 50 × 70 mm; horizontal Patch pitch remains 50 mm.
+- A: κ≈0.224, Zt≈44.05 Ω / 3.82 mm, Zb≈93.06 Ω / 0.88 mm.
+- B: κ≈0.316, Zt≈41.35 Ω / 4.21 mm, Zb≈73.56 Ω / 1.52 mm.
+- C: κ≈0.501, Zt≈35.32 Ω / 5.32 mm, Zb≈49.90 Ω / 3.13 mm.
+- Common 50 Ω input lead seed: 2.87 mm.
+- The Patch inset is included in the branch quarter-wave transformer.
+- First-order through-phase residuals are approximately -1.62° / -0.70° / +1.62° for A/B/C.
+- D uses a direct ~33.84 mm half-wave feed seed to the Patch-bottom reference.
+
+Entrypoints: `index-ta.tsx`, `index-tb.tsx`, `index-tc.tsx`, `index-td.tsx`.
+
+The original coupler variants remain in the project for topology comparison.
