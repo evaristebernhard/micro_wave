@@ -164,14 +164,15 @@ For pre-HFSS phase synthesis, A/B/C use a common target branch phase of approxim
 
 The PCB project now exports a second A/B/C/D topology based on analytically matched extraction T-cells.
 
-- Board envelope: 50 × 70 mm; horizontal Patch pitch remains 50 mm.
+- Board envelope: 50 × 60 mm; horizontal Patch pitch remains 50 mm.
 - A: κ≈0.224, Zt≈44.05 Ω / 3.82 mm, Zb≈93.06 Ω / 0.88 mm.
 - B: κ≈0.316, Zt≈41.35 Ω / 4.21 mm, Zb≈73.56 Ω / 1.52 mm.
 - C: κ≈0.501, Zt≈35.32 Ω / 5.32 mm, Zb≈49.90 Ω / 3.13 mm.
-- Common 50 Ω input lead seed: 2.87 mm.
-- The Patch inset is included in the branch quarter-wave transformer.
-- First-order through-phase residuals are approximately -1.62° / -0.70° / +1.62° for A/B/C.
-- D uses a direct ~33.84 mm half-wave feed seed to the Patch-bottom reference.
+- Transformer reference planes are at the inner edges of the magnetic RF pads.
+- The 10.5 mm Patch inset remains a common 50 Ω feed and is not folded into the unequal branch transformer.
+- A/B/C T-junctions are near y≈-25 to -26 mm and use ordinary manufacturable line widths.
+- Inter-cell pad/bridge section target is approximately 37–39° electrical phase.
+- D uses a direct ~33.84 mm pre-inset half-wave V-feed plus the common 10.5 mm inset.
 
 Entrypoints: `index-ta.tsx`, `index-tb.tsx`, `index-tc.tsx`, `index-td.tsx`.
 
