@@ -468,13 +468,13 @@ const PresentationSilkscreen = ({ boardClass }: VariantProps) => {
 
       <silkscreentext
         pcbX="-20.5mm"
-        pcbY="-24mm"
+        pcbY="-33.2mm"
         text="ID IN"
         fontSize="0.65mm"
       />
       <silkscreentext
         pcbX="20.5mm"
-        pcbY="-24mm"
+        pcbY="-33.2mm"
         text="ID OUT"
         fontSize="0.65mm"
       />
