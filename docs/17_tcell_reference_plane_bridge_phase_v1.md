@@ -176,7 +176,7 @@ inset feed。
 
 当前 T-cell Gerber seed 采用：
 
-1. 50×70 mm engineering envelope；
+1. 50×60 mm engineering envelope，board center y=-5 mm，边界 y∈[-35,25] mm；
 2. 50 mm 水平 Patch pitch 不变；
 3. A/B/C 使用普通可制造线宽的 unequal extraction T-cell；
 4. RF conductor 用单一连续 polygon 表示，避免多 pad 伪断路；
