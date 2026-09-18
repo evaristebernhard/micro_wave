@@ -129,3 +129,14 @@ Before adding meanders or phase-shifter geometry:
 Design theory: `docs/10_zone_complex_phase_synthesis_v1.md` and `docs/11_qmatrix_phase_dof_design_v1.md`.
 
 Do not add a fixed ~18 mm phase-trim meander yet. That length is only the first-order amount required to move the natural ~265° electrical path toward 360° on the present effective-permittivity estimate, and it would add roughly 0.15 dB/cell of FR4 path loss under the current 0.42 dB/50 mm estimate.
+
+### Pre-HFSS analytical phase seed
+
+The reduced-order transmission-line model gives a natural 50 mm cell progression of about +94.81° for εeff≈3.25. A +90° progressive-phase baseline therefore requires only small branch-path corrections. The current analytical seed is:
+
+- A phase trim: 0 mm
+- B phase trim: 0.66 mm
+- C phase trim: 1.41 mm
+- D: solve independently as a terminal/direct-fed radiator
+
+These values are stored as metadata in `src/geometry.ts` under `phaseDesignSeed`; they are not yet routed as copper meanders. See `docs/12_pre_simulation_phase_trim_estimate_v1.md`.
