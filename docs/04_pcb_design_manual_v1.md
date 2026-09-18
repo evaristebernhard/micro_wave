@@ -694,76 +694,126 @@ L_{m line,50mm}.
 - 0.30–0.45 dB：正常；
 - >0.50 dB：必须重新检查材料/线宽/PP/接口。
 
-### Step 2：单 Patch 支路
+### Step 2：单 Patch / coupler 标定
 
 加入 Patch、inset、coupler。
 
-先调整：
+先调 \(L_p\) 让主要谐振落在 2.45 GHz，再调 \(y_i\) 改善 Patch 支路局部匹配。
 
-[
-L_p
-]
+随后建立 coupler 响应映射，而不是只寻找固定 10% tap：
 
-让主要谐振落在：
+\[
+(g_c,\ l_c,\ w_c,\ {\rm overlap},\ y_i)
+\rightarrow
+\kappa.
+\]
 
-[
-2.45	ext{ GHz}.
-]
+第一轮扫参至少覆盖约 10%–55% 的抽取比例，用于寻找 A/B/C 三类板的实现几何。
 
-然后调整：
+在当前 0.42 dB/cell 理论值下，目标为：
 
-[
-y_i
-]
+\[
+\kappa_A\approx21.5\%,
+\qquad
+\kappa_B\approx30.2\%,
+\qquad
+\kappa_C\approx47.6\%.
+\]
 
-改善局部匹配。
+当前 tscircuit 的 0.5 mm gap / 6 mm coupling length 只保留为 calibration seed，不再声明它就是最终 10% 或最终 A/B/C 中任一板型。
 
-再调：
+### Step 3：D 终端辐射板
 
-[
-g_c, l_c
-]
+D 板必须单独建模。
 
-使单板抽取功率约：
+它不是普通 through-board 的“更强耦合版本”，而是 Zone 终端匹配辐射结构。目标：
 
-[
-8%	ext{–}12%.
-]
+\[
+S_{11,D}(2.45\ {\rm GHz})
+\rightarrow \min
+\]
 
-第一版中心：
+并使 Zone 末端剩余 RF 功率被 D 板使用，而不是继续送入 dummy load。
 
-[
-oxed{10%}
-]
+D 板需要单独优化：
 
-### Step 3：加入工件
+- 终端匹配；
+- Patch 输入阻抗；
+- 工件加载；
+- 局部场强；
+- 铜/FR4 损耗；
+- 是否需要 taper / stepped transition。
 
-检查：
+### Step 4：加入工件
+
+分别对 A/B/C/D 加入代表性工件负载，检查：
 
 - 谐振移动；
+- 实际抽取比例变化；
 - 工件吸收功率；
 - 前向场；
 - Patch 自身损耗。
 
-### Step 4：2 块
+耦合比例是在“Patch + PP + 工件”完整负载下定义的，不能只在空气中标定。
 
-确认磁吸接口和级联相位。
+### Step 5：2 块 Zone
 
-### Step 5：4 块
+优先验证：
 
-当前普通 FR4 推荐 Zone：
+\[
+C\rightarrow D.
+\]
 
-[
-oxed{4	ext{ 块}}
-]
+检查：
 
-### Step 6：5 块
+- 两板抽取功率是否接近；
+- 接口相位；
+- D 端是否真正终端匹配；
+- 是否出现相干反射导致耦合比例偏移。
 
-作为当前普通 FR4 的工程上限候选。
+### Step 6：3 块 Zone
 
-### Step 7：8 块
+验证：
 
-只做对照，不作为默认设计。
+\[
+B\rightarrow C\rightarrow D.
+\]
+
+### Step 7：4 块完整 Zone
+
+最终基线：
+
+\[
+\boxed{
+A\rightarrow B\rightarrow C\rightarrow D_{\rm term}
+}
+\]
+
+验收重点不是“每块 S21 一样”，而是：
+
+\[
+P_A\approx P_B\approx P_C\approx P_D.
+\]
+
+第一阶段要求：
+
+\[
+\Delta P_{\rm board}
+=
+10\log_{10}\frac{P_{\max}}{P_{\min}}
+\le1\ {\rm dB},
+\]
+
+优化目标争取：
+
+\[
+\Delta P_{\rm board}\le0.5\ {\rm dB}.
+\]
+
+### Step 8：5 块 / 8 块对照
+
+5 块和 8 块只用于确认普通 FR4 累计损耗为什么不适合继续扩大单 Zone，不作为当前默认工程架构。
+
 
 ---
 
