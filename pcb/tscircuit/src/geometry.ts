@@ -472,3 +472,25 @@ export const matchedExtractionTCellSeed = {
   primaryRisk: "three-port-T-cell-has-no-inherent-output-isolation"
 } as const
 
+
+export const tCellRobustnessGate = {
+  preferredLoadedPatchGammaMax: 0.10,
+  conditionalLoadedPatchGammaMax: 0.20,
+  nominalBandGHz: [2.40, 2.50],
+  nominalWorstReturnLossDbAcrossBand: {
+    A: 62.85,
+    B: 53.42,
+    C: 38.86
+  },
+  worstReturnLossDbAtGamma0p10: {
+    A: 32.29,
+    B: 29.39,
+    C: 25.56
+  },
+  worstReturnLossDbAtGamma0p20: {
+    A: 25.51,
+    B: 22.71,
+    C: 19.07
+  },
+  decision: "prefer-tcell-if-loaded-patch-reflection-is-small"
+} as const
