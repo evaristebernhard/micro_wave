@@ -15,8 +15,11 @@ type VariantProps = {
 }
 
 /**
- * Parameterized presentation/engineering seed for the 50 mm x 50 mm
- * gradient-coupled Patch boards.
+ * Parameterized presentation/engineering seed for the 50 mm x 60 mm
+ * extended-height gradient-coupled Patch boards.
+ *
+ * The original RF/Patch coordinates are preserved. The extra 10 mm grows
+ * downward only, so the 50 mm horizontal Patch pitch is unchanged.
  *
  * A/B/C are through boards with quarter-wave-scale coupling sections.
  * D is a terminal radiator and deliberately has no RF OUT.
@@ -190,9 +193,9 @@ const RfGeometry = ({ boardClass }: VariantProps) => {
           <smtpad
             portHints={["pin3"]}
             pcbX="0mm"
-            pcbY="0mm"
-            width="49.6mm"
-            height="49.6mm"
+            pcbY={mm(pcb.boardCenterY)}
+            width={mm(pcb.boardW - 0.4)}
+            height={mm(pcb.boardH - 0.4)}
             shape="rect"
             layer="bottom"
           />
@@ -505,7 +508,7 @@ export const GradientPatchBoard = ({ boardClass }: VariantProps) => (
     width={mm(pcb.boardW)}
     height={mm(pcb.boardH)}
     center_x={0}
-    center_y={0}
+    center_y={pcb.boardCenterY}
     routingDisabled
   >
     <net name="GND" />
