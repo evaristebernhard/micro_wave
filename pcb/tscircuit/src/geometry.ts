@@ -38,6 +38,7 @@ export const pcb = {
   rfGroundPadW: 4.6,
   rfGroundPadH: 2.4,
   rfGroundPadY: -13.7,
+  tCellGroundPadY: -23.0,
   rfGroundViaOffsetX: 0.8,
   rfGroundViaHole: 0.30,
   rfGroundViaOuter: 0.60,
