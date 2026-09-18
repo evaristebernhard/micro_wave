@@ -111,3 +111,21 @@ After Gerber generation, HFSS must add the real material stack and external stru
 - representative / actual workpiece
 
 The first HFSS pass should determine 50 mm through-line loss and phase before multi-board cascade optimization. After that, solve A/B/C coupling and board return loss as complex S-parameters, then cascade the loaded cells with S/ABCD matrices. C should fall back to a matched 3 dB hybrid/power-divider topology if the simple side-coupled seed cannot reach ~50% extraction with adequate return loss.
+
+## Phase-synthesis design gate
+
+The current A/B/C geometry is a coupling-magnitude seed, not yet a complete complex-taper implementation.
+
+At 2.45 GHz the 50 mm cell has an estimated natural through phase of roughly -265° to -270° (equivalently about +90° to +95° modulo 360°). That value must not be frozen merely because four cells sum to an integer number of turns.
+
+Before adding meanders or phase-shifter geometry:
+
+1. solve the four Patch unit-excitation complex fields with the workpiece present;
+2. construct the regional power-deposition matrices Q^(k);
+3. compare 0°, +90°, 180°, and -90° progressive-phase modes;
+4. optimize the target complex Patch excitation vector u*;
+5. only then synthesize branch/through phase using the relation p_(i+1) h_i = (u*_(i+1)/u*_i) p_i.
+
+Design theory: `docs/10_zone_complex_phase_synthesis_v1.md` and `docs/11_qmatrix_phase_dof_design_v1.md`.
+
+Do not add a fixed ~18 mm phase-trim meander yet. That length is only the first-order amount required to move the natural ~265° electrical path toward 360° on the present effective-permittivity estimate, and it would add roughly 0.15 dB/cell of FR4 path loss under the current 0.42 dB/50 mm estimate.
