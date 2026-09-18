@@ -5,11 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "tsci dev index.tsx",
-    "build": "npm run build:variants",
-    "export:circuit-json": "mkdir -p dist && tsci export index-a.tsx -f circuit-json -o dist/board-a.circuit.json && tsci export index-b.tsx -f circuit-json -o dist/board-b.circuit.json && tsci export index-c.tsx -f circuit-json -o dist/board-c.circuit.json && tsci export index-d.tsx -f circuit-json -o dist/board-d.circuit.json",
-    "export:gerbers": "mkdir -p dist && tsci export index-a.tsx -f gerbers -o dist/board-a.gerbers.zip && tsci export index-b.tsx -f gerbers -o dist/board-b.gerbers.zip && tsci export index-c.tsx -f gerbers -o dist/board-c.gerbers.zip && tsci export index-d.tsx -f gerbers -o dist/board-d.gerbers.zip",
+    "build": "npm run build:variants && npm run build:tcell",
+    "export:circuit-json": "mkdir -p dist && tsci export index-a.tsx -f circuit-json -o dist/board-a.circuit.json && tsci export index-b.tsx -f circuit-json -o dist/board-b.circuit.json && tsci export index-c.tsx -f circuit-json -o dist/board-c.circuit.json && tsci export index-d.tsx -f circuit-json -o dist/board-d.circuit.json && npm run export:circuit-json:tcell",
+    "export:gerbers": "mkdir -p dist && tsci export index-a.tsx -f gerbers -o dist/board-a.gerbers.zip && tsci export index-b.tsx -f gerbers -o dist/board-b.gerbers.zip && tsci export index-c.tsx -f gerbers -o dist/board-c.gerbers.zip && tsci export index-d.tsx -f gerbers -o dist/board-d.gerbers.zip && npm run export:gerbers:tcell",
     "dev:wsl": "NO_PROXY=localhost,127.0.0.1,::1 no_proxy=localhost,127.0.0.1,::1 tsci dev index.tsx -p 3020",
-    "build:variants": "tsci build index-a.tsx --ignore-routing-drc --ignore-netlist-drc --ignore-pin-specification-drc && tsci build index-b.tsx --ignore-routing-drc --ignore-netlist-drc --ignore-pin-specification-drc && tsci build index-c.tsx --ignore-routing-drc --ignore-netlist-drc --ignore-pin-specification-drc && tsci build index-d.tsx --ignore-routing-drc --ignore-netlist-drc --ignore-pin-specification-drc"
+    "build:variants": "tsci build index-a.tsx --ignore-routing-drc --ignore-netlist-drc --ignore-pin-specification-drc && tsci build index-b.tsx --ignore-routing-drc --ignore-netlist-drc --ignore-pin-specification-drc && tsci build index-c.tsx --ignore-routing-drc --ignore-netlist-drc --ignore-pin-specification-drc && tsci build index-d.tsx --ignore-routing-drc --ignore-netlist-drc --ignore-pin-specification-drc",
+    "build:tcell": "tsci build index-ta.tsx --ignore-routing-drc --ignore-netlist-drc --ignore-pin-specification-drc && tsci build index-tb.tsx --ignore-routing-drc --ignore-netlist-drc --ignore-pin-specification-drc && tsci build index-tc.tsx --ignore-routing-drc --ignore-netlist-drc --ignore-pin-specification-drc && tsci build index-td.tsx --ignore-routing-drc --ignore-netlist-drc --ignore-pin-specification-drc",
+    "export:circuit-json:tcell": "mkdir -p dist && tsci export index-ta.tsx -f circuit-json -o dist/tcell-a.circuit.json && tsci export index-tb.tsx -f circuit-json -o dist/tcell-b.circuit.json && tsci export index-tc.tsx -f circuit-json -o dist/tcell-c.circuit.json && tsci export index-td.tsx -f circuit-json -o dist/tcell-d.circuit.json",
+    "export:gerbers:tcell": "mkdir -p dist && tsci export index-ta.tsx -f gerbers -o dist/tcell-a.gerbers.zip && tsci export index-tb.tsx -f gerbers -o dist/tcell-b.gerbers.zip && tsci export index-tc.tsx -f gerbers -o dist/tcell-c.gerbers.zip && tsci export index-td.tsx -f gerbers -o dist/tcell-d.gerbers.zip"
   },
   "dependencies": {
     "tscircuit": "0.0.2571"
