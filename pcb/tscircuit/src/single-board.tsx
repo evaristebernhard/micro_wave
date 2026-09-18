@@ -61,8 +61,7 @@ const RfGeometry = ({ boardClass }: VariantProps) => {
           : {
               pin1: "RF_THROUGH",
               pin2: "PATCH",
-              pin3: "GND",
-              pin4: "ISO"
+              pin3: "GND"
             }
       }
       connections={
@@ -72,8 +71,7 @@ const RfGeometry = ({ boardClass }: VariantProps) => {
             }
           : {
               pin2: "net.COUPLED",
-              pin3: "net.GND",
-              pin4: "net.COUPLED"
+              pin3: "net.GND"
             }
       }
       footprint={
@@ -134,7 +132,7 @@ const RfGeometry = ({ boardClass }: VariantProps) => {
                * the isolated-end calibration reference.
                */}
               <smtpad
-                portHints={["pin2", "pin4"]}
+                portHints={["pin2"]}
                 pcbX={mm(derived.coupledTraceCenterX)}
                 pcbY={mm(derived.coupledTraceY)}
                 width={mm(variant.couplingLengthSeed)}
@@ -142,15 +140,7 @@ const RfGeometry = ({ boardClass }: VariantProps) => {
                 shape="rect"
               />
 
-              {/* Explicit isolated-end landing pad for the 50 ohm termination seed. */}
-              <smtpad
-                portHints={["pin4"]}
-                pcbX={mm(derived.coupledTraceXMin)}
-                pcbY={mm(derived.coupledTraceY)}
-                width={mm(pcb.isoPadW)}
-                height={mm(pcb.isoPadH)}
-                shape="rect"
-              />
+              {/* The isolated-end termination is attached by TP_ISO_TAP below. */}
             </>
           )}
 
@@ -270,7 +260,7 @@ const GroundContactPads = ({ boardClass }: VariantProps) => {
   return (
     <>
       <testpoint
-        name="RF_GND_IN"
+        name="TP_RF_GND_IN"
         footprintVariant="pad"
         padShape="rect"
         width={mm(pcb.rfGroundPadW)}
@@ -281,7 +271,7 @@ const GroundContactPads = ({ boardClass }: VariantProps) => {
       />
       {variant.hasRfOut && (
         <testpoint
-          name="RF_GND_OUT"
+          name="TP_RF_GND_OUT"
           footprintVariant="pad"
           padShape="rect"
           width={mm(pcb.rfGroundPadW)}
@@ -306,6 +296,17 @@ const IsolationTermination = ({ boardClass }: VariantProps) => {
 
   return (
     <>
+      <testpoint
+        name="TP_ISO_TAP"
+        footprintVariant="pad"
+        padShape="rect"
+        width={mm(pcb.isoPadW)}
+        height={mm(pcb.isoPadH)}
+        pcbX={mm(derived.coupledTraceXMin)}
+        pcbY={mm(derived.coupledTraceY)}
+        connections={{ pin1: "net.COUPLED" }}
+      />
+
       <resistor
         name="R_ISO"
         resistance="50ohm"
@@ -319,7 +320,7 @@ const IsolationTermination = ({ boardClass }: VariantProps) => {
       />
 
       <testpoint
-        name="ISO_GND"
+        name="TP_ISO_GND"
         footprintVariant="pad"
         padShape="rect"
         width="1.6mm"
@@ -330,15 +331,17 @@ const IsolationTermination = ({ boardClass }: VariantProps) => {
       />
 
       <trace
-        from=".ANT1 > .pin4"
+        name="TR_ISO_COUPLED"
+        from=".TP_ISO_TAP > .pin1"
         to=".R_ISO > .pin1"
-        pcbPath={["ANT1.pin4", "R_ISO.pin1"]}
+        pcbPath={["TP_ISO_TAP.pin1", "R_ISO.pin1"]}
         width="0.5mm"
       />
       <trace
+        name="TR_ISO_GND"
         from=".R_ISO > .pin2"
-        to=".ISO_GND > .pin1"
-        pcbPath={["R_ISO.pin2", "ISO_GND.pin1"]}
+        to=".TP_ISO_GND > .pin1"
+        pcbPath={["R_ISO.pin2", "TP_ISO_GND.pin1"]}
         width="0.5mm"
       />
 
@@ -359,7 +362,7 @@ const IsolationTermination = ({ boardClass }: VariantProps) => {
 const IdChain = () => (
   <>
     <testpoint
-      name="ID_IN"
+      name="TP_ID_IN"
       footprintVariant="pad"
       padShape="rect"
       width={mm(pcb.idPadW)}
@@ -377,7 +380,7 @@ const IdChain = () => (
     />
 
     <testpoint
-      name="ID_OUT"
+      name="TP_ID_OUT"
       footprintVariant="pad"
       padShape="rect"
       width={mm(pcb.idPadW)}
@@ -387,15 +390,17 @@ const IdChain = () => (
     />
 
     <trace
-      from=".ID_IN > .pin1"
+      name="TR_ID_IN"
+      from=".TP_ID_IN > .pin1"
       to=".R_ID > .pin1"
-      pcbPath={["ID_IN.pin1", "R_ID.pin1"]}
+      pcbPath={["TP_ID_IN.pin1", "R_ID.pin1"]}
       width={mm(pcb.idTraceW)}
     />
     <trace
+      name="TR_ID_OUT"
       from=".R_ID > .pin2"
-      to=".ID_OUT > .pin1"
-      pcbPath={["R_ID.pin2", "ID_OUT.pin1"]}
+      to=".TP_ID_OUT > .pin1"
+      pcbPath={["R_ID.pin2", "TP_ID_OUT.pin1"]}
       width={mm(pcb.idTraceW)}
     />
   </>
