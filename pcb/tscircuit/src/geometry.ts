@@ -309,3 +309,36 @@ export const terminalPhaseRoutePolygonPoints = strokePolyline(
   terminalPhaseRouteCenterline,
   pcb.rfTraceW
 )
+
+/**
+ * Complete pre-HFSS complex-excitation seed.
+ *
+ * Magnitudes include the 0.42 dB/cell scalar loss estimate and the
+ * 6.5/5/3 dB A/B/C coupling seeds. Phases are normalized to A=0 deg.
+ * Complex values are represented as [real, imag].
+ */
+export const complexExcitationSeed = {
+  normalizedInputWave: 1.0,
+  patchAmplitude: {
+    A: 0.47315,
+    B: 0.47203,
+    C: 0.46819,
+    D: 0.44503
+  },
+  patchPhaseDeg: {
+    A: 0,
+    B: 90,
+    C: 180,
+    D: 270
+  },
+  patchComplex: {
+    A: [0.47315, 0.0],
+    B: [0.0, 0.47203],
+    C: [-0.46819, 0.0],
+    D: [0.0, -0.44503]
+  },
+  phaseDegreesPerMm: 5.30,
+  epsilonEffPhaseSensitivityDegPerUnit: 40.80,
+  epsilonEffUncertaintyExample: 0.15,
+  equivalentTrimUncertaintyMm: 1.15
+} as const
