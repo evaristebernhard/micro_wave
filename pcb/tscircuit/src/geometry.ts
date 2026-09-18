@@ -141,3 +141,31 @@ export const getVariantDerived = (boardClass: BoardClass) => {
     coupledTraceCenterX: -variant.couplingLengthSeed / 2
   } as const
 }
+
+
+/**
+ * Pre-HFSS phase-design seed.
+ *
+ * These values come from the reduced-order transmission-line model in
+ * docs/12_pre_simulation_phase_trim_estimate_v1.md. They are design metadata,
+ * not yet physical copper meanders. HFSS/openEMS should replace the estimated
+ * effective permittivity and coupler phases before manufacturing freeze.
+ */
+export const phaseDesignSeed = {
+  centerFrequencyGHz: 2.45,
+  effectivePermittivity: 3.25,
+  guidedWavelengthMm: 67.88,
+  naturalCellElectricalLengthDeg: 265.19,
+  naturalForwardProgressionDeg: 94.81,
+  preferredProgressionDeg: 90,
+  // A/B/C fine trims required by the first-order geometry/path model to
+  // move the natural ~94 deg progression toward +90 deg.
+  branchTrimLengthSeedMm: {
+    A: 0.0,
+    B: 0.66,
+    C: 1.41,
+    D: null
+  },
+  // D is terminal/direct-fed and must be phase-matched separately.
+  terminalPhaseNeedsIndependentSolve: true
+} as const
