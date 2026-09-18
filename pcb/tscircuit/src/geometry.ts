@@ -158,6 +158,9 @@ export const phaseDesignSeed = {
   naturalCellElectricalLengthDeg: 265.19,
   naturalForwardProgressionDeg: 94.81,
   preferredProgressionDeg: 90,
+  phaseDegreesPerMm: 5.30,
+  suggestedFineTrimStepMm: 0.5,
+  suggestedFineTrimRangeMm: 8.5,
   // A/B/C fine trims required by the first-order geometry/path model to
   // move the natural ~94 deg progression toward +90 deg.
   branchTrimLengthSeedMm: {
