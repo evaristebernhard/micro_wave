@@ -816,3 +816,735 @@ D_{\rm outer}.
 \text{工件加载后的真实取能与加热性能。}
 }
 \]
+
+
+---
+
+## 19. 设计思想升级：从“耦合百分比设计”转向“目标复激励设计”
+
+前面的设计理由解决了“为什么当前优先采用 Patch”这一层问题。继续向下推进后，当前方案的设计思想需要进一步升级。
+
+早期方案的逻辑是：
+
+\[
+\text{给定 } \kappa_A,\kappa_B,\kappa_C
+\rightarrow
+\text{设计 coupler}
+\rightarrow
+\text{希望各板加热均匀}.
+\]
+
+这个顺序只在以下近似成立时可靠：
+
+1. 每一级主要单向传播；
+2. Patch 反射足够小；
+3. 相邻 Patch 互耦足够弱；
+4. 工件对各 Patch 的反馈可近似独立；
+5. “等 RF 抽取”可以近似代表“等工件吸收”。
+
+在 2.45 GHz、50 mm cell 条件下，这些假设不能直接预设成立。当前设计思想因此改为：
+
+\[
+\boxed{
+\text{先确定工件侧所需的复数激励}
+\rightarrow
+\text{再反求无源 RF 网络}
+\rightarrow
+\text{最后映射为 PCB 几何}
+}
+\]
+
+也就是说，A/B/C/D 不再首先被定义为“22%、30%、50%、terminal”四个数字，而首先被定义为四个具有幅度和相位要求的 RF cell。
+
+---
+
+## 20. 当前设计链条必须分成四个空间
+
+今后的参数设计统一按下面四层组织。
+
+### 20.1 几何空间
+
+用：
+
+\[
+\boldsymbol{\theta}
+=
+(
+L_p,W_p,y_{\rm inset},
+l_c,g_c,w_c,
+l_{\rm line},
+\text{topology},
+d_{\rm workpiece},\ldots
+)
+\]
+
+表示 PCB 和负载几何。
+
+### 20.2 网络空间
+
+全波求解得到：
+
+\[
+\mathbf S(\omega;\boldsymbol{\theta}).
+\]
+
+这里必须保留复数：
+
+\[
+|S_{ij}|,
+\qquad
+\angle S_{ij}.
+\]
+
+不允许只保存 coupling dB 和 VSWR。
+
+### 20.3 激励空间
+
+四块 Patch 的实际复激励写成：
+
+\[
+\mathbf u
+=
+(u_A,u_B,u_C,u_D)^T.
+\]
+
+其中：
+
+\[
+u_i
+=
+|u_i|e^{j\phi_i}.
+\]
+
+系统真正送给工件的是 \(\mathbf u\)，而不是单独的 \(\kappa_i\)。
+
+### 20.4 功率沉积空间
+
+工件第 \(k\) 个区域的吸收功率写成：
+
+\[
+\boxed{
+H_k
+=
+\mathbf u^\dagger
+\mathbf Q^{(k)}
+\mathbf u
+}
+\]
+
+其中：
+
+\[
+\mathbf Q^{(k)}\succeq0.
+\]
+
+因此完整设计映射是：
+
+\[
+\boxed{
+\boldsymbol{\theta}
+\rightarrow
+\mathbf S
+\rightarrow
+\mathbf u
+\rightarrow
+\{H_k\}.
+}
+\]
+
+这条链以后作为当前项目最核心的设计思想。
+
+---
+
+## 21. 为什么不能再把 A/B/C 的百分比当作最终设计目标
+
+当前：
+
+\[
+A\approx6.5\ {\rm dB},
+\qquad
+B\approx5.0\ {\rm dB},
+\qquad
+C\approx3.0\ {\rm dB}
+\]
+
+仍然非常有价值，但它们的角色变了。
+
+它们现在定义为：
+
+\[
+\boxed{
+\text{第一轮功率预算 seed}
+}
+\]
+
+而不是：
+
+\[
+\boxed{
+\text{最终物理最优解}.
+}
+\]
+
+原因是同样的 \(|u_i|\) 在不同相位下可能得到完全不同的工件场：
+
+\[
+\mathbf E(\mathbf r)
+=
+\sum_i
+u_i\mathbf E_i(\mathbf r).
+\]
+
+于是：
+
+\[
+\left|
+\sum_i
+u_i\mathbf E_i
+\right|^2
+\neq
+\sum_i
+|u_i\mathbf E_i|^2
+\]
+
+一般成立。
+
+所以后续优化变量必须至少包含：
+
+\[
+\boxed{
+|u_i|,\quad \phi_i.
+}
+\]
+
+也就是说：
+
+\[
+\boxed{
+\text{amplitude taper}
++
+\text{phase taper}
+}
+\]
+
+要一起设计。
+
+---
+
+## 22. 50 mm 模块本身就是相位器件
+
+当前一阶：
+
+\[
+\lambda_g\approx66\sim68\ {\rm mm}.
+\]
+
+因此 50 mm cell 的 through phase 约：
+
+\[
+265^\circ\sim270^\circ.
+\]
+
+这意味着板间相位不是二阶修正，而是一级设计变量。
+
+当前建议继续以：
+
+\[
+\angle S_{21}(2.45{\rm GHz})
+\approx-270^\circ
+\]
+
+作为 modular cell 的第一轮 reference-plane seed，但其目的不是为了追求一个漂亮整数，而是为了让：
+
+1. A/B/C 的 reference plane 一致；
+2. 复数网络级联可重复；
+3. 后续 phase taper 可以通过明确的传输相位预算实现；
+4. 频率扫描时可以直接计算 group delay 和相位漂移。
+
+因此以后修改 coupler 几何时，不能只问：
+
+> coupling 变成多少？
+
+必须同时问：
+
+> through phase 和 coupled-port phase 变成多少？
+
+---
+
+## 23. 两个理论判据决定“简化模型还能不能用”
+
+设计阶段允许使用简化模型，但必须通过判据确认。
+
+### 23.1 多重反射判据
+
+将内部 radiator / load 端口消去后，多次散射由：
+
+\[
+(I-S_{rr}\Gamma_L)^{-1}
+\]
+
+控制。
+
+定义：
+
+\[
+\boxed{
+m_{\rm refl}
+=
+\|S_{rr}\Gamma_L\|_2.
+}
+\]
+
+若：
+
+\[
+m_{\rm refl}<1,
+\]
+
+则：
+
+\[
+(I-S_{rr}\Gamma_L)^{-1}
+=
+I+
+S_{rr}\Gamma_L+
+(S_{rr}\Gamma_L)^2+\cdots .
+\]
+
+并且：
+
+\[
+\left\|
+(I-S_{rr}\Gamma_L)^{-1}-I
+\right\|_2
+\le
+\frac{m_{\rm refl}}{1-m_{\rm refl}}.
+\]
+
+因此 \(m_{\rm refl}\) 小时，单向模型才有明确依据。
+
+更直接的 internal-resonance margin 为：
+
+\[
+\boxed{
+r_{\rm int}
+=
+\sigma_{\min}
+(I-S_{rr}\Gamma_L).
+}
+\]
+
+设计上希望它远离 0。
+
+### 23.2 相干沉积判据
+
+将某一区域的沉积矩阵分成：
+
+\[
+Q=D+C,
+\]
+
+其中：
+
+\[
+D=\operatorname{diag}(Q).
+\]
+
+定义：
+
+\[
+\boxed{
+\rho_C
+=
+\left\|
+D^{-1/2}
+C
+D^{-1/2}
+\right\|_2.
+}
+\]
+
+则对任意激励：
+
+\[
+\frac{
+|H-H_{\rm incoherent}|
+}{
+H_{\rm incoherent}
+}
+\le
+\rho_C.
+\]
+
+所以：
+
+- \(\rho_C\ll1\)：独立板近似有依据；
+- \(\rho_C\) 较大：必须按相干多源问题优化。
+
+这两个量以后作为判断理论层级的“设计 gate”。
+
+---
+
+## 24. 优化顺序必须反过来：先求理想场，再做无源综合
+
+后续优化分为两阶段。
+
+### Stage A — Ideal Maxwell excitation
+
+先暂时假设四个 Patch 可以由四个独立理想 RF 源激励，求：
+
+\[
+\mathbf u_*.
+\]
+
+目标例如：
+
+\[
+\min_{\mathbf u}
+\max_k
+\frac{
+|H_k-\bar H|
+}{
+\bar H
+}
+\]
+
+同时限制：
+
+\[
+P_{\rm total},
+\qquad
+E_{\max},
+\qquad
+P_{\rm parasitic}.
+\]
+
+这一阶段回答：
+
+\[
+\boxed{
+\text{在当前 Patch + 工件几何下，电磁场本身最多能做到多均匀？}
+}
+\]
+
+### Stage B — Passive RF synthesis
+
+再要求：
+
+\[
+\mathbf u=\mathbf u(\boldsymbol{\theta})
+\]
+
+必须由：
+
+\[
+\text{single magnetron}
++
+\text{passive reciprocal network}
+\]
+
+产生。
+
+第二阶段求：
+
+\[
+\min_{\boldsymbol{\theta}}
+\left\|
+\mathbf u(\boldsymbol{\theta})
+-
+\mathbf u_*
+\right\|.
+\]
+
+这一阶段回答：
+
+\[
+\boxed{
+\text{当前 A/B/C/D PCB 拓扑能多接近理想 Maxwell 激励？}
+}
+\]
+
+这样可以明确区分：
+
+- 几何/Maxwell 本身的限制；
+- 无源 coupler 拓扑的限制；
+- 加工尺寸和材料的限制。
+
+---
+
+## 25. A/B/C/D 的新定义
+
+以后四类板不优先按 coupling percentage 定义，而按“网络功能”定义。
+
+### A — early-stage extraction cell
+
+要求：
+
+- 较弱功率抽取；
+- 很低反射；
+- through phase 受控；
+- 不显著扰乱后级。
+
+### B — mid-stage extraction cell
+
+要求：
+
+- 中等抽取；
+- 低反射；
+- 与 A 保持兼容 reference plane；
+- 调整幅相以逼近目标 \(\mathbf u_*\)。
+
+### C — strong extraction / phase-conditioning cell
+
+C 不再只等价于“约 3 dB coupler”。
+
+它可能需要同时承担：
+
+\[
+\boxed{
+\text{strong extraction}
++
+\text{phase conditioning}
+}
+\]
+
+因此 branch-line / hybrid / broadside 等结构是否采用，应由目标复传输系数决定，而不是只由 50% coupling 决定。
+
+### D — terminal radiating load
+
+D 的核心目标：
+
+\[
+\boxed{
+\text{matched terminal field source}
+}
+\]
+
+不保留 RF OUT，并负责使 Zone 的终端边界条件可控。
+
+---
+
+## 26. 设计目标从“等 RF 功率”升级为“等目标区域吸收”
+
+旧目标：
+
+\[
+P_A\approx P_B\approx P_C\approx P_D.
+\]
+
+它仍可用于无工件或早期调试。
+
+最终目标改成：
+
+\[
+\boxed{
+H_1\approx H_2\approx H_3\approx H_4
+}
+\]
+
+其中：
+
+\[
+H_k
+=
+\mathbf u^\dagger Q^{(k)}\mathbf u.
+\]
+
+必要时还要加入：
+
+\[
+H_{\rm edge},
+\qquad
+H_{\rm hotspot},
+\qquad
+E_{\max}.
+\]
+
+因此“板功率均匀”降级为中间变量，“工件功率沉积均匀”才是最终物理目标。
+
+---
+
+## 27. 可以预先计算一个 Patch + 工件几何的效率上界
+
+将端口阻抗矩阵实部分解为：
+
+\[
+R
+=
+R_{\rm work}
++
+R_{\rm Cu}
++
+R_{\rm FR4}
++
+R_{\rm rad}
++\cdots .
+\]
+
+则任意端口电流 \(\mathbf I\) 下：
+
+\[
+P_{\rm work}
+=
+\frac12
+\mathbf I^\dagger
+R_{\rm work}
+\mathbf I,
+\]
+
+\[
+P_{\rm acc}
+=
+\frac12
+\mathbf I^\dagger
+R
+\mathbf I.
+\]
+
+因此最大可能工件吸收效率满足：
+
+\[
+\boxed{
+\eta_{\max}
+=
+\lambda_{\max}
+\left(
+R^{-1/2}
+R_{\rm work}
+R^{-1/2}
+\right).
+}
+\]
+
+这个量应在 coupler 深度优化之前计算。
+
+如果当前 radiator + workpiece geometry 的 \(\eta_{\max}\) 本身很低，那么继续优化 A/B/C coupling 没有意义，应先修改：
+
+- Patch；
+- 板距；
+- 工件距离；
+- superstrate；
+- Ground / aperture；
+- radiator topology。
+
+---
+
+## 28. 当前 PCB 参数的角色重新定义
+
+以下仍保留：
+
+\[
+W_p=37.5\ {\rm mm},
+\quad
+L_p=28.5\ {\rm mm},
+\quad
+y_{\rm inset}=10.5\ {\rm mm},
+\quad
+w_{\rm RF}=2.9\ {\rm mm}.
+\]
+
+但统一定义为：
+
+\[
+\boxed{\text{搜索起点，而非设计真值}}
+\]
+
+同样：
+
+\[
+A=6.5{\rm dB},
+\quad
+B=5{\rm dB},
+\quad
+C=3{\rm dB}
+\]
+
+定义为：
+
+\[
+\boxed{\text{scalar-budget seed}}
+\]
+
+后续若复数场优化要求：
+
+\[
+|u_A|:|u_B|:|u_C|:|u_D|
+\]
+
+或：
+
+\[
+\phi_A,\phi_B,\phi_C,\phi_D
+\]
+
+偏离这套 seed，应允许修改 A/B/C coupling 和 cell electrical length。
+
+不能为了保持旧百分比而牺牲最终加热性能。
+
+---
+
+## 29. 仿真数据必须能够反推设计，而不是只给图片
+
+以后单板和 Zone 仿真必须输出能够进入上述数学模型的数据。
+
+至少包括：
+
+1. 完整 complex Touchstone S 参数；
+2. reference-plane 定义；
+3. port phase；
+4. group delay；
+5. Patch / workpiece loaded reflection；
+6. 四个基激励对应的复数场；
+7. 分区 \(Q^{(k)}\)；
+8. \(\rho_C\)；
+9. \(r_{\rm int}=\sigma_{\min}(I-S_{rr}\Gamma_L)\)；
+10. Cu / FR4 / workpiece / radiation 的功率分解。
+
+场图仍然需要，但场图是解释结果，不是替代这些数据。
+
+---
+
+## 30. 当前设计思想的最终表述
+
+当前主方案不再表述成：
+
+\[
+\text{“用 6.5/5/3 dB 梯度耦合器给四块 Patch 等功率。”}
+\]
+
+更准确的设计思想是：
+
+\[
+\boxed{
+\begin{aligned}
+&\text{用 Patch 建立可参数化的局部场基函数；}\\
+&\text{用全波模型得到复数多端口网络和工件沉积矩阵；}\\
+&\text{先求满足均匀加热的目标复激励；}\\
+&\text{再用 A/B/C/D 无源 RF cell 去逼近该复激励；}\\
+&\text{最后通过几何参数、材料和接口完成可制造实现。}
+\end{aligned}
+}
+\]
+
+所以当前项目真正优化的是：
+
+\[
+\boxed{
+\text{field synthesis}
++
+\text{passive network synthesis}
+}
+\]
+
+而不仅仅是：
+
+\[
+\boxed{
+\text{coupling-ratio tuning}.
+}
+\]
+
+这条原则从现在起应作为 Patch、coupler、Zone、HFSS/openEMS 和 PCB 代码继续推进时的统一设计思想。
+
+
+> 复相位综合与四板 canonical phase-mode 扫描方案见 `docs/10_zone_complex_phase_synthesis_v1.md`。
