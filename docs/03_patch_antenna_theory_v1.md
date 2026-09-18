@@ -833,77 +833,114 @@ E(mathbf r),
 
 ### 16.5 功率按真实系统层级设置
 
-正式求解至少分三类实际功率层级：
+正式求解至少分三类功率层级，但不再把“8 块/Zone、70 W”和“100 W/Zone”写成默认工作点。
 
-#### 工况 A：正常单 Zone
+#### 工况 A：正常梯度 Zone
 
-8 块左右一个分区，目标每块约 5 W 时，第一轮使用：
+Zone 输入由板数、每块目标 RF 抽取功率 \(E\) 和 through-line 实际传输系数 \(\tau\) 计算。
 
-[
-oxed{P_{m zone}approx70	ext{ W}}
-]
+若暂取：
 
-作为代表性入口功率。
+\[
+L_s=0.42\ {\rm dB/cell},
+\qquad
+\tau=10^{-0.42/10}\approx0.90782,
+\]
+
+则 4 板 A-B-C-D 终端梯度 Zone 有：
+
+\[
+P_{\rm zone}
+=
+E\sum_{m=0}^{3}\tau^{-m}
+\approx4.6515E.
+\]
+
+所以：
+
+- 4 W/块 → \(P_{\rm zone}\approx18.61\) W；
+- 5 W/块 → \(P_{\rm zone}\approx23.26\) W；
+- 6 W/块 → \(P_{\rm zone}\approx27.91\) W；
+- 8 W/块 → \(P_{\rm zone}\approx37.21\) W。
 
 重点检查：
 
-- 每块 Patch 抽取功率；
+- A/B/C/D 各板 RF 抽取功率；
 - 板间均匀性；
-- 贯通主线损耗；
+- 贯通主线寄生损耗；
 - FR4/铜耗散；
-- 工件吸收功率。
+- 工件吸收功率；
+- D 终端板输入匹配。
 
-#### 工况 B：高功率 Zone
+这些入口功率只是当前理论预算。HFSS/openEMS 得到真实 \(\tau\) 后必须重算。
 
-使用：
+#### 工况 B：高功率/失配裕量
 
-[
-oxed{P_{m zone}=100	ext{ W}}
-]
-
-重点检查：
+100 W/Zone 不再作为正常工作点，仅作为局部过功率、失配或保护裕量工况，用于检查：
 
 - 局部最大 E 场；
 - 磁吸接口电流；
 - 铜表面电流密度；
 - FR4 / PP 耗散；
-- 接触热点。
+- 接触热点；
+- 失配时的峰值电压/电流。
 
 #### 工况 C：系统主干极限
 
-使用：
+仍使用：
 
-[
-oxed{P_{m trunk}=500	ext{ W}}
-]
+\[
+\boxed{P_{\rm trunk}=500\ {\rm W}}
+\]
 
-用于需要真实承受完整主干功率的结构：
+用于必须承受完整主干功率的结构：
 
 - WR340→N 转换；
 - 输入馈线；
-- 一级分配器；
+- 一级/多级分配器；
 - 跨区主馈线；
-- 任何位于功率分配前的磁吸/连接结构。
+- 位于功率分配前的磁吸/连接结构。
 
-不能把 500 W 直接施加到每块 Patch；Patch 实际只承担被支路抽取的局部功率。
+不能把 500 W 直接施加到每块 Patch。
 
-### 16.6 10% tap 的使用范围
+### 16.6 固定 10% tap 的新定位
 
-“单板抽取约 10%”只适用于已经分配到单个 Zone 的几十瓦到约 100 W 功率层级。
+“单板抽取约 10%”现在只保留为 coupler calibration 的一个低耦合参考点，不再是完整 Zone 的系统工作点。
 
-如果直接在 500 W 主干上抽取 10%，单块 Patch 将获得约 50 W，这与当前单板约 5–8 W 的设计目标不一致。
+当前 4 板等功率梯度目标由：
 
-因此系统拓扑应明确为：
+\[
+P_{i+1}=\tau(P_i-E),
+\qquad
+\kappa_i=\frac{E}{P_i}
+\]
 
-[
-500	ext{ W 主干}
-ightarrow
-	ext{分区/分配网络}
-ightarrow
-50	ext{–}100	ext{ W 级 Zone}
-ightarrow
-	ext{弱耦合 Patch 板链}.
-]
+反向递推。
+
+在 0.42 dB/cell 理论值下：
+
+\[
+\boxed{
+\kappa_A\approx21.5\%,\quad
+\kappa_B\approx30.2\%,\quad
+\kappa_C\approx47.6\%,\quad
+\kappa_D\approx100\%
+}
+\]
+
+其中 D 是终端辐射板，而不是普通 through-board。
+
+系统拓扑因此明确为：
+
+\[
+500\ {\rm W\ trunk}
+\rightarrow
+\text{low-loss distribution manifold}
+\rightarrow
+\text{gradient-coupled Zones}.
+\]
+
+完整数学推导和 1–100 块分区规则见 docs/05_gradient_coupling_system_architecture_v1.md。
 
 ### 16.7 正式优化目标
 
