@@ -15,11 +15,11 @@ type VariantProps = {
 }
 
 /**
- * Parameterized presentation/engineering seed for the 50 mm x 60 mm
+ * Parameterized presentation/engineering seed for the 50 mm x 70 mm
  * extended-height gradient-coupled Patch boards.
  *
- * The original RF/Patch coordinates are preserved. The extra 10 mm grows
- * downward only, so the 50 mm horizontal Patch pitch is unchanged.
+ * The original RF/Patch coordinates are preserved. The added height does not change the 50 mm horizontal Patch pitch. RF and
+ * Patch coordinates remain unchanged; only the board outline/ground area grows.
  *
  * A/B/C are through boards with quarter-wave-scale coupling sections.
  * D is a terminal radiator and deliberately has no RF OUT.
