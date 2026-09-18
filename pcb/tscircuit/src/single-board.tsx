@@ -1,103 +1,160 @@
-import { derived, pcb } from "./geometry"
+import {
+  boardVariants,
+  getVariantDerived,
+  patchDerived,
+  pcb,
+  type BoardClass
+} from "./geometry"
 
 const mm = (value: number) => `${value}mm`
 
+type VariantProps = {
+  boardClass: BoardClass
+}
+
 /**
- * Presentation/engineering seed for the 50 mm x 50 mm magnetic patch board.
+ * Parameterized presentation/engineering seed for the 50 mm x 50 mm
+ * gradient-coupled Patch boards.
  *
- * Critical microwave geometry stays as fixed copper inside ANT1 so the
- * autorouter cannot change the RF dimensions.
+ * A/B/C are through boards with quarter-wave-scale coupling sections.
+ * D is a terminal radiator and deliberately has no RF OUT.
  *
- * pin1 = THROUGH RF bus
- * pin2 = PATCH branch
- * pin3 = RF ground
+ * These are HFSS/openEMS seeds. Coupling gaps are search starting points,
+ * not validated final dimensions.
  */
-const RfGeometry = () => {
-  const patchTopHeight = derived.patchYMax - derived.notchYMax
-  const patchTopCenterY = (derived.patchYMax + derived.notchYMax) / 2
+const RfGeometry = ({ boardClass }: VariantProps) => {
+  const variant = boardVariants[boardClass]
+  const derived = getVariantDerived(boardClass)
 
-  const patchLegWidth = (pcb.patchW - derived.notchW) / 2
-  const patchLegCenterOffset = (derived.notchW + patchLegWidth) / 2
+  const patchTopHeight = patchDerived.patchYMax - patchDerived.notchYMax
+  const patchTopCenterY =
+    (patchDerived.patchYMax + patchDerived.notchYMax) / 2
+
+  const patchLegWidth = (pcb.patchW - patchDerived.notchW) / 2
+  const patchLegCenterOffset = (patchDerived.notchW + patchLegWidth) / 2
   const patchLegHeight = pcb.insetDepth
-  const patchLegCenterY = derived.patchYMin + patchLegHeight / 2
+  const patchLegCenterY = patchDerived.patchYMin + patchLegHeight / 2
 
-  const feedYMin = derived.coupledTraceY + pcb.rfTraceW / 2
-  const feedYMax = derived.notchYMax
+  const feedYMin =
+    boardClass === "D"
+      ? pcb.rfTraceY + pcb.rfTraceW / 2
+      : derived.coupledTraceY + pcb.rfTraceW / 2
+  const feedYMax = patchDerived.notchYMax
   const feedHeight = feedYMax - feedYMin
   const feedCenterY = (feedYMax + feedYMin) / 2
+
+  const terminalInputLength = pcb.rfContactX
+  const terminalInputCenterX = -terminalInputLength / 2
 
   return (
     <chip
       name="ANT1"
       pcbX={0}
       pcbY={0}
-      pinLabels={{
-        pin1: "RF_THROUGH",
-        pin2: "PATCH",
-        pin3: "GND"
-      }}
-      connections={{
-        pin3: "net.GND"
-      }}
+      pinLabels={
+        boardClass === "D"
+          ? {
+              pin1: "RF_IN",
+              pin2: "PATCH",
+              pin3: "GND"
+            }
+          : {
+              pin1: "RF_THROUGH",
+              pin2: "PATCH",
+              pin3: "GND",
+              pin4: "ISO"
+            }
+      }
+      connections={
+        boardClass === "D"
+          ? {
+              pin3: "net.GND"
+            }
+          : {
+              pin2: "net.COUPLED",
+              pin3: "net.GND",
+              pin4: "net.COUPLED"
+            }
+      }
       footprint={
         <footprint>
-          {/* 50 ohm through-line seed. */}
-          <smtpad
-            portHints={["pin1"]}
-            pcbX="0mm"
-            pcbY={mm(pcb.rfTraceY)}
-            width="49.6mm"
-            height={mm(pcb.rfTraceW)}
-            shape="rect"
-          />
+          {boardClass === "D" ? (
+            <>
+              {/* Terminal-board input line: no RF OUT after D. */}
+              <smtpad
+                portHints={["pin1"]}
+                pcbX={mm(terminalInputCenterX)}
+                pcbY={mm(pcb.rfTraceY)}
+                width={mm(terminalInputLength)}
+                height={mm(pcb.rfTraceW)}
+                shape="rect"
+              />
+              <smtpad
+                portHints={["pin1"]}
+                pcbX={mm(-pcb.rfContactX)}
+                pcbY={mm(pcb.rfTraceY)}
+                width={mm(pcb.rfPadW)}
+                height={mm(pcb.rfPadH)}
+                shape="rect"
+              />
+            </>
+          ) : (
+            <>
+              {/* 50 ohm through-line seed. */}
+              <smtpad
+                portHints={["pin1"]}
+                pcbX="0mm"
+                pcbY={mm(pcb.rfTraceY)}
+                width="49.6mm"
+                height={mm(pcb.rfTraceW)}
+                shape="rect"
+              />
 
-          {/* Left / right magnetic RF signal contact placeholders. */}
-          <smtpad
-            portHints={["pin1"]}
-            pcbX={mm(-pcb.rfContactX)}
-            pcbY={mm(pcb.rfTraceY)}
-            width={mm(pcb.rfPadW)}
-            height={mm(pcb.rfPadH)}
-            shape="rect"
-          />
-          <smtpad
-            portHints={["pin1"]}
-            pcbX={mm(pcb.rfContactX)}
-            pcbY={mm(pcb.rfTraceY)}
-            width={mm(pcb.rfPadW)}
-            height={mm(pcb.rfPadH)}
-            shape="rect"
-          />
+              {/* Left / right magnetic RF signal contact placeholders. */}
+              <smtpad
+                portHints={["pin1"]}
+                pcbX={mm(-pcb.rfContactX)}
+                pcbY={mm(pcb.rfTraceY)}
+                width={mm(pcb.rfPadW)}
+                height={mm(pcb.rfPadH)}
+                shape="rect"
+              />
+              <smtpad
+                portHints={["pin1"]}
+                pcbX={mm(pcb.rfContactX)}
+                pcbY={mm(pcb.rfTraceY)}
+                width={mm(pcb.rfPadW)}
+                height={mm(pcb.rfPadH)}
+                shape="rect"
+              />
 
-          {/* Dedicated top-side RF ground-return contact areas. */}
-          <smtpad
-            portHints={["pin3"]}
-            pcbX={mm(-pcb.rfContactX)}
-            pcbY={mm(pcb.rfGroundPadY)}
-            width={mm(pcb.rfGroundPadW)}
-            height={mm(pcb.rfGroundPadH)}
-            shape="rect"
-          />
-          <smtpad
-            portHints={["pin3"]}
-            pcbX={mm(pcb.rfContactX)}
-            pcbY={mm(pcb.rfGroundPadY)}
-            width={mm(pcb.rfGroundPadW)}
-            height={mm(pcb.rfGroundPadH)}
-            shape="rect"
-          />
+              {/*
+               * Quarter-wave-scale coupling seed. The line terminates at x=0
+               * where it feeds the centered Patch inset. The left endpoint is
+               * the isolated-end calibration reference.
+               */}
+              <smtpad
+                portHints={["pin2", "pin4"]}
+                pcbX={mm(derived.coupledTraceCenterX)}
+                pcbY={mm(derived.coupledTraceY)}
+                width={mm(variant.couplingLengthSeed)}
+                height={mm(pcb.rfTraceW)}
+                shape="rect"
+              />
 
-          {/* Parallel weak-coupling line. */}
-          <smtpad
-            portHints={["pin2"]}
-            pcbX="0mm"
-            pcbY={mm(derived.coupledTraceY)}
-            width={mm(pcb.couplingLength)}
-            height={mm(pcb.rfTraceW)}
-            shape="rect"
-          />
+              {/* Explicit isolated-end landing pad for the 50 ohm termination seed. */}
+              <smtpad
+                portHints={["pin4"]}
+                pcbX={mm(derived.coupledTraceXMin)}
+                pcbY={mm(derived.coupledTraceY)}
+                width={mm(pcb.isoPadW)}
+                height={mm(pcb.isoPadH)}
+                shape="rect"
+              />
+            </>
+          )}
 
-          {/* Vertical patch feed inside the inset notch. */}
+          {/* Vertical Patch feed inside the inset notch. */}
           <smtpad
             portHints={["pin2"]}
             pcbX="0mm"
@@ -151,7 +208,8 @@ const RfGeometry = () => {
   )
 }
 
-const GroundReturnVias = () => {
+const GroundReturnVias = ({ boardClass }: VariantProps) => {
+  const variant = boardVariants[boardClass]
   const leftX = -pcb.rfContactX
   const rightX = pcb.rfContactX
   const dx = pcb.rfGroundViaOffsetX
@@ -178,20 +236,116 @@ const GroundReturnVias = () => {
         outerDiameter={mm(pcb.rfGroundViaOuter)}
         connectsTo="net.GND"
       />
-      <via
-        name="V_GND_R1"
-        pcbX={mm(rightX - dx)}
+
+      {variant.hasRfOut && (
+        <>
+          <via
+            name="V_GND_R1"
+            pcbX={mm(rightX - dx)}
+            pcbY={mm(pcb.rfGroundPadY)}
+            fromLayer="top"
+            toLayer="bottom"
+            holeDiameter={mm(pcb.rfGroundViaHole)}
+            outerDiameter={mm(pcb.rfGroundViaOuter)}
+            connectsTo="net.GND"
+          />
+          <via
+            name="V_GND_R2"
+            pcbX={mm(rightX + dx)}
+            pcbY={mm(pcb.rfGroundPadY)}
+            fromLayer="top"
+            toLayer="bottom"
+            holeDiameter={mm(pcb.rfGroundViaHole)}
+            outerDiameter={mm(pcb.rfGroundViaOuter)}
+            connectsTo="net.GND"
+          />
+        </>
+      )}
+    </>
+  )
+}
+
+const GroundContactPads = ({ boardClass }: VariantProps) => {
+  const variant = boardVariants[boardClass]
+  return (
+    <>
+      <testpoint
+        name="RF_GND_IN"
+        footprintVariant="pad"
+        padShape="rect"
+        width={mm(pcb.rfGroundPadW)}
+        height={mm(pcb.rfGroundPadH)}
+        pcbX={mm(-pcb.rfContactX)}
         pcbY={mm(pcb.rfGroundPadY)}
-        fromLayer="top"
-        toLayer="bottom"
-        holeDiameter={mm(pcb.rfGroundViaHole)}
-        outerDiameter={mm(pcb.rfGroundViaOuter)}
-        connectsTo="net.GND"
+        connections={{ pin1: "net.GND" }}
       />
+      {variant.hasRfOut && (
+        <testpoint
+          name="RF_GND_OUT"
+          footprintVariant="pad"
+          padShape="rect"
+          width={mm(pcb.rfGroundPadW)}
+          height={mm(pcb.rfGroundPadH)}
+          pcbX={mm(pcb.rfContactX)}
+          pcbY={mm(pcb.rfGroundPadY)}
+          connections={{ pin1: "net.GND" }}
+        />
+      )}
+    </>
+  )
+}
+
+const IsolationTermination = ({ boardClass }: VariantProps) => {
+  const variant = boardVariants[boardClass]
+  if (!variant.needsIsolationTermination) return null
+
+  const derived = getVariantDerived(boardClass)
+  const x = derived.coupledTraceXMin
+  const resistorY = -11.4
+  const groundX = x - 2.4
+
+  return (
+    <>
+      <resistor
+        name="R_ISO"
+        resistance="50ohm"
+        footprint="0603"
+        pcbX={mm(x)}
+        pcbY={mm(resistorY)}
+        connections={{
+          pin1: "net.COUPLED",
+          pin2: "net.GND"
+        }}
+      />
+
+      <testpoint
+        name="ISO_GND"
+        footprintVariant="pad"
+        padShape="rect"
+        width="1.6mm"
+        height="1.6mm"
+        pcbX={mm(groundX)}
+        pcbY={mm(resistorY)}
+        connections={{ pin1: "net.GND" }}
+      />
+
+      <trace
+        from=".ANT1 > .pin4"
+        to=".R_ISO > .pin1"
+        pcbPath={["ANT1.pin4", "R_ISO.pin1"]}
+        width="0.5mm"
+      />
+      <trace
+        from=".R_ISO > .pin2"
+        to=".ISO_GND > .pin1"
+        pcbPath={["R_ISO.pin2", "ISO_GND.pin1"]}
+        width="0.5mm"
+      />
+
       <via
-        name="V_GND_R2"
-        pcbX={mm(rightX + dx)}
-        pcbY={mm(pcb.rfGroundPadY)}
+        name="V_ISO_GND"
+        pcbX={mm(groundX)}
+        pcbY={mm(resistorY)}
         fromLayer="top"
         toLayer="bottom"
         holeDiameter={mm(pcb.rfGroundViaHole)}
@@ -247,62 +401,97 @@ const IdChain = () => (
   </>
 )
 
-const PresentationSilkscreen = () => (
-  <>
-    <silkscreentext
-      pcbX="0mm"
-      pcbY="22.3mm"
-      text="2.45 GHz PATCH / WORKPIECE +Z"
-      fontSize="0.8mm"
-    />
-    <silkscreentext
-      pcbX="-21.5mm"
-      pcbY="-10.2mm"
-      text="RF IN"
-      fontSize="0.75mm"
-    />
-    <silkscreentext
-      pcbX="21.5mm"
-      pcbY="-10.2mm"
-      text="RF OUT"
-      fontSize="0.75mm"
-    />
-    <silkscreentext
-      pcbX="-20.5mm"
-      pcbY="-24mm"
-      text="ID IN"
-      fontSize="0.65mm"
-    />
-    <silkscreentext
-      pcbX="20.5mm"
-      pcbY="-24mm"
-      text="ID OUT"
-      fontSize="0.65mm"
-    />
+const PresentationSilkscreen = ({ boardClass }: VariantProps) => {
+  const variant = boardVariants[boardClass]
+  const couplingLabel =
+    variant.targetCouplingDb === null
+      ? "TERMINAL MATCHED PATCH"
+      : `${variant.targetCouplingDb.toFixed(1)} dB COUPLER HFSS SEED`
 
-    {/* Mechanical/magnetic interface outlines for presentation and placement. */}
-    <silkscreenrect
-      pcbX={mm(-pcb.rfContactX)}
-      pcbY="-16.0mm"
-      width={mm(pcb.magneticOutlineW)}
-      height={mm(pcb.magneticOutlineH)}
-      filled={false}
-      stroke="solid"
-      strokeWidth="0.2mm"
-    />
-    <silkscreenrect
-      pcbX={mm(pcb.rfContactX)}
-      pcbY="-16.0mm"
-      width={mm(pcb.magneticOutlineW)}
-      height={mm(pcb.magneticOutlineH)}
-      filled={false}
-      stroke="solid"
-      strokeWidth="0.2mm"
-    />
-  </>
-)
+  return (
+    <>
+      <silkscreentext
+        pcbX="0mm"
+        pcbY="22.3mm"
+        text={`2.45 GHz PATCH ${boardClass} / WORKPIECE +Z`}
+        fontSize="0.75mm"
+      />
+      <silkscreentext
+        pcbX="0mm"
+        pcbY="-5.5mm"
+        text={couplingLabel}
+        fontSize="0.55mm"
+      />
+      <silkscreentext
+        pcbX="-21.5mm"
+        pcbY="-10.2mm"
+        text="RF IN"
+        fontSize="0.75mm"
+      />
+      {variant.hasRfOut && (
+        <silkscreentext
+          pcbX="21.5mm"
+          pcbY="-10.2mm"
+          text="RF OUT"
+          fontSize="0.75mm"
+        />
+      )}
+      {!variant.hasRfOut && (
+        <silkscreentext
+          pcbX="18mm"
+          pcbY="-18mm"
+          text="NO RF OUT"
+          fontSize="0.65mm"
+        />
+      )}
 
-export const SingleBoard = () => (
+      {variant.needsIsolationTermination && (
+        <silkscreentext
+          pcbX="-17mm"
+          pcbY="-9.7mm"
+          text="ISO 50R"
+          fontSize="0.55mm"
+        />
+      )}
+
+      <silkscreentext
+        pcbX="-20.5mm"
+        pcbY="-24mm"
+        text="ID IN"
+        fontSize="0.65mm"
+      />
+      <silkscreentext
+        pcbX="20.5mm"
+        pcbY="-24mm"
+        text="ID OUT"
+        fontSize="0.65mm"
+      />
+
+      <silkscreenrect
+        pcbX={mm(-pcb.rfContactX)}
+        pcbY="-16.0mm"
+        width={mm(pcb.magneticOutlineW)}
+        height={mm(pcb.magneticOutlineH)}
+        filled={false}
+        stroke="solid"
+        strokeWidth="0.2mm"
+      />
+      {variant.hasRfOut && (
+        <silkscreenrect
+          pcbX={mm(pcb.rfContactX)}
+          pcbY="-16.0mm"
+          width={mm(pcb.magneticOutlineW)}
+          height={mm(pcb.magneticOutlineH)}
+          filled={false}
+          stroke="solid"
+          strokeWidth="0.2mm"
+        />
+      )}
+    </>
+  )
+}
+
+export const GradientPatchBoard = ({ boardClass }: VariantProps) => (
   <board
     width={mm(pcb.boardW)}
     height={mm(pcb.boardH)}
@@ -311,10 +500,21 @@ export const SingleBoard = () => (
     routingDisabled
   >
     <net name="GND" />
+    <net name="COUPLED" />
 
-    <RfGeometry />
-    <GroundReturnVias />
+    <RfGeometry boardClass={boardClass} />
+    <GroundContactPads boardClass={boardClass} />
+    <GroundReturnVias boardClass={boardClass} />
+    <IsolationTermination boardClass={boardClass} />
     <IdChain />
-    <PresentationSilkscreen />
+    <PresentationSilkscreen boardClass={boardClass} />
   </board>
 )
+
+export const BoardA = () => <GradientPatchBoard boardClass="A" />
+export const BoardB = () => <GradientPatchBoard boardClass="B" />
+export const BoardC = () => <GradientPatchBoard boardClass="C" />
+export const BoardD = () => <GradientPatchBoard boardClass="D" />
+
+// Backward-compatible default used by the historical index.tsx.
+export const SingleBoard = BoardA
