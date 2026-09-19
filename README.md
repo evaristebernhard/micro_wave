@@ -292,23 +292,55 @@ micro_wave/
 
 ## 当前设计方法
 
-当前 Patch+Zone 路线统一按以下顺序推进：
+V4.1 之后，1–80 通用无源路线的优先级改为：
 
 \[
 \boxed{
-\text{Geometry}
+\text{loss budget}
 \rightarrow
-\text{Complex }S
+\text{equal-power extraction}
 \rightarrow
-\text{Patch excitation }\mathbf u
+\text{loaded match}
 \rightarrow
-\text{Workpiece deposition }Q
+\text{workpiece efficiency}
 \rightarrow
-\text{Passive synthesis}
+\text{optional field shaping}
 }
 \]
 
-因此后续 HFSS/openEMS 与 PCB 优化不再只以 coupling dB 为中心。A/B/C/D 的第一轮 6.5/5/3 dB 参数用于启动搜索，最终应由工件侧目标复激励和无源网络可实现性共同决定。
+系统级主链：
+
+\[
+\boxed{
+\text{materials/geometry}
+\rightarrow
+(\alpha,\beta)
+\rightarrow
+S_{\rm cell}
+\rightarrow
+\kappa_i
+\rightarrow
+C_N
+\rightarrow
+P_{\rm src}(N)
+}
+\]
+
+工件侧支链：
+
+\[
+\boxed{
+\text{PP/gap/workpiece}
+\rightarrow
+G_{\rm work}+jB_{\rm work}
+\rightarrow
+Z_{\rm loaded}
+\rightarrow
+\eta_{\rm work}
+}
+\]
+
+field-aware complex excitation / Q-matrix 仍保留，但作为低板数或可重构优化层，不再优先于 80-board loss closure。
 
 - `docs/16_extended_board_tcell_design_v1.md`：50×60 工程包络与 matched-extraction T-cell 解析设计。
 - `docs/17_tcell_reference_plane_bridge_phase_v1.md`：T-cell 最终参考面；5 mm 磁吸桥作为独立相移二端口，统一约 19° bridge phase，A/B/C 残差约在 ±0.7° 内
