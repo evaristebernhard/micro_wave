@@ -6,11 +6,12 @@
 
 ## 当前基线
 
-**当前有效需求基线：`docs/01_rf_simulation_requirements_v3.md`。**
+**当前有效需求基线：`docs/01_rf_simulation_requirements_v4.md`。**
 
 - `docs/01_rf_simulation_requirements_v1.md`：原始需求冻结版，仅保留追踪
 - `docs/01_rf_simulation_requirements_v2.md`：第一轮工程修订版，现保留用于追踪
-- `docs/01_rf_simulation_requirements_v3.md`：当前客户技术修订基线；明确写入不可执行原始指标、替代验收口径和客户需确认项
+- `docs/01_rf_simulation_requirements_v3.md`：上一版工程修订基线，保留追踪
+- `docs/01_rf_simulation_requirements_v4.md`：当前物理闭合基线；正式改为 1–80 块，并统一 500 W、5–8 W/板、±25%、板数自适应功率与 efficiency gate
 - `docs/02_system_theory_analysis_v1.md`：系统拓扑、功率预算、级联均匀性、WR340/50 Ω、磁吸接口等理论分析
 - `docs/03_patch_antenna_theory_v1.md`：2.45 GHz 前向辐射矩形 Patch 的尺寸、弱耦合、馈电、功率守恒与 tscircuit/HFSS 参数化基线
 - `docs/04_pcb_design_manual_v1.md`：第一版 tscircuit PCB 的执行手册，含坐标、尺寸、层叠、Patch/主线/耦合/识别线/磁吸接口规则和 HFSS 交接清单
@@ -25,78 +26,102 @@
 - `docs/13_coupler_terminal_phase_closure_v1.md`：闭合 C 的 quadrature phase 约定与 D terminal 相位；给出完整四板约 0/90/180/270° seed，并落实 B/C V-feed 与 D 35.34 mm 斜向 phase route
 - `docs/14_c_coupler_footprint_feasibility_v1.md`：审计 C 的 3 dB quadrature coupler footprint；证明标准 full-size branch-line 在当前 50×50 mm 同层 Patch 布局中无空间，保留 compact quadrature 路线
 
-## V3 当前工程口径
+## V4 当前工程口径
 
-### 功率
+### 板数与功率
 
-- 原“500 W + 100 块 + 5–8 W/块”不再作为同时硬指标；
-- 磁控管硬件上限仍为 500 W；
-- 预留约 20% 系统损耗/反射余量，初始有效功率预算按 400 W；
-- 5–8 W/块不再作为 1–100 块全范围硬指标；
-- 50 块：约 8 W/块；
-- 80 块：约 5 W/块；
-- 100 块：约 4 W/块；
-- 若必须 100 块均达到 5 W/块，则 80% 效率假设下源功率至少约 625 W，需要升级硬件。
+- 正式支持 **1–80 块**；5 / 25 / 80 为代表验收工况；
+- 磁控管硬件上限仍为 **500 W**；
+- 端到板 useful RF 设计预算按 **400 W**，因此 80 板模式要求系统总效率 **η_sys ≥ 80%**；
+- 单板 useful accepted RF 保持 **5–8 W**；
+- 组内 nominal power deviation 保持 **≤±25%**；
+- nominal 平均功率：
+  [
+  \bar P(N)=\min\left(6.5,\frac{400}{N}\right)\ \mathrm W;
+  ]
+- 1–61 块按 6.5 W/板 nominal；62–80 块进入 power-limited mode；80 块为 5 W/板。
+
+### 自适应四板 taper
+
+低/中板数沿用当前 field-aware endpoint：
+
+[
+P_A:P_B:P_C:P_D=1:0.6412:0.6412:1,
+]
+
+即 6.5 W 平均时约 **7.92 / 5.08 / 5.08 / 7.92 W**。
+
+高板数按
+
+[
+q^*(N)=
+\min\left[
+1,
+\max\left(
+0.6412,
+\frac{5}{2\bar P(N)-5}
+\right)
+\right]
+]
+
+自动把 inner/outer taper 压平。80 板时 (q=1)，即 5 / 5 / 5 / 5 W equal-power Zone。整个解析目标范围内最大 nominal deviation 约 ±21.9%，低于 ±25%。
 
 ### RF 分区
 
-系统仍支持总计 1–100 块，但不再默认全部串在一条连续 FR4 主线上。
+系统机械上允许 1–80 块连续磁吸，但 RF 不采用 80 块连续普通 FR4 长链。
 
-当前工程基线：
+[
+N=4M+r,qquad r=0,1,2,3.
+]
 
-```text
-磁控管
-  → WR340 / 匹配
-  → WR340→N
-  → 低损耗分配主干
-  → 梯度耦合 RF Zone
-       ├─ 4 块：A → B → C → D_term
-       ├─ 3 块：B → C → D_term
-       ├─ 2 块：C → D_term
-       └─ 1 块：D_term
-```
+完整 Zone：
 
-按当前 0.42 dB/cell 理论值，4 板等功率梯度目标约为 **21.5% / 30.2% / 47.6% / 100%**。D 板是终端辐射板，不再把所有板都按固定 10% 弱耦合同构板处理。
+[
+A\rightarrow B\rightarrow C\rightarrow D_{term}.
+]
 
-25/100 块优先使用局部全波模型 + 复数 S 参数网络级联。梯度比例必须在 HFSS/openEMS 得到真实 through-line 传输系数后重新标定。
+80 块对应 **20 个四板 Zone**；余数 1 / 2 / 3 块用 partial Zone，并用同一套 backward loss-aware synthesis 求 coupling。
+
+### 80 板 efficiency gate
+
+若 upstream feed + manifold 目标效率为 95%，则 80 板模式要求：
+
+[
+\eta_{zone}\ge\frac{0.80}{0.95}=84.21\%.
+]
+
+当前 0.42 dB/cell 的一阶 equal-power 四板模型约为 **85.99%**，因此解析上有小幅余量，但必须由 full-wave 验证。
 
 ### 50 Ω 主线
 
 - 原 2.0 mm 不再冻结；
-- tscircuit/HFSS seed 改为 **2.90 mm**；
-- 扫描范围 **2.60–3.20 mm**；
-- 最终按真实 PP 覆盖、地结构和铜厚场求解得到 50 Ω ±2 Ω。
-
-### 连接桥
-
-普通 FR4、tanδ≈0.02 条件下：
-
-- 100 mm 平面桥：设计目标 ≤0.6 dB，验收≤0.8 dB；
-- 约 100 mm 立体直角桥：目标≤0.8 dB，验收≤1.0 dB；
-- 若坚持 0.2–0.3 dB，则改用 tanδ≤0.004 的 RF 低损耗基材或短同轴。
-
-### 长馈线
-
-RG142 不再作为 500 W、3–10 m 主馈线基线。
-
-V2 采用 **LMR-900 等级或等效低损耗 50 Ω 电缆**作为比较基准：
-
-- 3 m 总成：≤0.5 dB；
-- 5 m 总成：≤0.8 dB；
-- 10 m 总成：≤1.3 dB；
-- VSWR≤1.3 优选，≤1.5 硬上限。
+- PP-corrected 下一版中心约 **2.91 mm**；
+- 正式制造前按真实 PP 厚度、FR4 参数和铜厚重新求 (Z(W))。
 
 ### 板数识别
 
-取消“10 kΩ/板简单并联计数”作为基线，改为：
+恢复客户原始 **10 kΩ/板**，但明确为独立识别线串联计数：
 
-- 每板 100 Ω；
-- 0.1%；
-- ≤25 ppm/°C；
-- 串联计数；
-- 100 μA 恒流测量。
+[
+R_{ID}(N)=10N\ \mathrm{k\Omega}.
+]
 
-由此每增加一块约增加 10 mV，1–100 块对应约 10 mV–1.00 V。
+建议 1 μA 恒流读取；1–80 块约对应 10 mV–0.80 V。识别线不进入 RF extraction 网络。
+
+### 客户原始 Spiral 与优化 Patch
+
+- 方形螺旋保留为正式 baseline；
+- rectangular Patch / matched T-cell 作为优化方案；
+- 最终按 S 参数、有用取能、工件吸收、场均匀性、高场风险、50×50 mm footprint 和加载敏感性比较。
+
+### 连接桥 / 长馈线
+
+普通 FR4 100 mm 平面桥 ≤0.2 dB、直角桥 ≤0.3 dB，以及 RG142 5 m ≤0.5 dB 均不作为“材料与损耗同时无条件冻结”的组合。若坚持原超低插损指标，必须同步采用更低损耗 RF 基材/电缆或缩短路径。
+
+详细闭合推导：
+
+- `docs/25_1_to_80_closed_power_framework_v1.md`
+- `docs/24_next_pcb_design_parameters_v2.md`
 
 ## 保持不变的材料/频率参数
 
@@ -163,3 +188,5 @@ micro_wave/
 - `docs/18_tcell_bandwidth_load_sensitivity_v1.md`：理想传输线频带与 loaded-Patch reflection 敏感性；给出 T-cell / isolated-topology 的定量切换判据。
 
 - `docs/19_tcell_exact_equal_power_synthesis_v1.md`：按 0.42 dB/cell 精确反解等功率 T-cell；A/B/C 更新为 21.498% / 30.167% / 47.584%，并重新综合线宽、T 点与 inter-cell phase。
+
+- `docs/25_1_to_80_closed_power_framework_v1.md`：1–80 块闭合功率理论；给出 board-count-adaptive taper、loss-aware extraction、80 板 efficiency gate 与 5/25/80 验收链。
