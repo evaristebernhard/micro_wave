@@ -36,24 +36,26 @@
 - 单板 useful accepted RF 保持 **5–8 W**；
 - 组内 nominal power deviation 保持 **≤±25%**；
 - nominal 平均功率：
-  [
-  \bar P(N)=\min\left(6.5,\frac{400}{N}\right)\ \mathrm W;
-  ]
+
+\[
+\bar P(N)=\min\left(6.5,\frac{400}{N}\right)\ {\rm W}.
+\]
+
 - 1–61 块按 6.5 W/板 nominal；62–80 块进入 power-limited mode；80 块为 5 W/板。
 
 ### 自适应四板 taper
 
 低/中板数沿用当前 field-aware endpoint：
 
-[
-P_A:P_B:P_C:P_D=1:0.6412:0.6412:1,
-]
+\[
+P_A:P_B:P_C:P_D=1:0.6412:0.6412:1.
+\]
 
 即 6.5 W 平均时约 **7.92 / 5.08 / 5.08 / 7.92 W**。
 
-高板数按
+高板数按：
 
-[
+\[
 q^*(N)=
 \min\left[
 1,
@@ -61,24 +63,24 @@ q^*(N)=
 0.6412,
 \frac{5}{2\bar P(N)-5}
 \right)
-\right]
-]
+\right].
+\]
 
-自动把 inner/outer taper 压平。80 板时 (q=1)，即 5 / 5 / 5 / 5 W equal-power Zone。整个解析目标范围内最大 nominal deviation 约 ±21.9%，低于 ±25%。
+自动把 inner/outer taper 压平。80 板时 \(q=1\)，即 5 / 5 / 5 / 5 W equal-power Zone。整个解析目标范围内最大 nominal deviation 约 ±21.9%，低于 ±25%。
 
 ### RF 分区
 
 系统机械上允许 1–80 块连续磁吸，但 RF 不采用 80 块连续普通 FR4 长链。
 
-[
-N=4M+r,qquad r=0,1,2,3.
-]
+\[
+N=4M+r,\qquad r=0,1,2,3.
+\]
 
 完整 Zone：
 
-[
-A\rightarrow B\rightarrow C\rightarrow D_{term}.
-]
+\[
+A\rightarrow B\rightarrow C\rightarrow D_{\rm term}.
+\]
 
 80 块对应 **20 个四板 Zone**；余数 1 / 2 / 3 块用 partial Zone，并用同一套 backward loss-aware synthesis 求 coupling。
 
@@ -86,9 +88,9 @@ A\rightarrow B\rightarrow C\rightarrow D_{term}.
 
 若 upstream feed + manifold 目标效率为 95%，则 80 板模式要求：
 
-[
-\eta_{zone}\ge\frac{0.80}{0.95}=84.21\%.
-]
+\[
+\eta_{\rm zone}\ge\frac{0.80}{0.95}=84.21\%.
+\]
 
 当前 0.42 dB/cell 的一阶 equal-power 四板模型约为 **85.99%**，因此解析上有小幅余量，但必须由 full-wave 验证。
 
@@ -96,15 +98,15 @@ A\rightarrow B\rightarrow C\rightarrow D_{term}.
 
 - 原 2.0 mm 不再冻结；
 - PP-corrected 下一版中心约 **2.91 mm**；
-- 正式制造前按真实 PP 厚度、FR4 参数和铜厚重新求 (Z(W))。
+- 正式制造前按真实 PP 厚度、FR4 参数和铜厚重新求 \(Z(W)\)。
 
 ### 板数识别
 
 恢复客户原始 **10 kΩ/板**，但明确为独立识别线串联计数：
 
-[
-R_{ID}(N)=10N\ \mathrm{k\Omega}.
-]
+\[
+R_{\rm ID}(N)=10N\ {\rm k\Omega}.
+\]
 
 建议 1 μA 恒流读取；1–80 块约对应 10 mV–0.80 V。识别线不进入 RF extraction 网络。
 
@@ -120,8 +122,8 @@ R_{ID}(N)=10N\ \mathrm{k\Omega}.
 
 详细闭合推导：
 
-- `docs/25_1_to_80_closed_power_framework_v1.md`
-- `docs/24_next_pcb_design_parameters_v2.md`
+- \`docs/25_1_to_80_closed_power_framework_v1.md\`
+- \`docs/24_next_pcb_design_parameters_v2.md\`
 
 ## 保持不变的材料/频率参数
 
