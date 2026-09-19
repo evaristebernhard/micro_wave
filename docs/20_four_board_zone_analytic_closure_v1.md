@@ -6,38 +6,38 @@
 
 当前主架构为：
 
-[
-oxed{
-	ext{Zone input}
-	o A 	o B 	o C 	o D_{m term}
+\[
+\boxed{
+\text{Zone input}
+\to A \to B \to C \to D_{\mathrm{term}}
 }
-]
+\]
 
 A/B/C 是取能 + 继续传输的中间板；D 是终端辐射板。
 
 四块板不是焊成一张大 PCB，而是四块独立模块，通过磁吸 RF 接口串联。每块都有自己的 Patch。
 
-设第 i 块入口前向功率为 (P_i)，目标每块 Patch 接受相同 RF 功率 (E)，through path 的功率传输效率为 (	au_i)。
+设第 \(i\) 块入口前向功率为 \(P_i\)，目标每块 Patch 接受相同 RF 功率 \(E\)，through path 的功率传输效率为 \(\tau_i\)。
 
 则中间级满足
 
-[
-P_{i+1}=	au_i(P_i-E),
-]
+\[
+P_{i+1}=\tau_i(P_i-E),
+\]
 
 因此
 
-[
-oxed{
-P_i=E+rac{P_{i+1}}{	au_i}.
+\[
+\boxed{
+P_i=E+\frac{P_{i+1}}{\tau_i}.
 }
-]
+\]
 
 终端板取尽剩余目标功率，故
 
-[
+\[
 P_4=E.
-]
+\]
 
 这个递推是四板等 RF 取能的基本式。
 
@@ -45,148 +45,148 @@ P_4=E.
 
 若 A/B/C 的 through loss 近似相同，
 
-[
-	au_A=	au_B=	au_C=	au,
-]
+\[
+\tau_A=\tau_B=\tau_C=\tau,
+\]
 
 则
 
-[
+\[
 P_i
 =
-Esum_{m=0}^{4-i}	au^{-m}.
-]
+E\sum_{m=0}^{4-i}\tau^{-m}.
+\]
 
-相应第 i 块需要从本级入口抽取的比例为
+相应第 \(i\) 块需要从本级入口抽取的比例为
 
-[
-oxed{
-kappa_i=rac{E}{P_i}.
+\[
+\boxed{
+\kappa_i=\frac{E}{P_i}.
 }
-]
+\]
 
 对于当前理论基线
 
-[
-L_{m cell}=0.42 {m dB},
-qquad
-	au=10^{-0.42/10}=0.90782053,
-]
+\[
+L_{\mathrm{cell}}=0.42\ \mathrm{dB},
+\qquad
+\tau=10^{-0.42/10}=0.90782053,
+\]
 
 得到
 
-[
-oxed{
-kappa_A=0.214983,quad
-kappa_B=0.301666,quad
-kappa_C=0.475842,quad
-kappa_D=1.
+\[
+\boxed{
+\kappa_A=0.214983,\quad
+\kappa_B=0.301666,\quad
+\kappa_C=0.475842,\quad
+\kappa_D=1.
 }
-]
+\]
 
 对应功率耦合量：
 
-[
-oxed{
-6.676 {m dB},quad
-5.205 {m dB},quad
-3.225 {m dB},quad
-	ext{terminal}.
+\[
+\boxed{
+6.676\ \mathrm{dB},\quad
+5.205\ \mathrm{dB},\quad
+3.225\ \mathrm{dB},\quad
+\text{terminal}.
 }
-]
+\]
 
 这说明 A/B/C/D 不是四个“候选板”，而是同一四级 Zone 内的四个位置专用板。
 
 ## 3. 5–8 W/板对应的 Zone 输入功率
 
-由于 (kappa_i) 与绝对功率尺度无关，只要线性工作，改变目标 (E) 只会等比例改变 (P_i)。
+由于 \(\kappa_i\) 与绝对功率尺度无关，只要线性工作，改变目标 \(E\) 只会等比例改变 \(P_i\)。
 
-### E = 5 W/板
+### \(E=5\) W/板
 
-[
+\[
 (P_A,P_B,P_C,P_D)
 =
-(23.258, 16.575, 10.508, 5.000) {m W}.
-]
+(23.258,\ 16.575,\ 10.508,\ 5.000)\ \mathrm{W}.
+\]
 
 所以 Zone input 约
 
-[
-oxed{23.26 {m W}}.
-]
+\[
+\boxed{23.26\ \mathrm{W}}.
+\]
 
-### E = 6.5 W/板
+### \(E=6.5\) W/板
 
-[
+\[
 (P_A,P_B,P_C,P_D)
 =
-(30.235, 21.547, 13.660, 6.500) {m W}.
-]
+(30.235,\ 21.547,\ 13.660,\ 6.500)\ \mathrm{W}.
+\]
 
 所以 Zone input 约
 
-[
-oxed{30.23 {m W}}.
-]
+\[
+\boxed{30.23\ \mathrm{W}}.
+\]
 
-### E = 8 W/板
+### \(E=8\) W/板
 
-[
+\[
 (P_A,P_B,P_C,P_D)
 =
-(37.212, 26.519, 16.812, 8.000) {m W}.
-]
+(37.212,\ 26.519,\ 16.812,\ 8.000)\ \mathrm{W}.
+\]
 
 所以 Zone input 约
 
-[
-oxed{37.21 {m W}}.
-]
+\[
+\boxed{37.21\ \mathrm{W}}.
+\]
 
 因此当前 5–8 W/板的四板局部 Zone 与 500 W 主机功率尺度并不冲突。真正不合理的是把 100 块全部串成一条连续 FR4 链，而不是四板局部 Zone 本身。
 
 ## 4. 必须区分 RF 取能与工件实际加热功率
 
-上面的 (E) 是 Patch 支路接受的 RF 功率。
+上面的 \(E\) 是 Patch 支路接受的 RF 功率。
 
-若客户所说的 5–8 W 实际指工件吸收功率 (H)，且第 i 块局部 RF→工件效率为 (eta_i)，则应改为
+若客户所说的 5–8 W 实际指工件吸收功率 \(H\)，且第 \(i\) 块局部 RF→工件效率为 \(\eta_i\)，则应改为
 
-[
-B_i=rac{H}{eta_i},
-]
+\[
+B_i=\frac{H}{\eta_i},
+\]
 
-其中 (B_i) 是该板需要从主链抽取的 RF 功率。
+其中 \(B_i\) 是该板需要从主链抽取的 RF 功率。
 
 递推变成
 
-[
-oxed{
+\[
+\boxed{
 P_i
 =
-rac{H}{eta_i}
+\frac{H}{\eta_i}
 +
-rac{P_{i+1}}{	au_i}.
+\frac{P_{i+1}}{\tau_i}.
 }
-]
+\]
 
 抽取比例则为
 
-[
-oxed{
-kappa_i
+\[
+\boxed{
+\kappa_i
 =
-rac{H/eta_i}{P_i}.
+\frac{H/\eta_i}{P_i}.
 }
-]
+\]
 
-如果四块 (eta_i=eta_h) 近似相同，则所有 (kappa_i) 不变，但整个 Zone 输入功率放大 (1/eta_h)。
+如果四块 \(\eta_i=\eta_h\) 近似相同，则所有 \(\kappa_i\) 不变，但整个 Zone 输入功率放大 \(1/\eta_h\)。
 
 以 6.5 W/板实际加热为例：
 
-- (eta_h=1)：Zone input ≈ 30.23 W；
-- (eta_h=0.8)：≈ 37.79 W；
-- (eta_h=0.7)：≈ 43.19 W；
-- (eta_h=0.6)：≈ 50.39 W。
+- \(\eta_h=1\)：Zone input ≈ 30.23 W；
+- \(\eta_h=0.8\)：≈ 37.79 W；
+- \(\eta_h=0.7\)：≈ 43.19 W；
+- \(\eta_h=0.6\)：≈ 50.39 W。
 
 因此下一阶段必须把“每板 5–8 W”明确区分为 RF accepted power 还是 workpiece absorbed power。
 
@@ -194,57 +194,57 @@ kappa_i
 
 设参考阻抗
 
-[
-Z_0=50 Omega,
-]
+\[
+Z_0=50\ \Omega,
+\]
 
-目标抽取比例为 (kappa)。
+目标抽取比例为 \(\kappa\)。
 
-为了使 Patch branch 在 T-junction 的电导占总电导的比例为 (kappa)，其等效输入电阻应满足
+为了使 Patch branch 在 T-junction 的电导占总电导的比例为 \(\kappa\)，其等效输入电阻应满足
 
-[
-oxed{
+\[
+\boxed{
 R_b
 =
-Z_0rac{1-kappa}{kappa}.
+Z_0\frac{1-\kappa}{\kappa}.
 }
-]
+\]
 
 T-junction 总阻抗为
 
-[
-R_J=Z_0parallel R_b
+\[
+R_J=Z_0\parallel R_b
 =
-Z_0(1-kappa).
-]
+Z_0(1-\kappa).
+\]
 
 所以输入侧四分之一波变换器应取
 
-[
-oxed{
-Z_t=Z_0sqrt{1-kappa}.
+\[
+\boxed{
+Z_t=Z_0\sqrt{1-\kappa}.
 }
-]
+\]
 
-若 Patch 在设计频率处的实际谐振电阻为 (R_L)，并不要求必须等于 50 Ω。branch quarter-wave transformer 应满足
+若 Patch 在设计频率处的实际谐振电阻为 \(R_L\)，并不要求必须等于 50 Ω。branch quarter-wave transformer 应满足
 
-[
-oxed{
+\[
+\boxed{
 Z_b
 =
-sqrt{
-R_L Z_0rac{1-kappa}{kappa}
+\sqrt{
+R_L Z_0\frac{1-\kappa}{\kappa}
 }.
 }
-]
+\]
 
 当前 docs/19 中
 
-[
-Z_b=50sqrt{rac{1-kappa}{kappa}}
-]
+\[
+Z_b=50\sqrt{\frac{1-\kappa}{\kappa}}
+\]
 
-只是 (R_L=50Omega) 的特殊情况。
+只是 \(R_L=50\Omega\) 的特殊情况。
 
 这个推广很重要：最终设计的第一要求应是 Patch 在 2.45 GHz 附近接近纯电阻，而不是强迫裸 Patch 本身正好 50 Ω。
 
@@ -252,55 +252,55 @@ Z_b=50sqrt{rac{1-kappa}{kappa}}
 
 设 loaded Patch
 
-[
+\[
 Z_L=R+jX.
-]
+\]
 
-令 (x=X/R)。
+令 \(x=X/R\)。
 
 在中心频率的理想 T-cell 一阶模型中，可以得到输入归一化阻抗近似
 
-[
-oxed{
-rac{Z_{m in}}{Z_0}
-approx
-1+jkappa x.
+\[
+\boxed{
+\frac{Z_{\mathrm{in}}}{Z_0}
+\approx
+1+j\kappa x.
 }
-]
+\]
 
 所以
 
-[
-oxed{
-Gamma_{m in}
-approx
-rac{jkappa x}{2+jkappa x}.
+\[
+\boxed{
+\Gamma_{\mathrm{in}}
+\approx
+\frac{j\kappa x}{2+j\kappa x}.
 }
-]
+\]
 
-当 (|x|ll1) 时，
+当 \(|x|\ll1\) 时，
 
-[
-oxed{
-|Gamma_{m in}|
-approx
-rac{kappa}{2}|x|.
+\[
+\boxed{
+|\Gamma_{\mathrm{in}}|
+\approx
+\frac{\kappa}{2}|x|.
 }
-]
+\]
 
 因此 T-cell 的输入匹配会“掩盖”一部分 Patch 电抗。
 
-例如 C 板 (kappa_Capprox0.476)。即便
+例如 C 板 \(\kappa_C\approx0.476\)。即便
 
-[
+\[
 |X/R|=0.2,
-]
+\]
 
 一阶仍只有
 
-[
-|Gamma_{m in}|approx0.048,
-]
+\[
+|\Gamma_{\mathrm{in}}|\approx0.048,
+\]
 
 入口 return loss 仍可能很好。
 
@@ -308,19 +308,19 @@ approx
 
 对复场设计，更严格的量是 Patch branch phase error。若希望局部相位误差控制在约 5°，一阶要求
 
-[
-oxed{
-|X/R|lesssim	an5^circapprox0.087.
+\[
+\boxed{
+|X/R|\lesssim\tan5^\circ\approx0.087.
 }
-]
+\]
 
 因此后续 loaded-Patch 的设计 gate 应至少同时检查
 
-[
-operatorname{Re}Z_L,quad
-operatorname{Im}Z_L,quad
-arg u_{m patch},
-]
+\[
+\operatorname{Re}Z_L,\quad
+\operatorname{Im}Z_L,\quad
+\arg u_{\mathrm{patch}},
+\]
 
 而不是只检查 S11。
 
@@ -328,32 +328,32 @@ arg u_{m patch},
 
 对理想 matched T-cell：
 
-- input reference → T-junction：约 (-90^circ)；
-- T-junction → Patch branch reference：约 (-90^circ)；
-- 因此单板 Patch 相位相对本 cell input 约 (-180^circ)。
+- input reference → T-junction：约 \(-90^\circ\)；
+- T-junction → Patch branch reference：约 \(-90^\circ\)；
+- 因此单板 Patch 相位相对本 cell input 约 \(-180^\circ\)。
 
 若 T-junction → 下一板 input reference 的 through path 设计成约半波：
 
-[
--180^circ,
-]
+\[
+-180^\circ,
+\]
 
 则整个 cell through phase 为
 
-[
--90^circ-180^circ
+\[
+-90^\circ-180^\circ
 =
--270^circ
-equiv+90^circ.
-]
+-270^\circ
+\equiv+90^\circ.
+\]
 
 于是相邻 Patch 的相位推进自然为
 
-[
-oxed{
-+90^circ.
+\[
+\boxed{
++90^\circ.
 }
-]
+\]
 
 这说明当前 +90° seed 在“网络可实现性”上非常自然。
 
@@ -361,69 +361,67 @@ equiv+90^circ.
 
 因此建议把设计职责拆开：
 
-[
-oxed{
-	ext{T-cell负责幅度/取能}
+\[
+\boxed{
+\text{T-cell负责幅度/取能}
 +
-	ext{短 phase-trim 段负责最终场相位}
+\text{短 phase-trim 段负责最终场相位}
 }
-]
+\]
 
 而不要要求同一个 T-cell 几何同时承担全部 heating-field synthesis。
 
 ## 8. 推荐的设计层级
 
-当前四板 Zone 理论可以分成三层：
-
 ### Layer 1：Patch radiator
 
 优先保证：
 
-[
-f_{r,m loaded}approx2.45 {m GHz},
-]
+\[
+f_{r,\mathrm{loaded}}\approx2.45\ \mathrm{GHz},
+\]
 
 并控制
 
-[
+\[
 X/R
-]
+\]
 
 足够小。
 
 ### Layer 2：power divider
 
-按照实际 (	au_i) 和 (eta_i) 解
+按照实际 \(\tau_i\) 和 \(\eta_i\) 解
 
-[
+\[
 P_i
 =
-rac{H}{eta_i}
+\frac{H}{\eta_i}
 +
-rac{P_{i+1}}{	au_i}
-]
+\frac{P_{i+1}}{\tau_i}
+\]
 
 得到
 
-[
-kappa_A,kappa_B,kappa_C.
-]
+\[
+\kappa_A,\kappa_B,\kappa_C.
+\]
 
-然后通过 (Z_t,Z_b) 完成中心频率 matched extraction。
+然后通过 \(Z_t,Z_b\) 完成中心频率 matched extraction。
 
 ### Layer 3：phase trim
 
-在不显著改变 (kappa_i) 的前提下，用局部短线修正
+在不显著改变 \(\kappa_i\) 的前提下，用局部短线修正
 
-[
-phi_A,phi_B,phi_C,phi_D.
-]
+\[
+\phi_A,\phi_B,\phi_C,\phi_D.
+\]
 
 当前约
 
-[
-1 {m mm}sim5^circ
-]
+\[
+1\ \mathrm{mm}\sim5^\circ
+\]
 
 数量级，因此 0–8.5 mm fine-trim 区域大致可覆盖 ±45° 级相位残差。
 
@@ -433,7 +431,7 @@ phi_A,phi_B,phi_C,phi_D.
 
 主方案应保留 loss-corrected matched T-cell：
 
-| Board | κ | Zt | Zb（若 RL=50 Ω） |
+| Board | κ | \(Z_t\) | \(Z_b\)（若 \(R_L=50\Omega\)） |
 |---|---:|---:|---:|
 | A | 0.214983 | 44.301 Ω | 95.545 Ω |
 | B | 0.301666 | 41.783 Ω | 76.074 Ω |
@@ -442,15 +440,15 @@ phi_A,phi_B,phi_C,phi_D.
 
 但 PCB 映射时必须重新根据真实 PP+FR4 stack 求：
 
-[
-Z_c(W_i)=Z_{i,m target},
-]
+\[
+Z_c(W_i)=Z_{i,\mathrm{target}},
+\]
 
 以及
 
-[
-eta(W_i,f_0)L_i=pi/2.
-]
+\[
+\beta(W_i,f_0)L_i=\pi/2.
+\]
 
 因此应冻结“目标阻抗”，而不是先冻结当前 Hammerstad 裸 FR4 线宽。
 
@@ -458,37 +456,37 @@ Z_c(W_i)=Z_{i,m target},
 
 四板串联 Zone 本身是可行且有明确解析结构的：
 
-[
-oxed{
-A	o B	o C	o D
+\[
+\boxed{
+A\to B\to C\to D
 }
-]
+\]
 
 不是四选一，而是一个完整四级功率分配单元。
 
 在 0.42 dB/cell 基线下：
 
-[
-oxed{
-kappa_A/kappa_B/kappa_C
+\[
+\boxed{
+\kappa_A/\kappa_B/\kappa_C
 =
-21.50%/30.17%/47.58%.
+21.50\%/30.17\%/47.58\%.
 }
-]
+\]
 
 若每块 RF 取能 6.5 W：
 
-[
-oxed{
-P_{m Zone,in}approx30.23 {m W}.
+\[
+\boxed{
+P_{\mathrm{Zone,in}}\approx30.23\ \mathrm{W}.
 }
-]
+\]
 
 因此后续理论重点不再是“是否需要四块”，而是：
 
-1. loaded Patch 的 (R+jX)；
-2. 实际 (	au_A,	au_B,	au_C)；
-3. RF→工件效率 (eta_i)；
+1. loaded Patch 的 \(R+jX\)；
+2. 实际 \(\tau_A,\tau_B,\tau_C\)；
+3. RF→工件效率 \(\eta_i\)；
 4. matched T-cell 的真实 stack 映射；
 5. phase-trim 与加热场目标的解耦。
 
