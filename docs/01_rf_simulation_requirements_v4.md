@@ -4,7 +4,7 @@
 >
 > V4 在 V3 的基础上把最大组内板数由 100 修正为 80，并把“500 W、5–8 W/板、±25%、板数智能调功率”写成一个可以由功率守恒和损耗模型闭合的统一规格。
 >
-> 详细推导见：`docs/25_1_to_80_closed_power_framework_v1.md`。
+> 详细推导见：\`docs/25_1_to_80_closed_power_framework_v1.md\`。
 
 ---
 
@@ -34,27 +34,27 @@
 
 ## 2. 工作频率
 
-[
-oxed{f_0=2.45 {m GHz}}
-]
+\[
+\boxed{f_0=2.45\ {\rm GHz}}
+\]
 
 工作带：
 
-[
-oxed{2.40	ext{–}2.50 {m GHz}}
-]
+\[
+\boxed{2.40\text{–}2.50\ {\rm GHz}}
+\]
 
 全局仿真扫频：
 
-[
-2.0	ext{–}3.0 {m GHz}.
-]
+\[
+2.0\text{–}3.0\ {\rm GHz}.
+\]
 
 RF 端口参考阻抗：
 
-[
-oxed{50 Omega}.
-]
+\[
+\boxed{50\ \Omega}.
+\]
 
 50 Ω 是同轴/微带参考阻抗，不表示所有 branch、transformer、waveguide 的局部波阻抗都必须等于 50 Ω。
 
@@ -64,45 +64,45 @@ RF 端口参考阻抗：
 
 正式支持：
 
-[
-oxed{1le Nle80}.
-]
+\[
+\boxed{1\le N\le80}.
+\]
 
 代表验收：
 
-[
-oxed{N=5, 25, 80}.
-]
+\[
+\boxed{N=5,\ 25,\ 80}.
+\]
 
 源最大功率：
 
-[
-oxed{P_{m src,max}=500 {m W}}.
-]
+\[
+\boxed{P_{\rm src,max}=500\ {\rm W}}.
+\]
 
 单板 useful accepted RF：
 
-[
-oxed{5le P_ile8 {m W}}.
-]
+\[
+\boxed{5\le P_i\le8\ {\rm W}}.
+\]
 
 组内均匀性：
 
-[
-oxed{
-max_i
-left|
-P_i/ar P-1
-ight|
-le25%.
+\[
+\boxed{
+\max_i
+\left|
+P_i/\bar P-1
+\right|
+\le25\%.
 }
-]
+\]
 
 V4 不再包含：
 
-[
-	ext{100块}	imes5	ext{–}8 {m W}
-]
+\[
+\text{100块}\times5\text{–}8\ {\rm W}
+\]
 
 这一互相冲突的验收条件。
 
@@ -112,16 +112,16 @@ V4 不再包含：
 
 V4 使用：
 
-[
-oxed{
-ar P(N)
+\[
+\boxed{
+\bar P(N)
 =
-minleft(
-6.5,rac{400}{N}
-ight)
- {m W}.
+\min\left(
+6.5,\frac{400}{N}
+\right)
+\ {\rm W}.
 }
-]
+\]
 
 含义：
 
@@ -131,15 +131,15 @@ minleft(
 
 400 W 是端到板 useful RF 设计预算，对应：
 
-[
-eta_{m sys}=400/500=80%.
-]
+\[
+\eta_{\rm sys}=400/500=80\%.
+\]
 
 因此 80 块不是无条件保证值，而有明确验收 gate：
 
-[
-oxed{eta_{m sys}ge80%}.
-]
+\[
+\boxed{\eta_{\rm sys}\ge80\%}.
+\]
 
 ---
 
@@ -147,49 +147,49 @@ eta_{m sys}=400/500=80%.
 
 V4 明确区分：
 
-[
-	ext{机械上1–80块连续磁吸}
-]
+\[
+\text{机械上1–80块连续磁吸}
+\]
 
 与：
 
-[
-	ext{RF上80块连续普通FR4长链}.
-]
+\[
+\text{RF上80块连续普通FR4长链}.
+\]
 
 后者取消。
 
 统一 RF 架构：
 
-[
-oxed{
-	ext{magnetron}
-	o
-	ext{WR340 / matching}
-	o
-	ext{low-loss feed/manifold}
-	o
-	ext{local RF Zones}.
+\[
+\boxed{
+\text{magnetron}
+\to
+\text{WR340 / matching}
+\to
+\text{low-loss feed/manifold}
+\to
+\text{local RF Zones}.
 }
-]
+\]
 
 板数：
 
-[
-N=4M+r,quad r=0,1,2,3.
-]
+\[
+N=4M+r,\quad r=0,1,2,3.
+\]
 
 完整 Zone：
 
-[
-A	o B	o C	o D_{m term}.
-]
+\[
+A\to B\to C\to D_{\rm term}.
+\]
 
 80 块：
 
-[
-20	imes4	ext{-board Zone}.
-]
+\[
+20\times4\text{-board Zone}.
+\]
 
 1/2/3 块余数由 partial Zone 完成。
 
@@ -199,56 +199,56 @@ A	o B	o C	o D_{m term}.
 
 低/中板数 current field-aware endpoint：
 
-[
+\[
 P_A:P_B:P_C:P_D
 =
 1:0.6412:0.6412:1.
-]
+\]
 
 6.5 W 平均时：
 
-[
-oxed{
-(7.92, 5.08, 5.08, 7.92) {m W}.
+\[
+\boxed{
+(7.92,\ 5.08,\ 5.08,\ 7.92)\ {\rm W}.
 }
-]
+\]
 
 高板数必须按功率约束自动 flatten。
 
 定义：
 
-[
-q(N)=P_{m inner}/P_{m outer}.
-]
+\[
+q(N)=P_{\rm inner}/P_{\rm outer}.
+\]
 
 V4 采用：
 
-[
-oxed{
+\[
+\boxed{
 q^*(N)=
-minleft[
+\min\left[
 1,
-maxleft(
+\max\left(
 0.6412,
-rac{5}{2ar P(N)-5}
-ight)
-ight].
+\frac{5}{2\bar P(N)-5}
+\right)
+\right].
 }
-]
+\]
 
 于是：
 
-[
-P_{m outer}
+\[
+P_{\rm outer}
 =
-rac{2ar P}{1+q^*},
-]
+\frac{2\bar P}{1+q^*},
+\]
 
-[
-P_{m inner}
+\[
+P_{\rm inner}
 =
-rac{2q^*ar P}{1+q^*}.
-]
+\frac{2q^*\bar P}{1+q^*}.
+\]
 
 代表点：
 
@@ -263,9 +263,9 @@ P_{m inner}
 
 因此整个 1–80 范围解析目标都保持：
 
-[
-5le P_ile8 {m W}
-]
+\[
+5\le P_i\le8\ {\rm W}
+\]
 
 且最大 nominal deviation 约 ±21.9%，低于 ±25%。
 
@@ -275,26 +275,26 @@ P_{m inner}
 
 低/中板数当前 reduced-order 推荐：
 
-[
-mathbf u
-propto
-(1, 0.801e^{-j5.3^circ}, 0.801e^{-j5.3^circ}, 1).
-]
+\[
+\mathbf u
+\propto
+(1,\ 0.801e^{-j5.3^\circ},\ 0.801e^{-j5.3^\circ},\ 1).
+\]
 
 该目标不能对所有 N 冻结。
 
 V4 中：
 
-1. 先由 (N) 得到 (q^*(N))；
+1. 先由 \(N\) 得到 \(q^*(N)\)；
 2. 固定 amplitude ratio；
 3. 在当前工件场景集合上只优化 phase；
 4. 再由 passive network synthesis 反推 line/transformer 参数。
 
 80 板 endpoint：
 
-[
+\[
 q=1,
-]
+\]
 
 允许回到低损耗 near-equal / near-in-phase Zone。
 
@@ -304,33 +304,33 @@ q=1,
 
 每个 Zone 目标 accepted powers 记为：
 
-[
-(e_1,ldots,e_m).
-]
+\[
+(e_1,\ldots,e_m).
+\]
 
 cell transmission：
 
-[
-	au_i=10^{-L_i/10}.
-]
+\[
+\tau_i=10^{-L_i/10}.
+\]
 
 从末端向前：
 
-[
+\[
 P_m=e_m,
-]
+\]
 
-[
-P_i=e_i+rac{P_{i+1}}{	au_i}.
-]
+\[
+P_i=e_i+\frac{P_{i+1}}{\tau_i}.
+\]
 
 所需抽取系数：
 
-[
-oxed{
-kappa_i=e_i/P_i.
+\[
+\boxed{
+\kappa_i=e_i/P_i.
 }
-]
+\]
 
 因此 A/B/C 的 coupling target 必须随：
 
@@ -345,15 +345,15 @@ kappa_i=e_i/P_i.
 当前两个解析端点：
 
 - field-aware endpoint：
-  [
-  kappaapprox(24.76%,24.07%,36.08%);
-  ]
-- equal-power endpoint、(L_s=0.42) dB/cell：
-  [
-  kappaapprox(21.50%,30.17%,47.58%).
-  ]
+  \[
+  \kappa\approx(24.76\%,24.07\%,36.08\%);
+  \]
+- equal-power endpoint、\(L_s=0.42\) dB/cell：
+  \[
+  \kappa\approx(21.50\%,30.17\%,47.58\%).
+  \]
 
-最终值由 full-wave 真实 (	au_i) 更新。
+最终值由 full-wave 真实 \(\tau_i\) 更新。
 
 ---
 
@@ -361,41 +361,41 @@ kappa_i=e_i/P_i.
 
 80 块：
 
-[
-80	imes5=400 {m W}.
-]
+\[
+80\times5=400\ {\rm W}.
+\]
 
 因此：
 
-[
-eta_{m sys}ge80%.
-]
+\[
+\eta_{\rm sys}\ge80\%.
+\]
 
 若 feed + manifold：
 
-[
-eta_{m dist}ge95%,
-]
+\[
+\eta_{\rm dist}\ge95\%,
+\]
 
 则 local Zone 必须：
 
-[
-oxed{
-eta_{m zone}ge84.21%.
+\[
+\boxed{
+\eta_{\rm zone}\ge84.21\%.
 }
-]
+\]
 
-当前旧 (0.42) dB/cell 的等功率 4-board 一阶模型：
+当前旧 \(0.42\) dB/cell 的等功率 4-board 一阶模型：
 
-[
-eta_{m zone}approx85.99%.
-]
+\[
+\eta_{\rm zone}\approx85.99\%.
+\]
 
 所以 V4 允许保留 80 板目标，但把：
 
-[
-oxed{eta_{m zone}ge84.21%}
-]
+\[
+\boxed{\eta_{\rm zone}\ge84.21\%}
+\]
 
 列为正式设计 gate。
 
@@ -437,12 +437,12 @@ eta_{m zone}approx85.99%.
 
 最终 Spiral / Patch 应比较：
 
-- (S_{11})；
+- \(S_{11}\)；
 - useful RF extraction；
 - parasitic loss；
 - loaded workpiece absorption；
 - field uniformity；
-- local (E_{max})；
+- local \(E_{\max}\)；
 - 50×50 mm footprint；
 - magnetic interface sensitivity。
 
@@ -452,9 +452,9 @@ eta_{m zone}approx85.99%.
 
 正式灰板：
 
-[
-oxed{50	imes50 {m mm}}.
-]
+\[
+\boxed{50\times50\ {\rm mm}}.
+\]
 
 当前某些 T-cell seed 的 RF 纵向 envelope 超过 50 mm，因此目前仍是 layout gap。
 
@@ -473,23 +473,23 @@ eta_{m zone}approx85.99%.
 
 当前材料 seed：
 
-- FR4：(arepsilon_rapprox4.3)，(	andeltaapprox0.02)，1.6 mm；
+- FR4：\(\varepsilon_r\approx4.3\)，\(\tan\delta\approx0.02\)，1.6 mm；
 - front PP：当前暂用约 2 mm；
 - rear PP：当前暂用约 6 mm。
 
 PP 会改变：
 
-- (Z(W))；
-- (arepsilon_{m eff})；
+- \(Z(W)\)；
+- \(\varepsilon_{\rm eff}\)；
 - guided wavelength；
 - quarter-wave length；
 - Patch loaded resonance。
 
 当前 quasi-static PP-corrected 50 Ω seed：
 
-[
-oxed{w_{50}approx2.91 {m mm}}.
-]
+\[
+\boxed{w_{50}\approx2.91\ {\rm mm}}.
+\]
 
 正式制造前必须用真实 PP 厚度、装配间隙和 full-wave 重新标定。
 
@@ -499,31 +499,31 @@ PP 会改变：
 
 V4 恢复：
 
-[
-oxed{10 {m kOmega/board}}
-]
+\[
+\boxed{10\ {\rm k\Omega/board}}
+\]
 
 但明确采用独立识别线串联计数，不进入 RF extraction 网络。
 
 建议：
 
-[
-R_{m ID}(N)=10N {m kOmega}.
-]
+\[
+R_{\rm ID}(N)=10N\ {\rm k\Omega}.
+\]
 
 1–80 块：
 
-[
-10 {m kOmega}
-	o
-800 {m kOmega}.
-]
+\[
+10\ {\rm k\Omega}
+\to
+800\ {\rm k\Omega}.
+\]
 
 例如 1 μA 恒流读取：
 
-[
-V_{m ID}=10N {m mV},
-]
+\[
+V_{\rm ID}=10N\ {\rm mV},
+\]
 
 80 块约 0.80 V。
 
@@ -548,11 +548,11 @@ V_{m ID}=10N {m mV},
 
 V4：
 
-[
-oxed{
-	ext{普通FR4 + 100 mm + ≤0.2 dB}
+\[
+\boxed{
+\text{普通FR4 + 100 mm + ≤0.2 dB}
 }
-]
+\]
 
 不作为无条件可执行组合。
 
@@ -623,19 +623,19 @@ V4 将“RG142”和“5 m ≤0.5 dB”拆成两个不能预先同时冻结的�
 
 控制器 nominal law：
 
-[
-oxed{
-P_{m cmd}(N)
+\[
+\boxed{
+P_{\rm cmd}(N)
 =
-minleft[
+\min\left[
 500,
-rac{Nar P(N)}
-{hateta_{m sys}(N)}
-ight].
+\frac{N\bar P(N)}
+{\hat\eta_{\rm sys}(N)}
+\right].
 }
-]
+\]
 
-其中 (hateta_{m sys}(N)) 最终来自：
+其中 \(\hat\eta_{\rm sys}(N)\) 最终来自：
 
 - full-wave S parameters；
 - bridge/cable model；
@@ -654,7 +654,7 @@ minleft[
 2. magnetic contact；
 3. Spiral baseline；
 4. Patch baseline；
-5. loaded radiator (R+jX)；
+5. loaded radiator \(R+jX\)；
 6. bridge/cable S parameters。
 
 ### P1 — Zone
@@ -688,27 +688,27 @@ minleft[
 - nominal power deviation：≤±25%；
 - parasitic loss separately reported；
 - loaded workpiece absorption separately reported；
-- local (E_{max}) separately reported。
+- local \(E_{\max}\) separately reported。
 
 ### 80-board system
 
 必须同时：
 
-[
-oxed{P_{m cmd}le500 {m W}}
-]
+\[
+\boxed{P_{\rm cmd}\le500\ {\rm W}}
+\]
 
-[
-oxed{eta_{m sys}ge80%}
-]
+\[
+\boxed{\eta_{\rm sys}\ge80\%}
+\]
 
-[
-oxed{5le P_ile8 {m W}}
-]
+\[
+\boxed{5\le P_i\le8\ {\rm W}}
+\]
 
-[
-oxed{delta_Ple25%}.
-]
+\[
+\boxed{\delta_P\le25\%}.
+\]
 
 若其中任一项不能满足，80 板不能标记为已通过。
 
@@ -718,44 +718,44 @@ minleft[
 
 V4 把旧的：
 
-[
-	ext{1–100块}
+\[
+\text{1–100块}
 +
-	ext{500 W}
+\text{500 W}
 +
-	ext{5–8 W/块}
-]
+\text{5–8 W/块}
+\]
 
 修订成：
 
-[
-oxed{
-	ext{1–80块}
+\[
+\boxed{
+\text{1–80块}
 +
-	ext{500 W}
+\text{500 W}
 +
-	ext{board-count-adaptive power/taper}
+\text{board-count-adaptive power/taper}
 }
-]
+\]
 
 并形成统一链：
 
-[
-oxed{
+\[
+\boxed{
 N
-	o
-ar P(N)
-	o
+\to
+\bar P(N)
+\to
 q^*(N)
-	o
-kappa_i(N)
-	o
-S	ext{-parameter calibrated Zone}
-	o
-eta_{m sys}
-	o
-P_{m cmd}(N).
+\to
+\kappa_i(N)
+\to
+S\text{-parameter calibrated Zone}
+\to
+\eta_{\rm sys}
+\to
+P_{\rm cmd}(N).
 }
-]
+\]
 
 因此后续 PCB 设计不再围绕单一 A/B/C coupling 数字盲调，而是服务于这个系统级闭环。
