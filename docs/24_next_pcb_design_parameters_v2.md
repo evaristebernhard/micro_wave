@@ -1,4 +1,6 @@
-# 下一版四板 Zone 设计参数 V2
+# 下一版四板 Zone 设计参数 V2（field-aware 可重构/低板数分支）
+
+> **状态修正（V4.1）：本文不再是 1–80 通用无源 PCB 的默认参数。** 固定无源网络不能仅靠源功率变化实现 board-count-adaptive taper；80×5 W endpoint 又强迫 universal passive baseline 为 equal-power。因此本文的 outer-strong taper 与额外 phase sections 只保留给低板数、可切换 coupling/phase、独立外部分配或不同硬件 SKU。通用 baseline 见 `docs/25_1_to_80_closed_power_framework_v1.md` 与 `docs/26_physical_correction_analytic_closure_v1.md`。
 
 > 目的：把已合并的四板解析闭合、loaded-Patch 分层模型和 few-mode 鲁棒场综合，转换成下一版 PCB 可直接使用的设计中心值与理论容差区间。
 >
