@@ -621,6 +621,46 @@ export const fewModeRobustDesignSeed = {
     C: 0.554
   },
   designStatus: "next-design-target-not-manufacturing-freeze",
+  ppCorrectedQuasiStaticSeed: {
+    superstrateParticipationNominal: 0.8,
+    superstrateParticipationBracket: [0.6, 1.0],
+    fiftyOhmWidthMm: 2.91,
+    fiftyOhmWidthBracketMm: [2.85, 2.96],
+    fiftyOhmQuarterWaveMm: 16.23,
+    phaseDegreesPerMm: 5.55,
+    variants: {
+      A: {
+        seriesWidthMm: 3.69,
+        seriesWidthBracketMm: [3.63, 3.75],
+        seriesQuarterWaveMm: 16.12,
+        branchWidthMm: 0.89,
+        branchWidthBracketMm: [0.86, 0.93],
+        branchQuarterWaveMm: 16.63
+      },
+      B: {
+        seriesWidthMm: 3.66,
+        seriesWidthBracketMm: [3.61, 3.72],
+        seriesQuarterWaveMm: 16.13,
+        branchWidthMm: 0.85,
+        branchWidthBracketMm: [0.82, 0.88],
+        branchQuarterWaveMm: 16.64
+      },
+      C: {
+        seriesWidthMm: 4.20,
+        seriesWidthBracketMm: [4.14, 4.26],
+        seriesQuarterWaveMm: 16.07,
+        branchWidthMm: 1.67,
+        branchWidthBracketMm: [1.63, 1.72],
+        branchQuarterWaveMm: 16.44
+      }
+    },
+    equivalent50OhmPhaseSectionMm: {
+      AB: 17.18,
+      BC: 16.22,
+      CD: 15.27
+    },
+    status: "quasi-static-center-before-full-wave-calibration"
+  },
   requiredCalibration: [
     "actual-PP-FR4-impedance-width-map",
     "loaded-patch-R-plus-jX",
