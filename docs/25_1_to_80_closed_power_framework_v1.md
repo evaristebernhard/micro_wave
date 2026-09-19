@@ -1,20 +1,18 @@
-# 1–80 块磁吸天线系统闭合功率理论框架 V1
+# 1–80 块磁吸天线系统闭合功率理论框架 V2
 
-> 状态：用于替代原“1–100 块 + 500 W + 每块 5–8 W”的不自洽口径，并作为后续 PCB / openEMS / HFSS / 系统级级联的统一理论框架。
+> 本文已按 docs/26_physical_correction_analytic_closure_v1.md 修正。
 >
-> 本文不把解析估算写成已经通过全波验证。所有损耗、阻抗和耦合参数最终必须由单板与接口 S 参数校准。
+> 关键修正：纯无源固定 PCB 不能仅靠改变源功率实现 board-count-adaptive taper，因此 1–80 通用硬件改用 **equal accepted RF power baseline**。field-aware outer-strong taper 仅保留为低板数/可重构优化模式。
 
 ---
 
-## 1. 修订后的系统边界
-
-正式支持板数改为
+## 1. 正式系统边界
 
 \[
 \boxed{1\le N\le80}
 \]
 
-代表验收工况：
+代表验收：
 
 \[
 \boxed{N=5,\ 25,\ 80}
@@ -26,91 +24,71 @@
 \boxed{P_{\rm src,max}=500\ {\rm W}}
 \]
 
-单板 RF 有用取能硬区间：
+单板 accepted RF：
 
 \[
-\boxed{5\le P_i\le8\ {\rm W}}
+\boxed{5\le E_i\le8\ {\rm W}}
 \]
 
-组内功率均匀性定义为：
+组内均匀性：
 
 \[
 \boxed{
-\delta_P=
-\max_i\left|
-\frac{P_i}{\bar P}-1
+\max_i
+\left|
+\frac{E_i}{\bar E}-1
 \right|
-\le25\%
+\le25\%.
 }
 \]
 
-其中 \(P_i\) 指板的 useful accepted RF power；工件实际吸收功率 \(P_{\rm abs,workpiece}\) 作为第二层指标单独计算，不能与 RF 取能混为同一量。
-
----
-
-## 2. 为什么上限改为 80
-
-定义端到板的设计有效功率预算：
-
-\[
-P_{\rm useful,budget}=400\ {\rm W}.
-\]
-
-这相当于要求在 500 W 源下，整个 feed + manifold + Zone 系统达到：
-
-\[
-\boxed{\eta_{\rm sys}\ge0.80}.
-\]
-
-于是仅按每块最低 5 W：
-
-\[
-N_{\max}
-=
-\frac{400}{5}
-=
-80.
-\]
-
-因此 80 不是任意修改，而是由
-
-\[
-500\ {\rm W}\times80\%
-\]
-
-的工程预算与
-
-\[
-5\ {\rm W/board}
-\]
-
-硬下限共同给出的系统上界。
-
-如果后续全波/实测证明 \(\eta_{\rm sys}<0.80\)，则三种选择只能三选一：
-
-1. 降低最大板数；
-2. 降低单板最低功率；
-3. 提高源功率上限。
-
----
-
-## 3. 不能再使用 80 块连续 FR4 长链
-
-支持 1–80 块是系统能力，不等于 RF 必须沿一条 4 m 普通 FR4 微带连续通过 80 块。
-
-当前统一架构：
+通用 passive baseline 直接采用：
 
 \[
 \boxed{
-\text{500 W source}
-\to
-\text{low-loss distribution}
-\to
-\text{local RF Zones}
+E_1=E_2=\cdots=E_N=E.
 }
 \]
 
-板数分解：
+因此 nominal power deviation 在理论目标层为 0%，天然满足 ±25%。
+
+---
+
+## 2. 为什么 80 块强迫 equal-power
+
+80 块若每板至少 5 W：
+
+\[
+80\times5=400\ {\rm W}.
+\]
+
+如果 useful RF budget 取 400 W，则所有板必须恰好：
+
+\[
+\boxed{E_i=5\ {\rm W}}.
+\]
+
+任何固定 outer-strong taper 都会使总 useful RF 超过 400 W。
+
+此前低/中板数得到的：
+
+\[
+7.92/5.08/5.08/7.92\ {\rm W}
+\]
+
+平均约 6.5 W。若对 80 块重复：
+
+\[
+80\times6.5=520\ {\rm W},
+\]
+
+因此不能作为 universal passive baseline。
+
+---
+
+## 3. Zone 分解
+
+总板数：
 
 \[
 \boxed{
@@ -119,626 +97,514 @@ r\in\{0,1,2,3\}.
 }
 \]
 
-完整 Zone 为四板：
+完整 Zone：
 
 \[
 A\to B\to C\to D_{\rm term}.
 \]
 
-余数 \(r\) 使用 1/2/3 板 partial Zone，并用同一套 backward power synthesis 求解，不再用“80 块一条 FR4 链”的模型。
-
-80 块对应：
+80 块：
 
 \[
-\boxed{20\text{ 个四板 Zone}}.
+\boxed{20\times4\text{-board Zone}}.
 \]
+
+余数 \(r\) 使用 partial Zone。
+
+系统机械上可以连续磁吸，但 RF 不采用一条 4 m 普通 FR4 长链。
 
 ---
 
-## 4. 板数自适应的平均功率目标
+## 4. loss-aware equal-power synthesis
 
-保留当前低/中板数的 6.5 W/板 nominal 工作点，同时在高板数下自动进入 power-limited mode：
+定义：
+
+\[
+\tau
+=
+10^{-L_{\rm cell}/10}.
+\]
+
+并定义：
 
 \[
 \boxed{
-\bar P(N)
+A_m(\tau)
 =
-\min\left(
-6.5,\;
-\frac{400}{N}
-\right)
-\ {\rm W}.
+\sum_{k=0}^{m-1}\tau^{-k},
+\qquad A_0=0.
 }
 \]
 
-因此：
+一个 m-board Zone 每板目标 E 时：
 
-- \(N\le61\)：\(\bar P=6.5\) W；
-- \(62\le N\le80\)：逐步降到 \(400/N\)；
-- \(N=80\)：\(\bar P=5.0\) W。
+\[
+\boxed{
+P_{\rm zone}^{(m)}
+=
+EA_m.
+}
+\]
 
-代表值：
+完整 N-board 系统所有 local Zone 入口总需求：
 
-| N | \(\bar P(N)\) | useful RF total |
-|---:|---:|---:|
-| 5 | 6.50 W | 32.5 W |
-| 25 | 6.50 W | 162.5 W |
-| 50 | 6.50 W | 325 W |
-| 61 | 6.50 W | 396.5 W |
-| 70 | 5.714 W | 400 W |
-| 75 | 5.333 W | 400 W |
-| 80 | 5.000 W | 400 W |
+\[
+\boxed{
+P_{\rm zones}
+=
+E C_N,
+}
+\]
 
-这使“根据板数智能调节输入功率”有了明确数学定义。
+其中：
+
+\[
+\boxed{
+C_N
+=
+M A_4+A_r.
+}
+\]
 
 ---
 
-## 5. 低板数 field-aware taper 与高板数功率约束必须统一
+## 5. fixed A/B/C/D extraction
 
-当前 few-mode 工件加载模型的低/中板数推荐 power taper 为：
+m-board Zone 中：
 
 \[
-P_A:P_B:P_C:P_D
+P_m=E,
+\]
+
+\[
+P_i
 =
-1:0.6412:0.6412:1.
-\]
-
-在四板平均 6.5 W 时：
-
-\[
-(7.92,\ 5.08,\ 5.08,\ 7.92)\ {\rm W}.
-\]
-
-它满足：
-
-\[
-5\le P_i\le8
-\]
-
-并且相对于四板平均值：
-
-\[
-\frac{7.92}{6.5}-1
-\approx+21.9\%,
-\]
-
-\[
-\frac{5.08}{6.5}-1
-\approx-21.9\%,
+E+\frac{P_{i+1}}{\tau}.
 \]
 
 所以：
 
 \[
-\boxed{\delta_P\approx21.9\%<25\%}.
-\]
-
-问题在于：如果把该 taper 原样缩放到 80 块的 5 W 平均值，内板会低于 5 W。因此高板数必须自动把 taper 压平。
-
----
-
-## 6. 可闭合的板数自适应 taper
-
-定义四板 Zone 的 inner/outer accepted-power ratio：
-
-\[
-q(N)
-=
-\frac{P_B}{P_A}
-=
-\frac{P_C}{P_D},
-\qquad
-0<q\le1.
-\]
-
-当前 field-aware 自由最优中心：
-
-\[
-\boxed{q_0=0.6412}.
-\]
-
-若四板平均功率为 \(\bar P\)，则：
-
-\[
-P_{\rm outer}
-=
-\frac{2\bar P}{1+q},
-\]
-
-\[
-P_{\rm inner}
-=
-\frac{2q\bar P}{1+q}.
-\]
-
-为了保证：
-
-\[
-P_{\rm inner}\ge5\ {\rm W},
-\]
-
-必须：
-
-\[
-q
-\ge
-\frac{5}{2\bar P-5}.
-\]
-
-因此定义：
-
-\[
-\boxed{
-q^*(N)
-=
-\min\left[
-1,\;
-\max\left(
-0.6412,\;
-\frac{5}{2\bar P(N)-5}
-\right)
-\right].
-}
-\]
-
-这就是 1–80 块系统的闭合功率调度律。
-
-相应 Patch amplitude ratio：
-
-\[
-\boxed{\rho(N)=\sqrt{q^*(N)}}.
-\]
-
----
-
-## 7. 该调度律自动满足 5–8 W 与 ±25%
-
-代表工况：
-
-| N | \(\bar P\) | \(q^*\) | amplitude ratio \(\rho\) | outer W | inner W |
-|---:|---:|---:|---:|---:|---:|
-| 5 | 6.500 | 0.6412 | 0.8008 | 7.921 | 5.079 |
-| 25 | 6.500 | 0.6412 | 0.8008 | 7.921 | 5.079 |
-| 50 | 6.500 | 0.6412 | 0.8008 | 7.921 | 5.079 |
-| 61 | 6.500 | 0.6412 | 0.8008 | 7.921 | 5.079 |
-| 62 | 6.452 | 0.6412 | 0.8008 | 7.862 | 5.041 |
-| 70 | 5.714 | 0.7778 | 0.8819 | 6.429 | 5.000 |
-| 75 | 5.333 | 0.8824 | 0.9393 | 5.667 | 5.000 |
-| 80 | 5.000 | 1.0000 | 1.0000 | 5.000 | 5.000 |
-
-因此：
-
-\[
-\boxed{
-5\le P_i\le8\ {\rm W}
-\quad
-\forall\,1\le N\le80
-}
-\]
-
-在该解析目标分配中成立。
-
-同时 \(q\) 只会从 0.6412 向 1 增大，所以 outer/inner 相对均值的最大偏差发生在 \(q=0.6412\)：
-
-\[
-\boxed{\delta_P^{\max}\approx21.9\%<25\%}.
-\]
-
-即 5–8 W 与 ±25% 两个条件第一次被同一个功率调度模型同时闭合。
-
----
-
-## 8. 相位也必须变成 constrained field synthesis
-
-低/中板数当前推荐：
-
-\[
-\mathbf u
-\propto
-(1,\;0.801e^{-j5.3^\circ},\;0.801e^{-j5.3^\circ},\;1).
-\]
-
-高板数由于 \(q(N)\to1\)，不能继续冻结同一复激励。
-
-统一问题写成：
-
-\[
-\boxed{
-\min_{\phi}
-\max_s
-|\Delta_s(q^*(N),\phi)|
-}
-\]
-
-其中 \(s\) 遍历当前 81 个代表工件场景，并保持功率 ratio \(q^*(N)\) 固定。
-
-设计边界：
-
-- 低/中板数：\(q=0.6412\)，当前解 \(\phi\approx-5.3^\circ\)；
-- 80 板：\(q=1\)，可回到 near-equal/in-phase 模式；
-- 中间板数：只做一维 phase 局部优化，不再重新大范围搜索所有几何参数。
-
-当前 few-mode 模型中 equal excitation 的 worst inner/outer imbalance 约 1.79 dB，对应两组相对均值约 ±20.3%，仍低于 ±25% 功率容差，因此 80 板 equal-power endpoint 在 reduced-order 模型中存在理论可行性。
-
----
-
-## 9. 每个 Zone 的 extraction coefficient 不再固定
-
-对一个 Zone，设目标 accepted powers 为：
-
-\[
-(e_1,e_2,\ldots,e_m).
-\]
-
-单 cell 寄生传输系数：
-
-\[
-\tau_i=10^{-L_i/10}.
-\]
-
-从 terminal board 向前递推：
-
-\[
-P_m=e_m,
-\]
-
-\[
-\boxed{
 P_i
 =
-e_i+\frac{P_{i+1}}{\tau_i}
-}
-\qquad(i=m-1,\ldots,1).
+EA_{m-i+1}.
 \]
 
-于是第 \(i\) 块所需 extraction：
+于是：
 
 \[
 \boxed{
 \kappa_i
 =
-\frac{e_i}{P_i}.
+\frac1{A_{m-i+1}}.
 }
 \]
 
-因此 A/B/C 的 \(\kappa\) 不是永远固定为同一组数字，而应随：
+因此 κ 与绝对 E 无关。
 
-- \(N\)；
-- \(q^*(N)\)；
-- 实测/全波 \(\tau_i\)；
-- phase-section loss；
-- 磁吸接口 loss；
-
-重新反解。
-
-两个重要端点：
-
-### 低/中板数 field-aware endpoint
-
-当前解析 seed：
+对：
 
 \[
-(\kappa_A,\kappa_B,\kappa_C)
-\approx
-(24.76\%,24.07\%,36.08\%).
+L_{\rm cell}=0.42\ {\rm dB},
 \]
 
-### 80 板 equal-power endpoint
-
-若使用旧的一阶：
-
-\[
-L_s=0.42\ {\rm dB/cell},
-\]
-
-则等功率四板 Zone 约：
-
-\[
-(\kappa_A,\kappa_B,\kappa_C)
-\approx
-(21.50\%,30.17\%,47.58\%).
-\]
-
-最终铜结构应支持这两个端点之间的 constrained synthesis，而不是只围绕单一 coupling dB 优化。
-
----
-
-## 10. 80 板的效率闭合条件
-
-系统总效率：
+得到：
 
 \[
 \boxed{
-\eta_{\rm sys}
-=
-\eta_{\rm feed}
-\eta_{\rm manifold}
-\eta_{\rm zone}.
+\kappa_A=21.498\%,
 }
 \]
 
-要实现 80 块 × 5 W：
-
 \[
-P_{\rm useful}=400\ {\rm W}.
+\boxed{
+\kappa_B=30.167\%,
+}
 \]
 
-500 W 源要求：
-
 \[
-\boxed{\eta_{\rm sys}\ge0.80}.
+\boxed{
+\kappa_C=47.584\%.
+}
 \]
 
-如果把上游 feed + manifold 设计目标冻结为：
+D 为 terminal。
+
+这组参数重新作为 universal equal-power passive seed。
+
+---
+
+## 6. upstream loss
+
+定义 worst-path upstream insertion loss：
 
 \[
-\boxed{\eta_{\rm dist}\ge0.95},
-\]
-
-则四板 Zone 必须：
-
-\[
-\eta_{\rm zone}
-\ge
-\frac{0.80}{0.95}
+L_{\rm up}
 =
-0.8421.
+L_{\rm cable}
++
+L_{\rm adapter}
++
+L_{\rm manifold}
++
+L_{\rm bridge}
++
+L_{\rm connector}.
 \]
 
-即：
-
 \[
-\boxed{\eta_{\rm zone}\ge84.21\%}.
-\]
-
-当前旧 0.42 dB/cell 的等功率四板解析模型给出：
-
-\[
-\eta_{\rm zone}\approx85.99\%.
+\eta_{\rm up}
+=
+10^{-L_{\rm up}/10}.
 \]
 
 因此：
 
 \[
-0.95\times0.8599
-\approx81.69\%
->
-80\%.
-\]
-
-这说明 80 板方案在当前一阶模型中存在约 1.7 个百分点的总效率理论余量。
-
-但这是一个很窄的 margin，所以：
-
-\[
 \boxed{
-\eta_{\rm zone}\ge84.21\%
+P_{\rm src}(N,E)
+=
+E C_N
+10^{L_{\rm up}/10}.
 }
 \]
 
-必须作为 80 板设计 gate，由 full-wave + 接口模型确认。
-
-当前带较长 phase section 的 field-aware nominal Zone：
+给定 500 W 后：
 
 \[
-26/31.99\approx81.3\%
+\boxed{
+E_{\max}(N)
+=
+\frac{
+500\,10^{-L_{\rm up}/10}
+}{
+C_N
+}.
+}
 \]
 
-不满足 80 板高功率模式的 Zone efficiency gate，因此高板数时必须同步：
+实际控制目标：
 
-- flatten power taper；
-- 减少不必要 phase-line loss；
-- 或采用更低损耗材料/更短路径。
+\[
+\boxed{
+E_{\rm cmd}(N)
+=
+\min
+\left(
+6.5,\,
+E_{\max}(N)
+\right)
+}
+\]
 
-这正是为什么“只改最大板数”还不够，必须把功率模式与 RF topology 一起调度。
+并必须满足：
+
+\[
+\boxed{
+E_{\rm cmd}(N)\ge5.
+}
+\]
 
 ---
 
-## 11. 源功率控制律
+## 7. 80-board exact closure
 
-控制器不应只使用：
+80 块：
 
 \[
-P_{\rm src}=N\times6.5.
+C_{80}=20A_4.
 \]
 
-应使用：
+5 W/板要求：
+
+\[
+5C_{80}
+10^{L_{\rm up}/10}
+\le500.
+\]
+
+等价于：
 
 \[
 \boxed{
-P_{\rm cmd}(N)
-=
-\min\left[
-500,\;
-\frac{N\bar P(N)}
-{\hat\eta_{\rm sys}(N)}
-\right].
+\eta_4\eta_{\rm up}\ge0.80,
 }
 \]
 
-其中 \(\hat\eta_{\rm sys}(N)\) 来自：
-
-1. 单板/Zone full-wave；
-2. bridge/cable S 参数；
-3. reflected-power 监测；
-4. 最终样机标定 LUT。
-
-若初始使用：
+其中：
 
 \[
-\hat\eta_{\rm sys}=0.80,
+\eta_4
+=
+\frac4{A_4}.
+\]
+
+定义：
+
+\[
+L_{\rm zone}
+=
+-10\log_{10}\eta_4.
 \]
 
 则：
 
-| N | nominal source command |
-|---:|---:|
-| 5 | 40.6 W |
-| 25 | 203.1 W |
-| 50 | 406.3 W |
-| 61 | 495.6 W |
-| 62–80 | 500 W power-limited mode |
-
-实际控制值必须按实测效率修正，不能把该表直接作为量产开环表。
-
----
-
-## 12. 任意 1–80 块的 partial Zone
-
-对：
-
-\[
-N=4M+r
-\]
-
-中的余数 \(r=1,2,3\)，不需要再定义新的系统理论。
-
-直接对最后一个 partial Zone 使用第 9 节 backward recursion：
-
-\[
-(e_1,\ldots,e_r)
-\rightarrow
-(P_1,\ldots,P_r)
-\rightarrow
-(\kappa_1,\ldots,\kappa_{r-1}).
-\]
-
-最后一块始终作为 terminal radiator。
-
-因此系统对每一个整数：
-
-\[
-\boxed{N=1,2,\ldots,80}
-\]
-
-都有确定的功率综合路径，而不是只对 5/25/80 三个点有效。
-
----
-
-## 13. 必须由 full-wave / 实测闭合的物理修正量
-
-理论框架已经闭合，但以下量仍是模型参数，不是已验证常数：
-
 \[
 \boxed{
-\tau_{\rm line},
-\;
-S_{\rm contact},
-\;
-S_{\rm bridge},
-\;
-Z_{\rm patch,loaded},
-\;
-\beta_{\rm actual},
-\;
-\eta_{\rm load}
+L_{\rm zone}
++
+L_{\rm up}
+\le0.9691\ {\rm dB}.
 }
 \]
 
-具体包括：
-
-1. PP + FR4 实际 \(Z(W)\)；
-2. PP + FR4 actual phase/mm；
-3. 50 mm cell 的真实 dissipative loss；
-4. 磁吸触点复数 S 参数；
-5. 平面桥、直角桥复数 S 参数；
-6. loaded Patch / Spiral 的 \(R+jX\)；
-7. 工件 \(\varepsilon_r',\tan\delta,t,g_{\rm air}\)；
-8. mutual coupling 与 vector polarization。
-
-这些量进入模型后，只更新 \(\tau_i\)、\(\kappa_i\)、phase 与 \(\eta_{\rm sys}\)，不需要推翻整个 1–80 理论架构。
+这是 80-board 的最终理论 gate。
 
 ---
 
-## 14. 下一轮验证顺序
+## 8. loss trade-off
 
-严格按：
+| \(L_{\rm cell}\) | \(\eta_4\) | 允许的 \(L_{\rm up,max}\) |
+|---:|---:|---:|
+| 0.30 dB | 89.89% | 0.506 dB |
+| 0.32 dB | 89.23% | 0.474 dB |
+| 0.35 dB | 88.25% | 0.426 dB |
+| 0.36 dB | 87.93% | 0.410 dB |
+| 0.38 dB | 87.28% | 0.378 dB |
+| 0.40 dB | 86.64% | 0.346 dB |
+| 0.42 dB | 85.99% | 0.314 dB |
+
+小损耗近似：
 
 \[
 \boxed{
-\text{through-line}
-\to
-\text{magnetic interface}
-\to
-\text{single radiator}
-\to
-\text{single T-cell}
-\to
-\text{4-board Zone}
-\to
-\text{5/25/80 network cascade}
+L_{\rm zone}
+\approx1.5L_{\rm cell}.
 }
 \]
 
-验收 gate：
+所以：
 
-### Gate A — 单 cell
-
-- 2.40–2.50 GHz 匹配；
-- \(Z(W)\)；
-- phase/mm；
-- dissipative loss。
-
-### Gate B — 4-board Zone
-
-- 5–8 W/板目标；
-- \(\delta_P\le25\%\)；
-- \(\eta_{\rm zone}\ge84.21\%\) for 80-board mode；
-- loaded field / absorption。
-
-### Gate C — 系统
-
-- \(N=5\)；
-- \(N=25\)；
-- \(N=80\)；
-- \(\eta_{\rm sys}\ge80\%\) at N=80；
-- source command ≤500 W。
-
-若 Gate B 的 84.21% 无法满足，则不能继续声称 80×5 W 已闭合，应回到材料、phase-path 或 Zone topology 修改。
+\[
+\boxed{
+L_{\rm up}
++
+1.5L_{\rm cell}
+\lesssim0.969\ {\rm dB}.
+}
+\]
 
 ---
 
-## 15. 当前结论
+## 9. 当前 0.42 dB/cell 下的 5 / 25 / 80
 
-修订后的核心不是简单：
+取：
 
 \[
-100\to80.
+L_{\rm cell}=0.42\ {\rm dB}
 \]
 
-而是形成下面完整闭环：
+且先取：
+
+\[
+L_{\rm up}=0.30\ {\rm dB}.
+\]
+
+则：
+
+### N=5
+
+\[
+C_5
+=
+A_4+A_1
+=
+5.6515.
+\]
+
+6.5 W/板：
+
+\[
+P_{\rm src}
+\approx39.4\ {\rm W}.
+\]
+
+### N=25
+
+\[
+C_{25}
+=
+6A_4+A_1
+\approx28.909.
+\]
+
+6.5 W/板：
+
+\[
+P_{\rm src}
+\approx201.3\ {\rm W}.
+\]
+
+### N=80
+
+\[
+C_{80}
+=
+20A_4
+\approx93.030.
+\]
+
+此时：
+
+\[
+E_{\max}
+\approx5.016\ {\rm W}.
+\]
+
+所以 80-board 可以达到约：
+
+\[
+5.0\ {\rm W/board}
+\]
+
+但 margin 很小。
+
+若：
+
+\[
+L_{\rm up}=0.314\ {\rm dB},
+\]
+
+则 80×5 W 基本刚好触及 500 W。
+
+---
+
+## 10. 5 m ≤0.5 dB 的重新判断
+
+如果线缆本身已经：
+
+\[
+0.5\ {\rm dB},
+\]
+
+则：
+
+\[
+L_{\rm up}\ge0.5\ {\rm dB}.
+\]
+
+当前 \(L_{\rm cell}=0.42\) dB 允许的上游总损耗只有：
+
+\[
+0.314\ {\rm dB}.
+\]
+
+所以：
 
 \[
 \boxed{
-N
-\to
-\bar P(N)
-\to
-q^*(N)
-\to
-\mathbf e(N)
-\to
-\kappa_i(N)
-\to
-S_i
-\to
-\eta_{\rm zone}
-\to
-\eta_{\rm sys}
-\to
-P_{\rm cmd}(N)
+0.42\ {\rm dB/cell}
++
+0.5\ {\rm dB upstream}
 }
 \]
 
-在解析层面：
+不能支持 80×5 W。
 
-- 正式板数：1–80；
-- 5/25/80 为代表验收点；
-- 每板 5–8 W；
-- 最大相对均值偏差约 21.9%，小于 ±25%；
-- 80 板时自动退化为 5/5/5/5 W equal-power Zone；
-- 80 板需要 \(\eta_{\rm sys}\ge80\%\)；
-- 若 upstream efficiency =95%，则 Zone 必须 \(\eta_{\rm zone}\ge84.21\%\)；
-- 当前 0.42 dB/cell 一阶 equal-power Zone 给出约 85.99%，因此理论上可闭合，但 margin 很小，必须 full-wave 验证。
+若 upstream 已经 0.5 dB，则要使 80-board 勉强闭合：
 
-这套关系作为后续所有 PCB 参数设计、openEMS/HFSS 和系统控制的统一理论骨架。
+\[
+\boxed{
+L_{\rm cell}\lesssim0.304\ {\rm dB}.
+}
+\]
+
+实际还要给 adapter/manifold/bridge 留余量，因此设计目标应更低。
+
+---
+
+## 11. universal baseline 与 optional field-aware mode
+
+### Universal passive mode
+
+目标：
+
+\[
+\boxed{
+E_A=E_B=E_C=E_D.
+}
+\]
+
+优先级：
+
+1. loss；
+2. equal-power extraction；
+3. loaded match；
+4. heating efficiency；
+5. field shaping。
+
+### Optional field-aware mode
+
+此前：
+
+\[
+\mathbf u
+\propto
+(1,0.801e^{-j5.3^\circ},0.801e^{-j5.3^\circ},1)
+\]
+
+继续保留，但只能用于：
+
+- 低板数；
+- 独立外部分配；
+- 可切换 coupling；
+- 可切换 phase network；
+- 或不同 hardware SKU。
+
+不能把它写成 1–80 同一无源 PCB 的唯一默认结构。
+
+---
+
+## 12. full-wave 只需要校准的量
+
+理论架构固定后，仿真只需要给出：
+
+\[
+L_{\rm cell}(f),
+\]
+
+\[
+S_{\rm contact}(f),
+\]
+
+\[
+S_{\rm bridge}(f),
+\]
+
+\[
+\beta(f),
+\]
+
+\[
+Z_{\rm loaded}(f),
+\]
+
+以及：
+
+\[
+\eta_{\rm work}.
+\]
+
+代入本文公式即可得到：
+
+\[
+\kappa_i,
+\quad
+E_{\max}(N),
+\quad
+P_{\rm src}(N),
+\quad
+N_{\max}.
+\]
+
+详细物理闭合见 docs/26_physical_correction_analytic_closure_v1.md。
