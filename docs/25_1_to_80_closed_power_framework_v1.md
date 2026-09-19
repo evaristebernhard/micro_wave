@@ -523,6 +523,70 @@ L_{\rm cell}\lesssim0.304\ {\rm dB}.
 
 ---
 
+### 10.1 当前 0.42 dB/cell + 0.5 dB upstream 时的最大板数
+
+在每板最低：
+
+\[
+E=5\ {\rm W}
+\]
+
+条件下，逐个整数 \(N\) 检查：
+
+\[
+5 C_N 10^{0.5/10}\le500.
+\]
+
+得到：
+
+\[
+\boxed{
+N_{\max}=76.
+}
+\]
+
+其中 76 块约需要：
+
+\[
+P_{\rm src}\approx495.8\ {\rm W},
+\]
+
+而 77 块已约：
+
+\[
+501.4\ {\rm W}.
+\]
+
+所以如果最终实测仍是：
+
+\[
+L_{\rm cell}\approx0.42\ {\rm dB}
+\]
+
+且 worst-path upstream loss 确实约：
+
+\[
+0.5\ {\rm dB},
+\]
+
+那么最大板数应物理修正为约 76，而不是继续声明 80。
+
+80 只有在：
+
+\[
+L_{\rm cell}
+\]
+
+或：
+
+\[
+L_{\rm up}
+\]
+
+进一步下降后才重新成立。
+
+---
+
 ## 11. universal baseline 与 optional field-aware mode
 
 ### Universal passive mode
