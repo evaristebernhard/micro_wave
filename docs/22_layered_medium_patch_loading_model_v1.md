@@ -809,3 +809,155 @@ k_y\approx0,
 8. 四板相位最终应由 layered-medium field target 决定，+90° 只保留为 comparison mode。
 
 这套模型提供了下一轮理论设计与最终全波模型之间的明确接口。
+
+
+---
+
+## 17. dominant-mode 归一化加载的一个数值例子
+
+为了把上面的解析结构变成可直接判断量级的设计工具，取代表工件：
+
+\[
+\varepsilon_r'=10,
+\qquad
+\tan\delta=0.2,
+\]
+
+并仍采用：
+
+\[
+k_t\approx103.7\ \mathrm{m^{-1}}.
+\]
+
+使用第 8 节的 TM 分层阻抗递推，并把 modal impedance 用自由空间阻抗归一化。无工件时，2 mm PP + air half-space 的 dominant-mode 归一化导纳约为：
+
+\[
+y_{\mathrm{baseline}}
+\approx
+0.00015+j0.75695.
+\]
+
+加入半无限工件后得到：
+
+| air gap | \(y_{\mathrm{stack}}\) | \(\Delta G_{\mathrm{work}}\) | \(\Delta B_{\mathrm{work}}\) |
+|---:|---:|---:|---:|
+| 0 mm | \(3.627+j1.387\) | 3.627 | +0.630 |
+| 5 mm | \(0.269+j1.337\) | 0.269 | +0.580 |
+| 10 mm | \(0.0634+j0.944\) | 0.0633 | +0.187 |
+| 20 mm | \(0.00818+j0.784\) | 0.00803 | +0.0274 |
+
+这里的数值是“单一 TM10 空间谐波的归一化 spectral admittance”，不是完整 Patch 端口的绝对西门子值；从 aperture spectrum 映射到真实端口还需要 modal coupling factor。
+
+但趋势非常明确：
+
+\[
+\boxed{
+g_{\mathrm{air}}
+\text{ 从 5 mm 增到 20 mm 时，}
+G_{\mathrm{work}}
+\text{ 可下降超过一个数量级。}
+}
+\]
+
+同时：
+
+\[
+B_{\mathrm{work}}
+\]
+
+也快速下降，所以 gap 会同时改变：
+
+- useful coupling；
+- resonance detuning；
+- loaded impedance。
+
+因此下一版参数设计中，工件 gap 必须在 Patch 长宽微调之前先冻结一个典型工作区间。
+
+---
+
+## 18. \(\tan\delta\) 更直接控制进入工件后的吸收深度
+
+对：
+
+\[
+k_{z,w}
+=
+\beta_z-j\alpha_w,
+\]
+
+若采用 \(e^{j\omega t}\) 相量并沿 +z 传播，则场幅衰减：
+
+\[
+|E(z)|\propto e^{-\alpha_w z},
+\]
+
+功率尺度衰减：
+
+\[
+P(z)\propto e^{-2\alpha_w z}.
+\]
+
+定义：
+
+\[
+L_{\mathrm{amp}}=\frac1{\alpha_w},
+\qquad
+L_{\mathrm{power}}=\frac1{2\alpha_w}.
+\]
+
+对代表参数可得到：
+
+| \(\varepsilon_r'\) | \(\tan\delta\) | power \(1/e\) depth |
+|---:|---:|---:|
+| 5 | 0.1 | 38.7 mm |
+| 5 | 0.2 | 20.8 mm |
+| 5 | 0.4 | 12.2 mm |
+| 10 | 0.1 | 47.6 mm |
+| 10 | 0.2 | 24.0 mm |
+| 10 | 0.4 | 12.4 mm |
+| 20 | 0.1 | 38.9 mm |
+| 20 | 0.2 | 19.6 mm |
+| 20 | 0.4 | 10.0 mm |
+
+所以：
+
+\[
+\boxed{
+\text{gap 主要控制“有多少近场能量能进入工件”，}
+}
+\]
+
+而：
+
+\[
+\boxed{
+\tan\delta
+\text{ 很大程度控制“进入以后在多深的范围内变成热”。}
+}
+\]
+
+这两种效应不能混成同一个“加热效率”参数。
+
+对有限厚度 \(t_w\)，如果忽略背面反射，进入工件后的单程吸收比例一阶为：
+
+\[
+\boxed{
+A_w
+\approx
+1-e^{-2\alpha_w t_w}.
+}
+\]
+
+因此最终有用功率应至少拆成：
+
+\[
+\boxed{
+P_{\mathrm{heat}}
+\approx
+P_{\mathrm{launched\ into\ work}}
+\times
+A_w.
+}
+\]
+
+这进一步说明真实工件厚度也是与 \(\varepsilon'\)、\(\tan\delta\)、gap 同等级的输入参数。
