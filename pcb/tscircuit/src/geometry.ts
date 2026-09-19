@@ -510,3 +510,122 @@ export const tCellRobustnessGate = {
   },
   decision: "prefer-tcell-if-loaded-patch-reflection-is-small"
 } as const
+
+
+/**
+ * Field-aware four-board design seed from the few-mode layered spectral model.
+ *
+ * This does not replace the current physical copper geometry yet. It is the
+ * next-design target set derived in docs/23_few_mode_robust_field_synthesis_v1.md.
+ * Widths/lengths below are electrical or bare-FR4 seeds and must be remapped
+ * against the real PP+FR4 stack before manufacturing freeze.
+ */
+export const fewModeRobustDesignSeed = {
+  model: "layered-few-mode-mirror-even",
+  centerFrequencyGHz: 2.45,
+  representativeScenarioSet: {
+    workpieceEpsilonReal: [5, 10, 20],
+    workpieceLossTangent: [0.1, 0.2, 0.4],
+    airGapMm: [5, 10, 20],
+    workpieceDepthMm: [10, 20, 40],
+    scenarioCount: 81
+  },
+  spectralModel: {
+    kxMaxPerM: 400,
+    recommendedModeCount: 20,
+    convergenceCheckedModeCounts: [20, 24, 30],
+    dominantKyPerM: 103.68
+  },
+  robustMinimax: {
+    innerOuterAmplitudeRatio: 0.799,
+    innerPhaseDegRelativeToOuter: -16.2,
+    worstInnerOuterImbalanceDb: 0.715
+  },
+  recommendedPareto: {
+    innerOuterAmplitudeRatio: 0.801,
+    innerPhaseDegRelativeToOuter: -5.30,
+    worstInnerOuterImbalanceDb: 0.75,
+    averageAbsorbedFieldSurrogateRelativeToEqual: 0.969,
+    minimumAbsorbedFieldSurrogateRelativeToEqual: 0.954
+  },
+  targetPatchAmplitude: {
+    A: 1.0,
+    B: 0.801,
+    C: 0.801,
+    D: 1.0
+  },
+  targetPatchPhaseDeg: {
+    A: 0.0,
+    B: -5.30,
+    C: -5.30,
+    D: 0.0
+  },
+  targetAcceptedPowerRelative: {
+    A: 1.0,
+    B: 0.6412,
+    C: 0.6412,
+    D: 1.0
+  },
+  nominalAcceptedPowerWAt6p5WMean: {
+    A: 7.92,
+    B: 5.08,
+    C: 5.08,
+    D: 7.92
+  },
+  nominalZoneInputPowerW: 31.99,
+  targetExtraction: {
+    A: {
+      k: 0.2476,
+      couplingDb: 6.06,
+      seriesTransformerOhm: 43.37,
+      branchTransformerOhm: 87.16,
+      bareFr4SeriesWidthMm: 3.92,
+      bareFr4SeriesQuarterWaveMm: 16.75,
+      bareFr4BranchWidthMm: 1.04,
+      bareFr4BranchQuarterWaveMm: 17.59
+    },
+    B: {
+      k: 0.2407,
+      couplingDb: 6.19,
+      seriesTransformerOhm: 43.57,
+      branchTransformerOhm: 88.81,
+      bareFr4SeriesWidthMm: 3.89,
+      bareFr4SeriesQuarterWaveMm: 16.76,
+      bareFr4BranchWidthMm: 0.99,
+      bareFr4BranchQuarterWaveMm: 17.61
+    },
+    C: {
+      k: 0.3608,
+      couplingDb: 4.43,
+      seriesTransformerOhm: 39.98,
+      branchTransformerOhm: 66.55,
+      bareFr4SeriesWidthMm: 4.43,
+      bareFr4SeriesQuarterWaveMm: 16.66,
+      bareFr4BranchWidthMm: 1.86,
+      bareFr4BranchQuarterWaveMm: 17.27
+    }
+  },
+  targetPatchPhaseIncrementDeg: {
+    AB: -5.30,
+    BC: 0.0,
+    CD: 5.30
+  },
+  equivalent50OhmPhaseSectionMm: {
+    AB: 17.97,
+    BC: 16.97,
+    CD: 15.97
+  },
+  estimatedCellLossDbWithPhaseSection: {
+    A: 0.571,
+    B: 0.563,
+    C: 0.554
+  },
+  designStatus: "next-design-target-not-manufacturing-freeze",
+  requiredCalibration: [
+    "actual-PP-FR4-impedance-width-map",
+    "loaded-patch-R-plus-jX",
+    "actual-guided-phase-per-mm",
+    "magnetic-interface-phase-and-loss",
+    "full-vector-mutual-coupling"
+  ]
+} as const
