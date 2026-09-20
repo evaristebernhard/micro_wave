@@ -75,7 +75,7 @@ def add_sheet_route(prop, a, b, width, z=0.0, priority=20):
     px, py = stroke_polygon(a, b, width)
     prop.AddPolygon(
         points=[px, py],
-        norm_dir="z",
+        norm_dir=2,
         elevation=z,
         priority=priority,
     )
