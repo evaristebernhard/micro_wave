@@ -363,6 +363,23 @@ def analyze(ports, sim_path: Path, freq, dut: str):
 
 def run(args):
     out_dir = args.out.resolve()
+
+    # Do not allow T-cell tuning on an unvalidated measurement fixture.
+    # XML-only remains available for geometry inspection, and --force is an
+    # explicit debugging escape hatch.
+    if args.dut == "tcell" and not args.force and not args.xml_only:
+        thru_summary = out_dir / f"thru_{args.profile}_summary.json"
+        if not thru_summary.exists():
+            raise SystemExit(
+                f"missing {thru_summary}; run the matching thru coupon first "
+                "or use --force for debugging"
+            )
+        thru = json.loads(thru_summary.read_text(encoding="utf-8"))
+        if not thru.get("fixture_valid", False):
+            raise SystemExit(
+                f"thru fixture is not valid for profile={args.profile}: {thru_summary}"
+            )
+
     sim_path = out_dir / f"{args.dut}_{args.profile}"
     if sim_path.exists() and not args.post_only:
         shutil.rmtree(sim_path)
@@ -460,6 +477,11 @@ def main():
     parser.add_argument("--threads", type=int, default=4)
     parser.add_argument("--post-only", action="store_true")
     parser.add_argument("--xml-only", action="store_true")
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="allow a T-cell run even if the matching thru fixture has not passed",
+    )
     args = parser.parse_args()
     run(args)
 
