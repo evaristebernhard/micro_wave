@@ -1,247 +1,158 @@
 import geom from "./connection-hardware-geometry.json"
 
 const mm = (v: number) => `${v}mm`
-type P = { x: number; y: number }
 
-const strokePolyline = (points: P[], width: number): P[] => {
-  const half = width / 2
-  const normals = points.slice(0, -1).map((p, i) => {
-    const q = points[i + 1]
-    const dx = q.x - p.x
-    const dy = q.y - p.y
-    const len = Math.hypot(dx, dy)
-    return { x: -dy / len, y: dx / len }
-  })
+export const CornerBridgeBoard = () => {
+  const L = geom.cornerBridge.legLengthMm
+  const W = geom.cornerBridge.legWidthMm
+  const xOuter = -L / 2 + geom.cornerBridge.outerContactOffsetFromEdgeMm
+  const xJoint = L / 2 - geom.cornerBridge.outerContactOffsetFromEdgeMm
+  const signalY = 0
+  const groundY = -6
+  const idY = -11.5
 
-  const offset = (i: number, side: 1 | -1): P => {
-    const p = points[i]
-    if (i === 0) {
-      const n = normals[0]
-      return { x: p.x + side * half * n.x, y: p.y + side * half * n.y }
-    }
-    if (i === points.length - 1) {
-      const n = normals[normals.length - 1]
-      return { x: p.x + side * half * n.x, y: p.y + side * half * n.y }
-    }
-    const n0 = normals[i - 1]
-    const n1 = normals[i]
-    const sx = n0.x + n1.x
-    const sy = n0.y + n1.y
-    const sl = Math.hypot(sx, sy)
-    const mx = sx / sl
-    const my = sy / sl
-    const denom = Math.max(Math.abs(mx * n0.x + my * n0.y), 0.25)
-    return {
-      x: p.x + side * half * mx / denom,
-      y: p.y + side * half * my / denom
-    }
-  }
+  return (
+    <board
+      title="2.45 GHz 90-degree bridge leg - fabricate QTY 2"
+      width={mm(L)}
+      height={mm(W)}
+      material="fr4"
+      layers={2}
+      thickness={mm(geom.stackup.fr4ThicknessMm)}
+      routeRemaining={false}
+      schematicDisabled
+    >
+      <net name="GND" />
 
-  const left = points.map((_, i) => offset(i, 1))
-  const right = points.map((_, i) => offset(i, -1)).reverse()
-  return [...left, ...right]
+      <copperpour
+        name="GND_PLANE"
+        connectsTo="net.GND"
+        layer="bottom"
+        boardEdgeMargin={mm(geom.rf.boardEdgeGroundMarginMm)}
+        clearance="0.15mm"
+      />
+
+      <testpoint
+        name="TP_RF_OUTER"
+        footprintVariant="pad"
+        padShape="rect"
+        width={mm(geom.interface.signalPadWidthMm)}
+        height={mm(geom.interface.signalPadHeightMm)}
+        pcbX={mm(xOuter)}
+        pcbY={mm(signalY)}
+      />
+      <testpoint
+        name="TP_RF_JOINT"
+        footprintVariant="pad"
+        padShape="rect"
+        width={mm(geom.interface.signalPadWidthMm)}
+        height={mm(geom.interface.signalPadHeightMm)}
+        pcbX={mm(xJoint)}
+        pcbY={mm(signalY)}
+      />
+      <trace
+        name="TR_RF"
+        from=".TP_RF_OUTER > .pin1"
+        to=".TP_RF_JOINT > .pin1"
+        pcbPath={["TP_RF_OUTER.pin1", "TP_RF_JOINT.pin1"]}
+        width={mm(geom.rf.calibratedTraceWidthMm)}
+      />
+
+      <testpoint
+        name="TP_GND_OUTER"
+        footprintVariant="pad"
+        padShape="rect"
+        width={mm(geom.interface.groundPadWidthMm)}
+        height={mm(geom.interface.groundPadHeightMm)}
+        pcbX={mm(xOuter)}
+        pcbY={mm(groundY)}
+        connections={{ pin1: "net.GND" }}
+      />
+      <testpoint
+        name="TP_GND_JOINT"
+        footprintVariant="pad"
+        padShape="rect"
+        width={mm(geom.interface.groundPadWidthMm)}
+        height={mm(geom.interface.groundPadHeightMm)}
+        pcbX={mm(xJoint)}
+        pcbY={mm(groundY)}
+        connections={{ pin1: "net.GND" }}
+      />
+
+      {geom.interface.viaXOffsetsMm.map((dx, i) => (
+        <via
+          key={`outer-${i}`}
+          name={`V_GND_OUTER_${i + 1}`}
+          pcbX={mm(xOuter + dx)}
+          pcbY={mm(groundY)}
+          fromLayer="top"
+          toLayer="bottom"
+          holeDiameter={mm(geom.interface.viaHoleDiameterMm)}
+          outerDiameter={mm(geom.interface.viaOuterDiameterMm)}
+          connectsTo="net.GND"
+        />
+      ))}
+      {geom.interface.viaXOffsetsMm.map((dx, i) => (
+        <via
+          key={`joint-${i}`}
+          name={`V_GND_JOINT_${i + 1}`}
+          pcbX={mm(xJoint + dx)}
+          pcbY={mm(groundY)}
+          fromLayer="top"
+          toLayer="bottom"
+          holeDiameter={mm(geom.interface.viaHoleDiameterMm)}
+          outerDiameter={mm(geom.interface.viaOuterDiameterMm)}
+          connectsTo="net.GND"
+        />
+      ))}
+
+      <testpoint
+        name="TP_ID_OUTER"
+        footprintVariant="pad"
+        padShape="rect"
+        width={mm(geom.interface.idPadWidthMm)}
+        height={mm(geom.interface.idPadHeightMm)}
+        pcbX={mm(xOuter)}
+        pcbY={mm(idY)}
+      />
+      <testpoint
+        name="TP_ID_JOINT"
+        footprintVariant="pad"
+        padShape="rect"
+        width={mm(geom.interface.idPadWidthMm)}
+        height={mm(geom.interface.idPadHeightMm)}
+        pcbX={mm(xJoint)}
+        pcbY={mm(idY)}
+      />
+      <trace
+        name="TR_ID"
+        from=".TP_ID_OUTER > .pin1"
+        to=".TP_ID_JOINT > .pin1"
+        pcbPath={["TP_ID_OUTER.pin1", "TP_ID_JOINT.pin1"]}
+        width={mm(geom.rf.idTraceWidthMm)}
+      />
+
+      <silkscreenrect pcbX={mm(xOuter)} pcbY="7mm" width="5mm" height="5mm" filled={false} stroke="solid" strokeWidth="0.18mm" />
+      <silkscreenrect pcbX={mm(xOuter)} pcbY="12mm" width="5mm" height="5mm" filled={false} stroke="solid" strokeWidth="0.18mm" />
+
+      <silkscreentext pcbX="0mm" pcbY="12.8mm" text="90deg BRIDGE LEG / FAB QTY 2" fontSize="0.60mm" />
+      <silkscreentext pcbX="0mm" pcbY="10.4mm" text="RF 50R + GND + ID / ORTHOGONAL ASSEMBLY" fontSize="0.42mm" />
+      <silkscreentext pcbX={mm(xJoint - 4)} pcbY="3.3mm" text="JOINT" fontSize="0.45mm" />
+
+      <fabricationnotedimension
+        from={{ x: -L / 2, y: W / 2 - 1 }}
+        to={{ x: L / 2, y: W / 2 - 1 }}
+        text="50.0 mm"
+        fontSize={0.7}
+        arrowSize={0.55}
+      />
+      <fabricationnotedimension
+        from={{ x: -L / 2 + 1, y: -W / 2 }}
+        to={{ x: -L / 2 + 1, y: W / 2 }}
+        text="30.0 mm"
+        fontSize={0.7}
+        arrowSize={0.55}
+      />
+    </board>
+  )
 }
-
-const outline = [
-  { x: -32.5, y: -32.5 },
-  { x: 32.5, y: -32.5 },
-  { x: 32.5, y: 32.5 },
-  { x: 2.5, y: 32.5 },
-  { x: 2.5, y: -2.5 },
-  { x: -32.5, y: -2.5 }
-]
-
-const rfJoint = { x: 17.5, y: -11.5 }
-const idJoint = { x: 7.0, y: -28.0 }
-
-const horizontalRfPath = [
-  { x: -30.0, y: -17.5 },
-  { x: 11.5, y: -17.5 },
-  rfJoint
-]
-
-const verticalRfPath = [
-  rfJoint,
-  { x: 17.5, y: 30.0 }
-]
-
-const horizontalIdPath = [
-  { x: -30.0, y: -28.0 },
-  idJoint
-]
-
-const verticalIdPath = [
-  idJoint,
-  { x: 7.0, y: 30.0 }
-]
-
-const HorizontalArmCopper = () => (
-  <chip
-    name="CORNER_H"
-    pcbX={0}
-    pcbY={0}
-    pinLabels={{ pin1: "RF", pin2: "GND", pin3: "ID" }}
-    connections={{
-      pin1: "net.RF_CORNER",
-      pin2: "net.GND",
-      pin3: "net.ID_CORNER"
-    }}
-    footprint={
-      <footprint>
-        <smtpad
-          portHints={["pin1"]}
-          shape="polygon"
-          points={strokePolyline(horizontalRfPath, geom.rf.calibratedTraceWidthMm)}
-          coveredWithSolderMask={false}
-        />
-        <smtpad
-          portHints={["pin3"]}
-          shape="polygon"
-          points={strokePolyline(horizontalIdPath, geom.rf.idTraceWidthMm)}
-        />
-
-        <smtpad
-          portHints={["pin1"]}
-          pcbX="-30mm"
-          pcbY="-17.5mm"
-          width={mm(geom.interface.signalPadWidthMm)}
-          height={mm(geom.interface.signalPadHeightMm)}
-          shape="rect"
-          coveredWithSolderMask={false}
-        />
-        <smtpad
-          portHints={["pin2"]}
-          pcbX="-30mm"
-          pcbY="-23.5mm"
-          width={mm(geom.interface.groundPadWidthMm)}
-          height={mm(geom.interface.groundPadHeightMm)}
-          shape="rect"
-          coveredWithSolderMask={false}
-        />
-        <smtpad
-          portHints={["pin3"]}
-          pcbX="-30mm"
-          pcbY="-28mm"
-          width={mm(geom.interface.idPadWidthMm)}
-          height={mm(geom.interface.idPadHeightMm)}
-          shape="rect"
-        />
-
-        {geom.interface.viaXOffsetsMm.map((dx, i) => (
-          <platedhole
-            key={`H-${i}`}
-            portHints={["pin2"]}
-            pcbX={mm(-30 + dx)}
-            pcbY="-23.5mm"
-            shape="circle"
-            holeDiameter={mm(geom.interface.viaHoleDiameterMm)}
-            outerDiameter={mm(geom.interface.viaOuterDiameterMm)}
-          />
-        ))}
-      </footprint>
-    }
-  />
-)
-
-const VerticalArmCopper = () => (
-  <chip
-    name="CORNER_V"
-    pcbX={0}
-    pcbY={0}
-    pinLabels={{ pin1: "RF", pin2: "GND", pin3: "ID" }}
-    connections={{
-      pin1: "net.RF_CORNER",
-      pin2: "net.GND",
-      pin3: "net.ID_CORNER"
-    }}
-    footprint={
-      <footprint>
-        <smtpad
-          portHints={["pin1"]}
-          shape="polygon"
-          points={strokePolyline(verticalRfPath, geom.rf.calibratedTraceWidthMm)}
-          coveredWithSolderMask={false}
-        />
-        <smtpad
-          portHints={["pin3"]}
-          shape="polygon"
-          points={strokePolyline(verticalIdPath, geom.rf.idTraceWidthMm)}
-        />
-
-        <smtpad
-          portHints={["pin1"]}
-          pcbX="17.5mm"
-          pcbY="30mm"
-          width={mm(geom.interface.signalPadHeightMm)}
-          height={mm(geom.interface.signalPadWidthMm)}
-          shape="rect"
-          coveredWithSolderMask={false}
-        />
-        <smtpad
-          portHints={["pin2"]}
-          pcbX="11.5mm"
-          pcbY="30mm"
-          width={mm(geom.interface.groundPadHeightMm)}
-          height={mm(geom.interface.groundPadWidthMm)}
-          shape="rect"
-          coveredWithSolderMask={false}
-        />
-        <smtpad
-          portHints={["pin3"]}
-          pcbX="7mm"
-          pcbY="30mm"
-          width={mm(geom.interface.idPadHeightMm)}
-          height={mm(geom.interface.idPadWidthMm)}
-          shape="rect"
-        />
-
-        {geom.interface.viaXOffsetsMm.map((dy, i) => (
-          <platedhole
-            key={`V-${i}`}
-            portHints={["pin2"]}
-            pcbX="11.5mm"
-            pcbY={mm(30 + dy)}
-            shape="circle"
-            holeDiameter={mm(geom.interface.viaHoleDiameterMm)}
-            outerDiameter={mm(geom.interface.viaOuterDiameterMm)}
-          />
-        ))}
-      </footprint>
-    }
-  />
-)
-
-export const CornerBridgeBoard = () => (
-  <board
-    title="2.45 GHz planar L corner magnetic bridge"
-    outline={outline}
-    material="fr4"
-    layers={2}
-    thickness={mm(geom.stackup.fr4ThicknessMm)}
-    routeRemaining={false}
-    schematicDisabled
-  >
-    <net name="GND" />
-    <net name="RF_CORNER" />
-    <net name="ID_CORNER" />
-
-    <copperpour
-      name="GND_PLANE"
-      connectsTo="net.GND"
-      layer="bottom"
-      boardEdgeMargin={mm(geom.rf.boardEdgeGroundMarginMm)}
-      clearance="0.15mm"
-    />
-
-    <HorizontalArmCopper />
-    <VerticalArmCopper />
-
-    <silkscreenrect pcbX="-30mm" pcbY="-9.5mm" width="5mm" height="5mm" filled={false} stroke="solid" strokeWidth="0.18mm" />
-    <silkscreenrect pcbX="-30mm" pcbY="-4.5mm" width="5mm" height="5mm" filled={false} stroke="solid" strokeWidth="0.18mm" />
-    <silkscreenrect pcbX="25.5mm" pcbY="30mm" width="5mm" height="5mm" filled={false} stroke="solid" strokeWidth="0.18mm" />
-    <silkscreenrect pcbX="30.5mm" pcbY="30mm" width="5mm" height="5mm" filled={false} stroke="solid" strokeWidth="0.18mm" />
-
-    <silkscreentext pcbX="-2.5mm" pcbY="-6.5mm" text="CORNER BRIDGE 5+5cm" fontSize="0.62mm" />
-    <silkscreentext pcbX="27.5mm" pcbY="7.5mm" pcbRotation={90} text="RF 50R + ID" fontSize="0.50mm" />
-  </board>
-)
