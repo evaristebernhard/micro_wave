@@ -120,7 +120,10 @@ def build_model(sim_path: Path, dut: str, profile: str):
 
     FDTD = openEMS(NrTS=cfg["nr_ts"], EndCriteria=cfg["end_criteria"])
     FDTD.SetGaussExcite(f0, fc)
-    FDTD.SetBoundaryCond(["PML_8"] * 6)
+    # Solid microstrip ground is the z-min PEC boundary. This is the same
+    # efficient topology used by the official openEMS microstrip tutorial and
+    # removes the electromagnetically shielded rear half-space from the grid.
+    FDTD.SetBoundaryCond(["PML_8", "PML_8", "PML_8", "PML_8", "PEC", "PML_8"])
 
     CSX = ContinuousStructure()
     FDTD.SetCSX(CSX)
@@ -151,17 +154,11 @@ def build_model(sim_path: Path, dut: str, profile: str):
 
     fr4 = CSX.AddMaterial("FR4", epsilon=stack["fr4EpsilonR"], kappa=fr4_kappa)
     front_pp = CSX.AddMaterial("front_PP", epsilon=stack["ppEpsilonR"], kappa=pp_kappa)
-    rear_pp = CSX.AddMaterial("rear_PP", epsilon=stack["ppEpsilonR"], kappa=pp_kappa)
     signal = CSX.AddMetal("cu_signal")
     ground = CSX.AddMetal("cu_ground")
 
     fr4.AddBox([stack_x0, stack_y0, z_gnd], [stack_x1, stack_y1, z_sig], priority=1)
     front_pp.AddBox([stack_x0, stack_y0, z_sig], [stack_x1, stack_y1, front_pp_t], priority=1)
-    rear_pp.AddBox(
-        [stack_x0, stack_y0, z_gnd - rear_pp_t],
-        [stack_x1, stack_y1, z_gnd],
-        priority=1,
-    )
     add_sheet_box(ground, stack_x0, stack_x1, stack_y0, stack_y1, z_gnd, priority=20)
 
     mesh_xy: list[tuple[float, float]] = []
@@ -207,7 +204,7 @@ def build_model(sim_path: Path, dut: str, profile: str):
         "x1": stack_x1 + 9.0,
         "y0": stack_y0 - 9.0,
         "y1": stack_y1 + 9.0,
-        "z0": z_gnd - rear_pp_t - 9.0,
+        "z0": z_gnd,
         "z1": front_pp_t + 9.0,
     }
 
@@ -226,8 +223,6 @@ def build_model(sim_path: Path, dut: str, profile: str):
 
     z_lines = [
         domain["z0"],
-        z_gnd - rear_pp_t,
-        z_gnd,
         -fr4_t / 2,
         z_sig,
         front_pp_t,
@@ -309,7 +304,18 @@ def build_model(sim_path: Path, dut: str, profile: str):
         "fixture_x_mm": fixture_x,
         "branch_outer_y_mm": branch_outer_y,
         "metal_model": "PEC sheet",
+        "rear_halfspace_model": "PEC ground boundary; rear PP omitted for network coupon",
         "port_feed_R_ohm": 50.0,
+        "mesh_lines": {
+            "x": int(len(mesh.GetLines(0))),
+            "y": int(len(mesh.GetLines(1))),
+            "z": int(len(mesh.GetLines(2))),
+        },
+        "yee_cells_approx": int(
+            max(0, len(mesh.GetLines(0)) - 1)
+            * max(0, len(mesh.GetLines(1)) - 1)
+            * max(0, len(mesh.GetLines(2)) - 1)
+        ),
     }
     return FDTD, ports, freq, g, metadata
 
