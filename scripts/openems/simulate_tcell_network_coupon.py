@@ -306,6 +306,10 @@ def build_model(sim_path: Path, dut: str, profile: str):
         "metal_model": "PEC sheet",
         "rear_halfspace_model": "PEC ground boundary; rear PP omitted for network coupon",
         "port_feed_R_ohm": 50.0,
+        "reference_plane_shift_mm": [
+            float(fixture_x + p_in["x"]),
+            float(fixture_x - p_out["x"]),
+        ] + ([float(branch_outer_y - p_branch["y"])] if dut == "tcell" else []),
         "mesh_lines": {
             "x": int(len(mesh.GetLines(0))),
             "y": int(len(mesh.GetLines(1))),
@@ -324,7 +328,7 @@ def db20(x):
     return 20 * np.log10(np.maximum(np.abs(x), 1e-15))
 
 
-def analyze(ports, sim_path: Path, freq, dut: str):
+def analyze(ports, sim_path: Path, freq, dut: str, ref_plane_shifts_mm):
     # First let MSLPort extract its native line impedance and beta.
     native_z = []
     native_beta = []
@@ -334,8 +338,14 @@ def analyze(ports, sim_path: Path, freq, dut: str):
         native_beta.append(np.asarray(p.beta).copy())
 
     # Then renormalize to the system's desired 50-ohm reference.
-    for p in ports:
-        p.CalcPort(str(sim_path), freq, ref_impedance=50.0, signal_type="pulse")
+    for p, shift_mm in zip(ports, ref_plane_shifts_mm):
+        p.CalcPort(
+            str(sim_path),
+            freq,
+            ref_impedance=50.0,
+            ref_plane_shift=shift_mm,
+            signal_type="pulse",
+        )
 
     inc = ports[0].uf_inc
     s11 = ports[0].uf_ref / inc
@@ -403,7 +413,13 @@ def run(args):
             disable_dumps=True,
         )
 
-    a = analyze(ports, sim_path, freq, args.dut)
+    a = analyze(
+        ports,
+        sim_path,
+        freq,
+        args.dut,
+        metadata["reference_plane_shift_mm"],
+    )
     i0 = int(np.argmin(np.abs(freq - g["frequencyGHz"] * 1e9)))
 
     result = {
