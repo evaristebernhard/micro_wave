@@ -4,10 +4,12 @@ on:
   push:
     paths:
       - "pcb/tscircuit/**"
+      - "scripts/openems/**"
       - ".github/workflows/tscircuit-pcb.yml"
   pull_request:
     paths:
       - "pcb/tscircuit/**"
+      - "scripts/openems/**"
       - ".github/workflows/tscircuit-pcb.yml"
 
 jobs:
@@ -32,6 +34,11 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+
+      - name: Validate canonical calibration geometry
+        run: |
+          python ../../scripts/openems/check_tcell_calibration_geometry.py
+          python -m py_compile ../../scripts/openems/simulate_tcell_calibration.py
 
       - name: Validate T-cell calibration board
         run: npm run check:cal

@@ -10,7 +10,8 @@
     "allowImportingTsExtensions": true,
     "types": [
       "tscircuit"
-    ]
+    ],
+    "resolveJsonModule": true
   },
   "include": [
     "index*.tsx",

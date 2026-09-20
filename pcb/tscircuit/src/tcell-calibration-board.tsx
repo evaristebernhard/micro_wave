@@ -1,4 +1,4 @@
-import { fewModeRobustDesignSeed, matchedExtractionTCellSeed, patchDerived, pcb } from "./geometry"
+import calGeom from "./tcell-calibration-geometry.json"
 
 const mm = (value: number) => `${value}mm`
 type P = { x: number; y: number }
@@ -18,53 +18,55 @@ const linePolygon = (a: P, b: P, width: number): P[] => {
   ]
 }
 
-const cal = fewModeRobustDesignSeed.targetExtraction.A
-const pIn = { x: -20.2, y: -18.0 }
-const pPatch = { x: 0.0, y: -9.25 }
+const pIn = calGeom.tcell.inputReference
+const junction = calGeom.tcell.junction
+const pOut = calGeom.tcell.outputReference
+const pPatch = calGeom.patch.feedReference
 
-// Field-aware A calibration junction.
-// Distances:
-// |J-pIn|    ~= 16.75 mm  (series quarter-wave seed)
-// |J-pPatch| ~= 17.59 mm  (branch quarter-wave seed)
-const junction = { x: -5.467, y: -25.969 }
-const pOut = { x: 20.2, y: -18.0 }
-const insetEnd = { x: 0.0, y: patchDerived.notchYMax + 0.2 }
+const patchXMin = calGeom.patch.center.x - calGeom.patch.widthMm / 2
+const patchXMax = calGeom.patch.center.x + calGeom.patch.widthMm / 2
+const patchYMin = calGeom.patch.center.y - calGeom.patch.lengthMm / 2
+const patchYMax = calGeom.patch.center.y + calGeom.patch.lengthMm / 2
+const notchW = calGeom.patch.feedWidthMm + 2 * calGeom.patch.insetGapMm
+const notchXMin = -notchW / 2
+const notchXMax = notchW / 2
+const notchYMax = patchYMin + calGeom.patch.insetDepthMm
+const insetEnd = { x: pPatch.x, y: notchYMax + 0.2 }
 
-const boardCenter = { x: 0, y: -5 }
+const patchTopHeight = patchYMax - notchYMax
+const patchTopCenterY = (patchYMax + notchYMax) / 2
+const patchLegWidth = (calGeom.patch.widthMm - notchW) / 2
+const patchLegOffset = (notchW + patchLegWidth) / 2
+const patchLegHeight = calGeom.patch.insetDepthMm
+const patchLegCenterY = patchYMin + patchLegHeight / 2
+
 const productBounds = {
-  xMin: -25,
-  xMax: 25,
-  yMin: -35,
-  yMax: 25
+  xMin: calGeom.board.center.x - calGeom.board.widthMm / 2,
+  xMax: calGeom.board.center.x + calGeom.board.widthMm / 2,
+  yMin: calGeom.board.center.y - calGeom.board.heightMm / 2,
+  yMax: calGeom.board.center.y + calGeom.board.heightMm / 2
 } as const
-
-const patchTopHeight = patchDerived.patchYMax - patchDerived.notchYMax
-const patchTopCenterY = (patchDerived.patchYMax + patchDerived.notchYMax) / 2
-const patchLegWidth = (pcb.patchW - patchDerived.notchW) / 2
-const patchLegOffset = (patchDerived.notchW + patchLegWidth) / 2
-const patchLegHeight = pcb.insetDepth
-const patchLegCenterY = patchDerived.patchYMin + patchLegHeight / 2
 
 const GroundLaunchFootprint = ({ x }: { x: number }) => (
   <>
     <smtpad
       portHints={["pin2"]}
       pcbX={mm(x)}
-      pcbY={mm(pcb.tCellGroundPadY)}
-      width={mm(pcb.rfGroundPadW)}
-      height={mm(pcb.rfGroundPadH)}
+      pcbY={mm(calGeom.launch.groundPadCenterYMm)}
+      width={mm(calGeom.launch.groundPadWidthMm)}
+      height={mm(calGeom.launch.groundPadHeightMm)}
       shape="rect"
       coveredWithSolderMask={false}
     />
-    {[-1.4, -0.5, 0.5, 1.4].map((dx, i) => (
+    {calGeom.launch.viaXOffsetsMm.map((dx, i) => (
       <platedhole
         key={`gnd-${x}-${i}`}
         portHints={["pin2"]}
         pcbX={mm(x + dx)}
-        pcbY={mm(pcb.tCellGroundPadY)}
+        pcbY={mm(calGeom.launch.groundPadCenterYMm)}
         shape="circle"
-        holeDiameter={mm(pcb.rfGroundViaHole)}
-        outerDiameter={mm(pcb.rfGroundViaOuter)}
+        holeDiameter={mm(calGeom.launch.viaHoleDiameterMm)}
+        outerDiameter={mm(calGeom.launch.viaOuterDiameterMm)}
       />
     ))}
   </>
@@ -79,57 +81,50 @@ const CalibrationRfCopper = () => (
     connections={{ pin2: "net.GND" }}
     footprint={
       <footprint>
-        {/* RF input/output magnetic signal pads. */}
         <smtpad
           portHints={["pin1"]}
-          pcbX={mm(-pcb.rfContactX)}
-          pcbY={mm(pcb.rfTraceY)}
-          width={mm(pcb.rfPadW)}
-          height={mm(pcb.rfPadH)}
+          pcbX={mm(-calGeom.launch.contactXAbsMm)}
+          pcbY={mm(calGeom.launch.signalPadCenterYMm)}
+          width={mm(calGeom.launch.signalPadWidthMm)}
+          height={mm(calGeom.launch.signalPadHeightMm)}
           shape="rect"
           coveredWithSolderMask={false}
         />
         <smtpad
           portHints={["pin1"]}
-          pcbX={mm(pcb.rfContactX)}
-          pcbY={mm(pcb.rfTraceY)}
-          width={mm(pcb.rfPadW)}
-          height={mm(pcb.rfPadH)}
+          pcbX={mm(calGeom.launch.contactXAbsMm)}
+          pcbY={mm(calGeom.launch.signalPadCenterYMm)}
+          width={mm(calGeom.launch.signalPadWidthMm)}
+          height={mm(calGeom.launch.signalPadHeightMm)}
           shape="rect"
           coveredWithSolderMask={false}
         />
 
-        {/* Field-aware A calibration T-cell. */}
         <smtpad
           portHints={["pin1"]}
           shape="polygon"
-          points={linePolygon(pIn, junction, cal.bareFr4SeriesWidthMm)}
+          points={linePolygon(pIn, junction, calGeom.tcell.seriesWidthMm)}
           coveredWithSolderMask={false}
         />
         <smtpad
           portHints={["pin1"]}
           shape="polygon"
-          points={linePolygon(junction, pOut, matchedExtractionTCellSeed.fiftyOhmWidthMm)}
+          points={linePolygon(junction, pOut, calGeom.tcell.through50WidthMm)}
           coveredWithSolderMask={false}
         />
         <smtpad
           portHints={["pin1"]}
           shape="polygon"
-          points={linePolygon(junction, pPatch, cal.bareFr4BranchWidthMm)}
+          points={linePolygon(junction, pPatch, calGeom.tcell.branchWidthMm)}
           coveredWithSolderMask={false}
         />
 
-        {/*
-         * Explicit copper nodes guarantee area overlap between separately
-         * stroked transformer polygons. Netlist/shorts checks do not prove
-         * same-net polygons are physically joined in the rendered Gerber.
-         */}
         <smtpad
           portHints={["pin1"]}
           pcbX={mm(junction.x)}
           pcbY={mm(junction.y)}
-          width="2.2mm"
-          height="2.2mm"
+          width={mm(calGeom.tcell.junctionNodeSizeMm)}
+          height={mm(calGeom.tcell.junctionNodeSizeMm)}
           shape="rect"
           coveredWithSolderMask={false}
         />
@@ -137,8 +132,8 @@ const CalibrationRfCopper = () => (
           portHints={["pin1"]}
           pcbX={mm(pPatch.x)}
           pcbY={mm(pPatch.y)}
-          width="1.6mm"
-          height="1.6mm"
+          width={mm(calGeom.patch.feedNodeSizeMm)}
+          height={mm(calGeom.patch.feedNodeSizeMm)}
           shape="rect"
           coveredWithSolderMask={false}
         />
@@ -146,16 +141,15 @@ const CalibrationRfCopper = () => (
         <smtpad
           portHints={["pin1"]}
           shape="polygon"
-          points={linePolygon(pPatch, insetEnd, pcb.rfTraceW)}
+          points={linePolygon(pPatch, insetEnd, calGeom.patch.feedWidthMm)}
           coveredWithSolderMask={false}
         />
 
-        {/* Rectangular inset-fed Patch. */}
         <smtpad
           portHints={["pin1"]}
-          pcbX={mm(pcb.patchCenterX)}
+          pcbX={mm(calGeom.patch.center.x)}
           pcbY={mm(patchTopCenterY)}
-          width={mm(pcb.patchW)}
+          width={mm(calGeom.patch.widthMm)}
           height={mm(patchTopHeight)}
           shape="rect"
           coveredWithSolderMask={false}
@@ -179,13 +173,8 @@ const CalibrationRfCopper = () => (
           coveredWithSolderMask={false}
         />
 
-        {/*
-         * Launch return pads and plated holes belong to the same distributed
-         * RF footprint. This prevents placement DRC from treating intentional
-         * launch geometry as overlapping independent components.
-         */}
-        <GroundLaunchFootprint x={-pcb.rfContactX} />
-        <GroundLaunchFootprint x={pcb.rfContactX} />
+        <GroundLaunchFootprint x={-calGeom.launch.contactXAbsMm} />
+        <GroundLaunchFootprint x={calGeom.launch.contactXAbsMm} />
       </footprint>
     }
   />
@@ -194,24 +183,23 @@ const CalibrationRfCopper = () => (
 export const TCellCalibrationBoard = () => (
   <board
     title="2.45 GHz T-cell calibration board"
-    width="50mm"
-    height="60mm"
-    boardAnchorPosition={boardCenter}
+    width={mm(calGeom.board.widthMm)}
+    height={mm(calGeom.board.heightMm)}
+    boardAnchorPosition={calGeom.board.center}
     boardAnchorAlignment="center"
     material="fr4"
     layers={2}
-    thickness="1.6mm"
+    thickness={mm(calGeom.stackup.fr4ThicknessMm)}
     routeRemaining={false}
     schematicDisabled
   >
     <net name="GND" />
 
-    {/* Board-level return plane: not a component footprint. */}
     <copperpour
       name="GND_PLANE"
       connectsTo="net.GND"
       layer="bottom"
-      boardEdgeMargin="0.2mm"
+      boardEdgeMargin={mm(calGeom.board.edgeMarginMm)}
       clearance="0.15mm"
     />
 
@@ -226,7 +214,7 @@ export const TCellCalibrationBoard = () => (
     <silkscreentext
       pcbX="0mm"
       pcbY="-31.8mm"
-      text={`k=${(100 * cal.k).toFixed(2)}%  Zt=${cal.seriesTransformerOhm.toFixed(2)}R  Zb=${cal.branchTransformerOhm.toFixed(2)}R`}
+      text={`k=${(100 * calGeom.tcell.targetExtraction).toFixed(2)}%  Zt=${calGeom.tcell.targetSeriesOhm.toFixed(2)}R  Zb=${calGeom.tcell.targetBranchOhm.toFixed(2)}R`}
       fontSize="0.52mm"
     />
     <silkscreentext
@@ -237,16 +225,16 @@ export const TCellCalibrationBoard = () => (
     />
 
     <fabricationnotedimension
-      from={{ x: -25, y: 24 }}
-      to={{ x: 25, y: 24 }}
-      text="50.0 mm"
+      from={{ x: productBounds.xMin, y: productBounds.yMax - 1 }}
+      to={{ x: productBounds.xMax, y: productBounds.yMax - 1 }}
+      text={`${calGeom.board.widthMm.toFixed(1)} mm`}
       fontSize={0.8}
       arrowSize={0.6}
     />
     <fabricationnotedimension
-      from={{ x: -24, y: -35 }}
-      to={{ x: -24, y: 25 }}
-      text="60.0 mm"
+      from={{ x: productBounds.xMin + 1, y: productBounds.yMin }}
+      to={{ x: productBounds.xMin + 1, y: productBounds.yMax }}
+      text={`${calGeom.board.heightMm.toFixed(1)} mm`}
       fontSize={0.8}
       arrowSize={0.6}
     />
@@ -254,17 +242,19 @@ export const TCellCalibrationBoard = () => (
 )
 
 export const calibrationGeometry = {
-  boardCenter,
+  schema: calGeom.schema,
+  frequencyGHz: calGeom.frequencyGHz,
+  boardCenter: calGeom.board.center,
   productBounds,
   inputReference: pIn,
   outputReference: pOut,
   patchReference: pPatch,
   junction,
-  targetExtraction: cal.k,
-  targetSeriesOhm: cal.seriesTransformerOhm,
-  targetBranchOhm: cal.branchTransformerOhm,
-  seriesWidthMm: cal.bareFr4SeriesWidthMm,
-  branchWidthMm: cal.bareFr4BranchWidthMm,
-  seriesQuarterWaveMm: cal.bareFr4SeriesQuarterWaveMm,
-  branchQuarterWaveMm: cal.bareFr4BranchQuarterWaveMm
+  targetExtraction: calGeom.tcell.targetExtraction,
+  targetSeriesOhm: calGeom.tcell.targetSeriesOhm,
+  targetBranchOhm: calGeom.tcell.targetBranchOhm,
+  seriesWidthMm: calGeom.tcell.seriesWidthMm,
+  branchWidthMm: calGeom.tcell.branchWidthMm,
+  seriesQuarterWaveMm: calGeom.tcell.targetSeriesQuarterWaveMm,
+  branchQuarterWaveMm: calGeom.tcell.targetBranchQuarterWaveMm
 } as const
