@@ -105,6 +105,14 @@ def build_model(sim_path: Path, dut: str, profile: str):
             "fc_ghz": 0.30,
             "points": 81,
         },
+        "screen": {
+            "nr_ts": 45000,
+            "end_criteria": 2e-4,
+            "xy_res": 0.85,
+            "z_res": 0.48,
+            "fc_ghz": 0.30,
+            "points": 101,
+        },
         "verify": {
             "nr_ts": 70000,
             "end_criteria": 1e-4,
@@ -320,6 +328,7 @@ def build_model(sim_path: Path, dut: str, profile: str):
             * max(0, len(mesh.GetLines(1)) - 1)
             * max(0, len(mesh.GetLines(2)) - 1)
         ),
+        "geometry_path": str(geometry_path),
     }
     return FDTD, ports, freq, g, metadata
 
@@ -382,7 +391,11 @@ def run(args):
     # XML-only remains available for geometry inspection, and --force is an
     # explicit debugging escape hatch.
     if args.dut == "tcell" and not args.force and not args.xml_only:
-        thru_summary = out_dir / f"thru_{args.profile}_summary.json"
+        thru_summary = (
+            args.fixture_summary.resolve()
+            if args.fixture_summary is not None
+            else out_dir / f"thru_{args.profile}_summary.json"
+        )
         if not thru_summary.exists():
             raise SystemExit(
                 f"missing {thru_summary}; run the matching thru coupon first "
@@ -398,7 +411,12 @@ def run(args):
     if sim_path.exists() and not args.post_only:
         shutil.rmtree(sim_path)
 
-    FDTD, ports, freq, g, metadata = build_model(sim_path, args.dut, args.profile)
+    FDTD, ports, freq, g, metadata = build_model(
+        sim_path,
+        args.dut,
+        args.profile,
+        args.geometry_json.resolve(),
+    )
 
     if args.xml_only:
         print(sim_path / f"{args.dut}.xml")
@@ -427,15 +445,20 @@ def run(args):
         **metadata,
         "frequency_hz": freq.tolist(),
         "S11_db": db20(a["s"]["S11"]).tolist(),
+        "S11_phase_deg": np.angle(a["s"]["S11"], deg=True).tolist(),
         "S21_db": db20(a["s"]["S21"]).tolist(),
+        "S21_phase_deg": np.angle(a["s"]["S21"], deg=True).tolist(),
         "power_sum": a["power_sum"].tolist(),
         "Zin_real_ohm": np.real(a["zin"]).tolist(),
         "Zin_imag_ohm": np.imag(a["zin"]).tolist(),
         "native_port_Z_real_ohm": [np.real(z).tolist() for z in a["native_z"]],
         "native_port_Z_imag_ohm": [np.imag(z).tolist() for z in a["native_z"]],
+        "native_beta_real_per_m": [np.real(b).tolist() for b in a["native_beta"]],
+        "native_beta_imag_per_m": [np.imag(b).tolist() for b in a["native_beta"]],
     }
     if args.dut == "tcell":
         result["S31_db"] = db20(a["s"]["S31"]).tolist()
+        result["S31_phase_deg"] = np.angle(a["s"]["S31"], deg=True).tolist()
 
     band = (freq >= 2.35e9) & (freq <= 2.55e9)
     if not np.any(band):
@@ -464,10 +487,28 @@ def run(args):
             ]
             for n in range(len(ports))
         ],
+        "native_beta_per_m": [
+            [
+                float(result["native_beta_real_per_m"][n][i0]),
+                float(result["native_beta_imag_per_m"][n][i0]),
+            ]
+            for n in range(len(ports))
+        ],
+        "native_quarter_wave_mm": [
+            (
+                float(np.pi / (2.0 * result["native_beta_real_per_m"][n][i0]) * 1e3)
+                if abs(result["native_beta_real_per_m"][n][i0]) > 1e-12
+                else None
+            )
+            for n in range(len(ports))
+        ],
+        "S11_phase_deg": float(result["S11_phase_deg"][i0]),
+        "S21_phase_deg": float(result["S21_phase_deg"][i0]),
     }
 
     if args.dut == "tcell":
         summary["S31_db"] = float(result["S31_db"][i0])
+        summary["S31_phase_deg"] = float(result["S31_phase_deg"][i0])
         summary["branch_power_fraction_50ohm"] = float(abs(a["s"]["S31"][i0]) ** 2)
         summary["target_branch_power_fraction"] = float(g["tcell"]["targetExtraction"])
         summary["branch_error_abs"] = (
@@ -506,7 +547,17 @@ def run(args):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dut", choices=["thru", "tcell"], default="thru")
-    parser.add_argument("--profile", choices=["smoke", "fast", "verify"], default="fast")
+    parser.add_argument(
+        "--profile",
+        choices=["smoke", "fast", "screen", "verify"],
+        default="fast",
+    )
+    parser.add_argument(
+        "--geometry-json",
+        type=Path,
+        default=GEOM_PATH,
+        help="canonical or candidate geometry JSON",
+    )
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--threads", type=int, default=4)
     parser.add_argument("--post-only", action="store_true")
@@ -515,6 +566,15 @@ def main():
         "--force",
         action="store_true",
         help="allow a T-cell run even if the matching thru fixture has not passed",
+    )
+    parser.add_argument(
+        "--fixture-summary",
+        type=Path,
+        default=None,
+        help=(
+            "reuse a previously validated thru summary for candidate screening; "
+            "avoids re-running an unchanged port fixture"
+        ),
     )
     args = parser.parse_args()
     run(args)
