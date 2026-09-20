@@ -26,7 +26,7 @@
     "emResistorStripHalfWidthMm": 0.15
   },
   "em": {
-    "defaultPortModel": "lumped-pad-to-ground",
+    "defaultPortModel": "coplanar-top-signal-to-ground-lumped",
     "defaultIdModel": "open",
     "note": "Fast EM uses zero-thickness PEC copper and treats the 10 kΩ ID resistor as RF-open by default; use id-model=10k for sensitivity."
   }
