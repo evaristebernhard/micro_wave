@@ -257,7 +257,8 @@ def build_tab(sim_path: Path, g: dict, cfg: dict):
     # ground pads
     sheet_box(ground,-6-itf["groundPadWidthMm"]/2,-6+itf["groundPadWidthMm"]/2,
               ymag-itf["groundPadHeightMm"]/2,ymag+itf["groundPadHeightMm"]/2,z0,25)
-    sheet_box(ground,-9.5,-2.5,ycoax-2,ycoax+2,z0,25)
+    sheet_box(ground,-9.0,-4.0,ycoax-2,ycoax+2,z0,25)
+    sheet_box(ground,4.0,9.0,ycoax-2,ycoax+2,z0,25)
     for x in [-7.0,-6.2,-5.4,5.4,6.2,7.0]:
         ground.AddCylinder(start=[x,ycoax-2.5,zg],stop=[x,ycoax-2.5,z0],
                            radius=itf["viaOuterDiameterMm"]/2,priority=30)
@@ -270,8 +271,20 @@ def build_tab(sim_path: Path, g: dict, cfg: dict):
     mesh.SmoothMeshLines("x",cfg["xy"],1.4);mesh.SmoothMeshLines("y",cfg["xy"],1.4);mesh.SmoothMeshLines("z",cfg["z"],1.4)
 
     # magnetic port at bottom and coax fixture port at top
-    p1=FDTD.AddLumpedPort(port_nr=1,R=50.0,start=[-0.8,ymag-2.0,-0.1],stop=[-0.8,ymag+1.0,0.1],p_dir="y",excite=1,priority=50,edges2grid="xy")
-    p2=FDTD.AddLumpedPort(port_nr=2,R=50.0,start=[-3.8,ycoax-0.8,-0.1],stop=[-0.8,ycoax+0.8,0.1],p_dir="x",excite=0,priority=50,edges2grid="xy")
+    # Both magnetic and coax fixtures bridge the signal conductor to a
+    # neighboring top-ground pad in the same plane.
+    p1=FDTD.AddLumpedPort(
+        port_nr=1,R=50.0,
+        start=[-3.7,ymag-0.8,-0.1],
+        stop=[-2.3,ymag+0.8,0.1],
+        p_dir="x",excite=1,priority=50,edges2grid="xy"
+    )
+    p2=FDTD.AddLumpedPort(
+        port_nr=2,R=50.0,
+        start=[-4.0,ycoax-0.8,-0.1],
+        stop=[-2.3,ycoax+0.8,0.1],
+        p_dir="x",excite=0,priority=50,edges2grid="xy"
+    )
     CSX.Write2XML(str(sim_path/"tab.xml"))
     return FDTD,[p1,p2],dict(target_il_db=None, length_mm=H)
 
