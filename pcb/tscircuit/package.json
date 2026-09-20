@@ -12,7 +12,12 @@
     "build:variants": "tsci build index-a.tsx --ignore-routing-drc --ignore-netlist-drc --ignore-pin-specification-drc && tsci build index-b.tsx --ignore-routing-drc --ignore-netlist-drc --ignore-pin-specification-drc && tsci build index-c.tsx --ignore-routing-drc --ignore-netlist-drc --ignore-pin-specification-drc && tsci build index-d.tsx --ignore-routing-drc --ignore-netlist-drc --ignore-pin-specification-drc",
     "build:tcell": "tsci build index-ta.tsx --ignore-routing-drc --ignore-netlist-drc --ignore-pin-specification-drc && tsci build index-tb.tsx --ignore-routing-drc --ignore-netlist-drc --ignore-pin-specification-drc && tsci build index-tc.tsx --ignore-routing-drc --ignore-netlist-drc --ignore-pin-specification-drc && tsci build index-td.tsx --ignore-routing-drc --ignore-netlist-drc --ignore-pin-specification-drc",
     "export:circuit-json:tcell": "mkdir -p dist && tsci export index-ta.tsx -f circuit-json -o dist/tcell-a.circuit.json && tsci export index-tb.tsx -f circuit-json -o dist/tcell-b.circuit.json && tsci export index-tc.tsx -f circuit-json -o dist/tcell-c.circuit.json && tsci export index-td.tsx -f circuit-json -o dist/tcell-d.circuit.json",
-    "export:gerbers:tcell": "mkdir -p dist && tsci export index-ta.tsx -f gerbers -o dist/tcell-a.gerbers.zip && tsci export index-tb.tsx -f gerbers -o dist/tcell-b.gerbers.zip && tsci export index-tc.tsx -f gerbers -o dist/tcell-c.gerbers.zip && tsci export index-td.tsx -f gerbers -o dist/tcell-d.gerbers.zip"
+    "export:gerbers:tcell": "mkdir -p dist && tsci export index-ta.tsx -f gerbers -o dist/tcell-a.gerbers.zip && tsci export index-tb.tsx -f gerbers -o dist/tcell-b.gerbers.zip && tsci export index-tc.tsx -f gerbers -o dist/tcell-c.gerbers.zip && tsci export index-td.tsx -f gerbers -o dist/tcell-d.gerbers.zip",
+    "build:cal": "tsci build index-tcal.tsx --all-images",
+    "check:cal": "tsci check netlist index-tcal.tsx && tsci check placement index-tcal.tsx && tsci build index-tcal.tsx && tsci check shorts index-tcal.tsx",
+    "export:cal:circuit-json": "mkdir -p dist && tsci export index-tcal.tsx -f circuit-json -o dist/tcell-cal.circuit.json",
+    "export:cal:gerbers": "mkdir -p dist && tsci export index-tcal.tsx -f gerbers -o dist/tcell-cal.gerbers.zip",
+    "export:cal:pcb-svg": "mkdir -p dist && tsci export index-tcal.tsx -f pcb-svg -o dist/tcell-cal.pcb.svg"
   },
   "dependencies": {
     "tscircuit": "0.0.2571"

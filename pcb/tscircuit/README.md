@@ -184,3 +184,32 @@ Entrypoints: `index-ta.tsx`, `index-tb.tsx`, `index-tc.tsx`, `index-td.tsx`.
 The original coupler variants remain in the project for topology comparison.
 
 Product/mechanical envelope: **50 × 60 mm**, equivalent RF coordinate envelope y ∈ [-35, 25] mm. Current tscircuit board outline remains **50 × 70 mm centered** only because the tool-generated outline is centered at the origin; the extra +10 mm at the top is not a product requirement.
+
+## Engineering calibration board
+
+A dedicated single-cell engineering board is now available at `index-tcal.tsx`.
+
+Purpose:
+
+- true 50 × 60 mm product outline, no 50 × 70 mm tooling margin;
+- field-aware A-stage target extraction k≈24.76%;
+- analytical targets Zt≈43.37 Ω and Zb≈87.16 Ω;
+- bare-FR4 geometry seeds 3.92 mm / 1.04 mm for the two quarter-wave transformers;
+- explicit RF IN / RF OUT / Patch reference geometry;
+- top RF copper intentionally exposed from solder mask so the EM stack can match the PP+FR4 calibration model;
+- enlarged ground-launch via groups for repeatable port/reference-plane extraction;
+- no board-count ID chain on this calibration board, to avoid mixing control-line parasitics into the first RF closure.
+
+This board is **not** the final A production board. Its job is to measure/calibrate `Zc(W)`, propagation constant, loaded Patch `R+jX`, T-junction discontinuity, through loss, extraction magnitude and phase. Only after those quantities close should A/B/C/D production copper be regenerated.
+
+Validation commands follow the vendored official tscircuit skill:
+
+```bash
+npm run check:cal
+npm run build:cal
+npm run export:cal:circuit-json
+npm run export:cal:gerbers
+npm run export:cal:pcb-svg
+```
+
+The project-local skill is vendored under `.codex/skills/tscircuit/` from the official `tscircuit/skill` repository.
