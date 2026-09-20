@@ -1,5 +1,7 @@
 # 四板串联 Zone 的解析闭合 V1
 
+> **状态更新（2026-09-20）：本文的通用递推和 T-cell 公式仍有效；其中 equal-power 与 +90° progressive phase 只保留为解析 benchmark。当前 field-aware 主解与统一优先级见 `docs/23_few_mode_robust_field_synthesis_v1.md`、`docs/24_theory_closure_master_v1.md`。**
+>
 > 目标：在不依赖下一轮全波参数搜索的前提下，把 A→B→C→D 四块独立磁吸板串联组成一个 RF Zone 的功率递推、T-cell 分流、相位闭合和系统功率尺度先解析确定。后续 openEMS/HFSS 只负责校正实际传播常数、损耗、Patch 负载和不连续效应。
 
 ## 1. 架构定义
@@ -452,7 +454,7 @@ Z_c(W_i)=Z_{i,\mathrm{target}},
 
 因此应冻结“目标阻抗”，而不是先冻结当前 Hammerstad 裸 FR4 线宽。
 
-## 10. 当前理论结论
+## 10. 本文结论在当前主线中的位置
 
 四板串联 Zone 本身是可行且有明确解析结构的：
 
@@ -464,7 +466,7 @@ A\to B\to C\to D
 
 不是四选一，而是一个完整四级功率分配单元。
 
-在 0.42 dB/cell 基线下：
+在 **equal-power benchmark** 与 0.42 dB/cell 基线下：
 
 \[
 \boxed{
@@ -473,6 +475,14 @@ A\to B\to C\to D
 21.50\%/30.17\%/47.58\%.
 }
 \]
+
+当前 field-aware 主设计已更新为约：
+
+\[
+\boxed{24.76\%/24.07\%/36.08\%}
+\]
+
+并使用 near-in-phase mirror phase，而不是把 +90° progression 作为最终工件场目标。
 
 若每块 RF 取能 6.5 W：
 
