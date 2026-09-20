@@ -22,7 +22,11 @@
     "build:full-v2": "tsci build index-full-v2.tsx --all-images",
     "export:full-v2:circuit-json": "mkdir -p dist && tsci export index-full-v2.tsx -f circuit-json -o dist/full-v2.circuit.json",
     "export:full-v2:gerbers": "mkdir -p dist && tsci export index-full-v2.tsx -f gerbers -o dist/full-v2.gerbers.zip",
-    "export:full-v2:pcb-svg": "mkdir -p dist && tsci export index-full-v2.tsx -f pcb-svg -o dist/full-v2.pcb.svg"
+    "export:full-v2:pcb-svg": "mkdir -p dist && tsci export index-full-v2.tsx -f pcb-svg -o dist/full-v2.pcb.svg",
+    "check:flat-bridge": "tsci check netlist index-flat-bridge.tsx && tsci check placement index-flat-bridge.tsx && tsci check trace-length TP_RF_IN.pin1 index-flat-bridge.tsx && tsci check trace-length TP_ID_IN.pin1 index-flat-bridge.tsx && tsci check routing-difficulty index-flat-bridge.tsx && tsci build index-flat-bridge.tsx && tsci check shorts index-flat-bridge.tsx",
+    "check:corner-bridge": "tsci check netlist index-corner-bridge.tsx && tsci check placement index-corner-bridge.tsx && tsci check routing-difficulty index-corner-bridge.tsx && tsci build index-corner-bridge.tsx && tsci check shorts index-corner-bridge.tsx",
+    "check:cable-tab": "tsci check netlist index-cable-tab.tsx && tsci check placement index-cable-tab.tsx && tsci check trace-length TP_RF_MAG.pin1 index-cable-tab.tsx && tsci check trace-length TP_ID_MAG.pin1 index-cable-tab.tsx && tsci check routing-difficulty index-cable-tab.tsx && tsci build index-cable-tab.tsx && tsci check shorts index-cable-tab.tsx",
+    "export:connections": "mkdir -p dist && tsci export index-flat-bridge.tsx -f gerbers -o dist/flat-bridge.gerbers.zip && tsci export index-flat-bridge.tsx -f pcb-svg -o dist/flat-bridge.pcb.svg && tsci export index-corner-bridge.tsx -f gerbers -o dist/corner-bridge.gerbers.zip && tsci export index-corner-bridge.tsx -f pcb-svg -o dist/corner-bridge.pcb.svg && tsci export index-cable-tab.tsx -f gerbers -o dist/cable-tab.gerbers.zip && tsci export index-cable-tab.tsx -f pcb-svg -o dist/cable-tab.pcb.svg"
   },
   "dependencies": {
     "tscircuit": "0.0.2571"
