@@ -101,44 +101,71 @@ A\rightarrow B\rightarrow C\rightarrow D
 
 ---
 
-## 2. 当前唯一现有 openEMS 数值结果是什么
+## 2. 当前可信的 openEMS 数值证据
 
-仓库当前 results/openems/summary.json 是**旧 edge-coupled A/B/C/D seed 的第一轮单板提取**，不是当前推荐 T-cell / field-aware PCB 的验证。
+当前已经不再只有旧 edge-coupled 结果。
 
-2.45 GHz 结果：
+### 2.1 thru fixture verify
 
-| Board | S11 | 约 VSWR | Patch-port transmission |
-|---|---:|---:|---:|
-| A | -7.67 dB | 2.41 | -27.86 dB |
-| B | -9.43 dB | 2.02 | -20.27 dB |
-| C | -10.59 dB | 1.84 | -14.91 dB |
-| D | -3.07 dB | 5.72 | -7.34 dB |
-
-其中 A/B/D 的输入匹配并不满足当前 VSWR≤2 的硬目标；C 仅初步通过。
-
-Patch-port 功率比粗略对应：
+在修正 MSLPort 终止和方向后，当前可信的 thru verify 在 2.45 GHz 得到：
 
 \[
-A\approx0.16\%,
-\quad
-B\approx0.94\%,
-\quad
-C\approx3.22\%,
-\quad
-D\approx18.4\%.
+S_{11}\approx-24.27\ \mathrm{dB},
+\qquad
+S_{21}\approx-0.376\ \mathrm{dB}.
 \]
 
-但必须注意：
-
-- 这是端口提取模型；
-- 不是工件吸收功率；
-- 不是当前 T-cell 结构；
-- 不应直接换算成“每板多少 W”。
-
-所以这批结果的正确意义只是：
+历史 3.137 mm nominal-50Ω line 的 native MSL impedance 约为：
 
 \[
-\boxed{\text{仿真链路已跑通，但旧结构性能未达标。}}
+Z_0\approx45.5\ \Omega.
+\]
+
+这证明 port fixture 已经基本可信，也证明 PP-loaded stack 下 bare-FR4 线宽需要重新标定。
+
+### 2.2 T-cell core verify
+
+当前可信的 T-cell coupon verify：
+
+\[
+S_{11}\approx-26.81\ \mathrm{dB},
+\]
+
+\[
+S_{21}\approx-2.285\ \mathrm{dB},
+\qquad
+S_{31}\approx-7.800\ \mathrm{dB}.
+\]
+
+两个输出之间的条件 branch split 约：
+
+\[
+\frac{P_3}{P_2+P_3}\approx21.9\%.
+\]
+
+当前 A-stage field-aware 目标为：
+
+\[
+24.76\%.
+\]
+
+因此核心 T-cell 已经从“纯理论 seed”推进到“有可信 full-wave 支撑、仍需参数修正”的阶段。
+
+### 2.3 还没有验证的部分
+
+上述结果仍不是完整客户板结果。尚未闭合：
+
+- magnetic launch 的最终寄生；
+- full engineering board V2 的 10 kΩ ID 支路 RF 串扰；
+- loaded Patch 的 \(R+jX\)；
+- PP + workpiece 下的 Patch accepted power；
+- 完整单板 2.40–2.50 GHz 验收；
+- A/B/C/D 和四板 Zone。
+
+所以当前准确表述是：
+
+\[
+\boxed{\text{T-cell core network 已验证；完整工程单板仍未验证完成。}}
 \]
 
 ---
