@@ -100,7 +100,15 @@ def add_via(prop, x, y, radius, z0, z1, priority=30):
     )
 
 
-def build_model(sim_path: Path, mode: str, coarse: bool = False):
+def build_model(
+    sim_path: Path,
+    mode: str,
+    coarse: bool = False,
+    nr_ts: int | None = None,
+    excitation: str = "gaussian",
+    fc_ghz: float = 0.55,
+    frequency_points: int = 401,
+):
     g = load_geometry()
     board = g["board"]
     stack = g["stackup"]
@@ -109,10 +117,14 @@ def build_model(sim_path: Path, mode: str, coarse: bool = False):
     launch = g["launch"]
 
     f0 = g["frequencyGHz"] * 1e9
-    fc = 0.55e9
+    fc = fc_ghz * 1e9
 
-    FDTD = openEMS(NrTS=120000 if coarse else 180000, EndCriteria=1e-4)
-    FDTD.SetGaussExcite(f0, fc)
+    max_nr_ts = nr_ts if nr_ts is not None else (120000 if coarse else 180000)
+    FDTD = openEMS(NrTS=max_nr_ts, EndCriteria=1e-4)
+    if excitation == "sinus":
+        FDTD.SetSinusExcite(f0)
+    else:
+        FDTD.SetGaussExcite(f0, fc)
     FDTD.SetBoundaryCond(["PML_8"] * 6)
 
     CSX = ContinuousStructure()
@@ -445,7 +457,10 @@ def build_model(sim_path: Path, mode: str, coarse: bool = False):
 
     sim_path.mkdir(parents=True, exist_ok=True)
     CSX.Write2XML(str(sim_path / f"tcell_calibration_{mode}.xml"))
-    freq = np.linspace(2.0e9, 3.0e9, 401)
+    if excitation == "sinus":
+        freq = np.asarray([f0], dtype=float)
+    else:
+        freq = np.linspace(2.0e9, 3.0e9, frequency_points)
     return FDTD, ports, freq, g
 
 
@@ -453,19 +468,46 @@ def calc_db(x: np.ndarray) -> np.ndarray:
     return 20.0 * np.log10(np.maximum(np.abs(x), 1e-15))
 
 
-def run(out_dir: Path, mode: str, coarse: bool, post_only: bool, xml_only: bool):
+def run(
+    out_dir: Path,
+    mode: str,
+    coarse: bool,
+    post_only: bool,
+    xml_only: bool,
+    threads: int,
+    nr_ts: int | None,
+    excitation: str,
+    fc_ghz: float,
+    frequency_points: int,
+    disable_dumps: bool,
+    profile: str,
+):
     out_dir = out_dir.resolve()
     sim_path = out_dir / mode
     if sim_path.exists() and not (post_only or xml_only):
         shutil.rmtree(sim_path)
 
-    FDTD, ports, freq, g = build_model(sim_path, mode, coarse=coarse)
+    FDTD, ports, freq, g = build_model(
+        sim_path,
+        mode,
+        coarse=coarse,
+        nr_ts=nr_ts,
+        excitation=excitation,
+        fc_ghz=fc_ghz,
+        frequency_points=frequency_points,
+    )
     if xml_only:
         print(sim_path / f"tcell_calibration_{mode}.xml")
         return
 
     if not post_only:
-        FDTD.Run(str(sim_path), cleanup=False, verbose=1)
+        FDTD.Run(
+            str(sim_path),
+            cleanup=False,
+            verbose=1,
+            numThreads=threads,
+            disable_dumps=disable_dumps,
+        )
 
     for port in ports:
         port.CalcPort(str(sim_path), freq, ref_impedance=50.0)
@@ -477,6 +519,11 @@ def run(out_dir: Path, mode: str, coarse: bool, post_only: bool, xml_only: bool)
         "geometry_schema": g["schema"],
         "geometry_path": str(GEOM_PATH.relative_to(ROOT)),
         "mode": mode,
+        "profile": profile,
+        "excitation": excitation,
+        "nr_ts": nr_ts,
+        "threads": threads,
+        "field_dumps_disabled": disable_dumps,
         "frequency_hz": freq.tolist(),
         "S11": {"magnitude_db": calc_db(s11).tolist()},
         "S21": {"magnitude_db": calc_db(s21).tolist()},
@@ -500,6 +547,10 @@ def run(out_dir: Path, mode: str, coarse: bool, post_only: bool, xml_only: bool)
     i0 = int(np.argmin(np.abs(freq - g["frequencyGHz"] * 1e9)))
     summary = {
         "mode": mode,
+        "profile": profile,
+        "excitation": excitation,
+        "nr_ts": nr_ts,
+        "threads": threads,
         "f_ghz": g["frequencyGHz"],
         "S11_db": float(result["S11"]["magnitude_db"][i0]),
         "S21_db": float(result["S21"]["magnitude_db"][i0]),
@@ -535,15 +586,86 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--mode", choices=["full", "network"], default="full")
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
+    parser.add_argument(
+        "--profile",
+        choices=["fast", "production", "smoke"],
+        default="fast",
+        help="fast=single-frequency screening, production=wideband final run, smoke=short validity check",
+    )
     parser.add_argument("--coarse", action="store_true")
     parser.add_argument("--post-only", action="store_true")
+    parser.add_argument(
+        "--threads",
+        type=int,
+        default=None,
+        help="number of OpenEMS FDTD worker threads (profile default: 4)",
+    )
+    parser.add_argument("--nr-ts", type=int, default=None)
+    parser.add_argument(
+        "--excitation",
+        choices=["gaussian", "sinus"],
+        default=None,
+        help="override the profile excitation",
+    )
+    parser.add_argument(
+        "--fc-ghz",
+        type=float,
+        default=None,
+        help="Gaussian -20 dB bandwidth in GHz",
+    )
+    parser.add_argument("--frequency-points", type=int, default=None)
+    parser.add_argument(
+        "--keep-field-dumps",
+        action="store_true",
+        help="retain volumetric field dumps; disabled by default for S-parameter runs",
+    )
     parser.add_argument(
         "--xml-only",
         action="store_true",
         help="write the exact openEMS XML geometry without running FDTD",
     )
     args = parser.parse_args()
-    run(args.out, args.mode, args.coarse, args.post_only, args.xml_only)
+    profiles = {
+        "fast": {
+            "coarse": True,
+            "nr_ts": 40000,
+            "excitation": "sinus",
+            "fc_ghz": 0.55,
+            "frequency_points": 1,
+            "threads": 4,
+        },
+        "production": {
+            "coarse": False,
+            "nr_ts": 180000,
+            "excitation": "gaussian",
+            "fc_ghz": 0.55,
+            "frequency_points": 401,
+            "threads": 4,
+        },
+        "smoke": {
+            "coarse": True,
+            "nr_ts": 2000,
+            "excitation": "sinus",
+            "fc_ghz": 0.55,
+            "frequency_points": 1,
+            "threads": 4,
+        },
+    }
+    cfg = profiles[args.profile]
+    run(
+        args.out,
+        args.mode,
+        args.coarse or cfg["coarse"],
+        args.post_only,
+        args.xml_only,
+        args.threads if args.threads is not None else cfg["threads"],
+        args.nr_ts if args.nr_ts is not None else cfg["nr_ts"],
+        args.excitation if args.excitation is not None else cfg["excitation"],
+        args.fc_ghz if args.fc_ghz is not None else cfg["fc_ghz"],
+        args.frequency_points if args.frequency_points is not None else cfg["frequency_points"],
+        not args.keep_field_dumps,
+        args.profile,
+    )
 
 
 if __name__ == "__main__":

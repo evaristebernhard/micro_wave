@@ -1,0 +1,13 @@
+{
+  "mode": "network",
+  "profile": "fast",
+  "excitation": "sinus",
+  "nr_ts": 40000,
+  "threads": 4,
+  "f_ghz": 2.45,
+  "S11_db": -3.820125025706129,
+  "S21_db": 1.0517869529075157,
+  "target_extraction": 0.2476,
+  "S31_db": -9.88518603634542,
+  "branch_power_fraction_50ohm": 0.10267894467096049
+}
