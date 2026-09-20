@@ -4,10 +4,15 @@ export type CouplerTopology = "edge-coupled-quarter-wave" | "strong-coupler-seed
 
 export const pcb = {
   boardW: 50,
-  // Keep the 50 mm horizontal pitch that controls inter-Patch phase.
-  // The extra 10 mm is added only below the original board outline so the
-  // RF/Patch coordinates and left-right magnetic pitch remain unchanged.
+  // Product/mechanical target is 50 x 60 mm with effective y-range [-35, +25] mm.
+  // tscircuit currently generates a board outline centered at the origin, so the
+  // CAD seed is temporarily 50 x 70 mm to reach y=-35 mm without translating the
+  // established RF/Patch reference coordinates. The extra +10 mm at the top is
+  // tooling margin, not a product/RF requirement.
   boardH: 70,
+  productBoardH: 60,
+  effectiveMechanicalYMin: -35,
+  effectiveMechanicalYMax: 25,
   boardCenterY: 0,
   originalBoardH: 50,
 
@@ -357,8 +362,9 @@ export const complexExcitationSeed = {
 /**
  * C-board topology decision from the pre-HFSS footprint audit.
  * A full-size single-section branch-line hybrid did not fit the historical
- * 50 mm x 50 mm layout, but becomes a valid comparison candidate after the
- * current one-sided extension to 50 mm x 60 mm (board center y = -5 mm).
+ * 50 mm x 50 mm layout, but becomes a valid comparison candidate inside the
+ * 50 mm x 60 mm product/mechanical target. The current 50 x 70 mm tscircuit
+ * outline is only a centered CAD workaround and is not required by the RF footprint.
  */
 export const cCouplerFeasibilitySeed = {
   standardBranchLineEnvelopeMm: {
@@ -368,7 +374,8 @@ export const cCouplerFeasibilitySeed = {
   originalPatchLowerFreeHeightMm: 15.75,
   currentPatchLowerFreeHeightMm: 25.75,
   originalAbsoluteMaxLowerFreeHeightMm: 21.5,
-  extendedBoardHeightMm: 60,
+  productBoardHeightMm: 60,
+  tscircuitCadOutlineHeightMm: 70,
   standardBranchLineFitsSameLayer: true,
   preferredPhaseConventionDeg: -90,
   fallbackClass: "extended-standard-or-compact-quadrature",
