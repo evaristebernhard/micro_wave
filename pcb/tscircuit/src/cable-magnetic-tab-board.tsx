@@ -66,12 +66,22 @@ export const CableMagneticTabBoard = () => {
         connections={{ pin1: "net.GND" }}
       />
       <testpoint
-        name="TP_COAX_SHIELD"
+        name="TP_COAX_SHIELD_L"
         footprintVariant="pad"
         padShape="rect"
-        width="7mm"
+        width="5mm"
         height="4mm"
-        pcbX="-6mm"
+        pcbX="-6.5mm"
+        pcbY={mm(yCable)}
+        connections={{ pin1: "net.GND" }}
+      />
+      <testpoint
+        name="TP_COAX_SHIELD_R"
+        footprintVariant="pad"
+        padShape="rect"
+        width="5mm"
+        height="4mm"
+        pcbX="6.5mm"
         pcbY={mm(yCable)}
         connections={{ pin1: "net.GND" }}
       />
