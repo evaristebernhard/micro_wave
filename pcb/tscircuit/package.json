@@ -18,7 +18,7 @@
     "export:cal:circuit-json": "mkdir -p dist && tsci export index-tcal.tsx -f circuit-json -o dist/tcell-cal.circuit.json",
     "export:cal:gerbers": "mkdir -p dist && tsci export index-tcal.tsx -f gerbers -o dist/tcell-cal.gerbers.zip",
     "export:cal:pcb-svg": "mkdir -p dist && tsci export index-tcal.tsx -f pcb-svg -o dist/tcell-cal.pcb.svg",
-    "check:full-v2": "tsci check netlist index-full-v2.tsx && tsci check placement index-full-v2.tsx && tsci check trace-length index-full-v2.tsx && tsci check routing-difficulty index-full-v2.tsx && tsci build index-full-v2.tsx && tsci check shorts index-full-v2.tsx",
+    "check:full-v2": "tsci check netlist index-full-v2.tsx && tsci check placement index-full-v2.tsx && tsci check trace-length R_ID.pin1 index-full-v2.tsx && tsci check trace-length R_ID.pin2 index-full-v2.tsx && tsci check routing-difficulty index-full-v2.tsx && tsci build index-full-v2.tsx && tsci check shorts index-full-v2.tsx",
     "build:full-v2": "tsci build index-full-v2.tsx --all-images",
     "export:full-v2:circuit-json": "mkdir -p dist && tsci export index-full-v2.tsx -f circuit-json -o dist/full-v2.circuit.json",
     "export:full-v2:gerbers": "mkdir -p dist && tsci export index-full-v2.tsx -f gerbers -o dist/full-v2.gerbers.zip",
