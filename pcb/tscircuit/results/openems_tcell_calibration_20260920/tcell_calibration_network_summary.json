@@ -1,0 +1,16 @@
+{
+  "mode": "network",
+  "profile": "fast",
+  "excitation": "gaussian",
+  "nr_ts": 30000,
+  "threads": 4,
+  "f_ghz": 2.45,
+  "S11_db": -5.132409082194368,
+  "S21_db": -9.568545455812664,
+  "target_extraction": 0.2476,
+  "S31_db": -11.556565438943135,
+  "branch_power_fraction_50ohm": 0.06987848104362894,
+  "power_sum": 0.48705533097321124,
+  "passivity_excess": 0.0,
+  "network_result_valid": true
+}
