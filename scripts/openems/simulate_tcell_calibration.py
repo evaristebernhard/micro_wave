@@ -417,7 +417,8 @@ def build_model(
             [-pad_inner, y1, ground_surface_z],
             "x",
             "z",
-            excite=1,
+            excite=-1,
+            Feed_R=50,
             priority=40,
             MeasPlaneShift=2.0,
             edges2grid="xyz",
@@ -425,11 +426,12 @@ def build_model(
         FDTD.AddMSLPort(
             2,
             signal,
-            [pad_inner, y0, top_z1],
-            [pad_outer, y1, ground_surface_z],
+            [pad_outer, y0, top_z1],
+            [pad_inner, y1, ground_surface_z],
             "x",
             "z",
             excite=0,
+            Feed_R=50,
             priority=40,
             MeasPlaneShift=2.0,
             edges2grid="xyz",
@@ -438,19 +440,23 @@ def build_model(
 
     if mode == "network":
         # Straight feed section provides an orthogonal branch reference plane.
-        port_y0 = patch["feedReference"]["y"] + 0.5
-        port_y1 = port_y0 + 1.0
+        # Passive branch port is OUTSIDE -> DUT, with a real 50-ohm
+        # termination at the outer end. The old 1 mm internal/open port was
+        # both unterminated and direction-reversed.
+        port_y_outer = inset_end["y"]
+        port_y_inner = patch["feedReference"]["y"]
         ports.append(
             FDTD.AddMSLPort(
                 3,
                 signal,
-                [-patch["feedWidthMm"] / 2, port_y0, top_z1],
-                [patch["feedWidthMm"] / 2, port_y1, ground_surface_z],
+                [-patch["feedWidthMm"] / 2, port_y_outer, top_z1],
+                [patch["feedWidthMm"] / 2, port_y_inner, ground_surface_z],
                 "y",
                 "z",
                 excite=0,
+                Feed_R=50,
                 priority=40,
-                MeasPlaneShift=0.0,
+                MeasPlaneShift=0.5 * (port_y_outer - port_y_inner),
                 edges2grid="xyz",
             )
         )
@@ -538,6 +544,9 @@ def run(
     if mode == "network":
         s31 = ports[2].uf_ref / inc
         result["S31"] = {"magnitude_db": calc_db(s31).tolist()}
+        result["power_sum"] = (
+            np.abs(s11) ** 2 + np.abs(s21) ** 2 + np.abs(s31) ** 2
+        ).tolist()
     else:
         reflected = np.abs(s11) ** 2
         through = np.abs(s21) ** 2
@@ -561,6 +570,9 @@ def run(
         summary["branch_power_fraction_50ohm"] = float(
             10.0 ** (summary["S31_db"] / 10.0)
         )
+        summary["power_sum"] = float(result["power_sum"][i0])
+        summary["passivity_excess"] = max(0.0, summary["power_sum"] - 1.0)
+        summary["network_result_valid"] = summary["power_sum"] <= 1.05
     else:
         summary["non_through_accepted_power_fraction"] = float(
             result["non_through_accepted_power_fraction"][i0]
@@ -628,10 +640,10 @@ def main():
     profiles = {
         "fast": {
             "coarse": True,
-            "nr_ts": 40000,
-            "excitation": "sinus",
-            "fc_ghz": 0.55,
-            "frequency_points": 1,
+            "nr_ts": 30000,
+            "excitation": "gaussian",
+            "fc_ghz": 0.30,
+            "frequency_points": 81,
             "threads": 4,
         },
         "production": {
@@ -644,10 +656,10 @@ def main():
         },
         "smoke": {
             "coarse": True,
-            "nr_ts": 2000,
-            "excitation": "sinus",
-            "fc_ghz": 0.55,
-            "frequency_points": 1,
+            "nr_ts": 4000,
+            "excitation": "gaussian",
+            "fc_ghz": 0.30,
+            "frequency_points": 21,
             "threads": 4,
         },
     }
