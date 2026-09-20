@@ -1,0 +1,20 @@
+{
+  "profile": "smoke",
+  "id_mode": "open",
+  "f_ghz": 2.45,
+  "S11_db": -19.174280075922525,
+  "S21_db": -44.71847412142033,
+  "VSWR": 1.247122791303188,
+  "reflected_power_fraction": 0.012094056478627165,
+  "through_power_fraction": 3.374058342039603e-05,
+  "non_through_accepted_fraction": 0.9878722029379524,
+  "power_sum_reflected_plus_through": 0.01212779706204756,
+  "passivity_excess": 0.0,
+  "vswr_le_2_bandwidth_mhz": 200.0,
+  "vswr_le_2_band_lo_ghz": 2.35,
+  "vswr_le_2_band_hi_ghz": 2.55,
+  "target_non_through_fraction_reference": 0.2476,
+  "yee_cells_approx": 279300,
+  "screen_gate": true,
+  "interpretation": "non_through_accepted_fraction is not pure workpiece absorption; it combines Patch radiation and all accepted/lost power in this fast model"
+}
