@@ -5,11 +5,13 @@ on:
     paths:
       - "pcb/tscircuit/**"
       - "scripts/openems/**"
+      - "scripts/system/**"
       - ".github/workflows/tscircuit-pcb.yml"
   pull_request:
     paths:
       - "pcb/tscircuit/**"
       - "scripts/openems/**"
+      - "scripts/system/**"
       - ".github/workflows/tscircuit-pcb.yml"
 
 jobs:
@@ -48,6 +50,11 @@ jobs:
           python -m py_compile ../../scripts/openems/simulate_connection_hardware.py
           python -m py_compile ../../scripts/system/cable_model.py
           python -m py_compile ../../scripts/system/cascade_power_budget.py
+
+      - name: Validate deterministic system models
+        run: |
+          python ../../scripts/system/cable_model.py --out ../../results/system/rg142_5m_audit_ci.json
+          python ../../scripts/system/cascade_power_budget.py --out ../../results/system/initial_5_25_100_budget_ci.json
 
       - name: Validate T-cell calibration board
         run: npm run check:cal
