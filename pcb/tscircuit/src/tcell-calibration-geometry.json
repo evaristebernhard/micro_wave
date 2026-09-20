@@ -1,0 +1,80 @@
+{
+  "schema": "micro-wave/tcell-calibration/v1",
+  "frequencyGHz": 2.45,
+  "board": {
+    "widthMm": 50,
+    "heightMm": 60,
+    "center": {
+      "x": 0,
+      "y": -5
+    },
+    "edgeMarginMm": 0.2
+  },
+  "stackup": {
+    "copperThicknessMm": 0.035,
+    "fr4ThicknessMm": 1.6,
+    "fr4EpsilonR": 4.3,
+    "fr4LossTangent": 0.02,
+    "frontPpThicknessMm": 2,
+    "rearPpThicknessMm": 6,
+    "ppEpsilonR": 2.2,
+    "ppLossTangent": 0.0005
+  },
+  "patch": {
+    "widthMm": 37.5,
+    "lengthMm": 28.5,
+    "center": {
+      "x": 0,
+      "y": 5
+    },
+    "feedWidthMm": 2.9,
+    "insetDepthMm": 10.5,
+    "insetGapMm": 0.5,
+    "feedReference": {
+      "x": 0,
+      "y": -9.25
+    },
+    "feedNodeSizeMm": 1.6
+  },
+  "tcell": {
+    "inputReference": {
+      "x": -20.2,
+      "y": -18
+    },
+    "junction": {
+      "x": -5.467,
+      "y": -25.969
+    },
+    "outputReference": {
+      "x": 20.2,
+      "y": -18
+    },
+    "seriesWidthMm": 3.92,
+    "through50WidthMm": 3.137,
+    "branchWidthMm": 1.04,
+    "junctionNodeSizeMm": 2.2,
+    "targetExtraction": 0.2476,
+    "targetCouplingDb": 6.06,
+    "targetSeriesOhm": 43.37,
+    "targetBranchOhm": 87.16,
+    "targetSeriesQuarterWaveMm": 16.75,
+    "targetBranchQuarterWaveMm": 17.59
+  },
+  "launch": {
+    "signalPadCenterYMm": -18,
+    "contactXAbsMm": 22.5,
+    "signalPadWidthMm": 4.6,
+    "signalPadHeightMm": 4,
+    "groundPadCenterYMm": -23,
+    "groundPadWidthMm": 4.6,
+    "groundPadHeightMm": 2.4,
+    "viaXOffsetsMm": [
+      -1.4,
+      -0.5,
+      0.5,
+      1.4
+    ],
+    "viaHoleDiameterMm": 0.3,
+    "viaOuterDiameterMm": 0.6
+  }
+}
