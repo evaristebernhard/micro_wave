@@ -6,12 +6,13 @@
 
 ## 当前基线
 
-**当前有效需求基线：`docs/01_rf_simulation_requirements_v3.md`。**
+**当前有效需求基线：`docs/01_rf_simulation_requirements_v3.md`。当前理论总基线：`docs/24_theory_closure_master_v1.md`。**
 
 - `docs/01_rf_simulation_requirements_v1.md`：原始需求冻结版，仅保留追踪
 - `docs/01_rf_simulation_requirements_v2.md`：第一轮工程修订版，现保留用于追踪
 - `docs/01_rf_simulation_requirements_v3.md`：当前客户技术修订基线；明确写入不可执行原始指标、替代验收口径和客户需确认项
-- `docs/02_system_theory_analysis_v1.md`：系统拓扑、功率预算、级联均匀性、WR340/50 Ω、磁吸接口等理论分析
+- `docs/02_system_theory_analysis_v1.md`：系统拓扑、功率预算、级联均匀性、WR340/50 Ω、磁吸接口等早期理论分析
+- `docs/24_theory_closure_master_v1.md`：**当前唯一理论总入口**；统一 50×60 产品机械目标、50×70 tscircuit CAD workaround、500 W/1–100 块功率边界、Zone 递推、field-aware T-cell 综合与仿真标定 gate
 - `docs/03_patch_antenna_theory_v1.md`：2.45 GHz 前向辐射矩形 Patch 的尺寸、弱耦合、馈电、功率守恒与 tscircuit/HFSS 参数化基线
 - `docs/04_pcb_design_manual_v1.md`：第一版 tscircuit PCB 的执行手册，含坐标、尺寸、层叠、Patch/主线/耦合/识别线/磁吸接口规则和 HFSS 交接清单
 - `docs/05_gradient_coupling_system_architecture_v1.md`：梯度耦合分区架构、等功率递推、A/B/C/D 四类板、500 W 系统功率边界和分配网络约束
@@ -25,7 +26,14 @@
 - `docs/13_coupler_terminal_phase_closure_v1.md`：闭合 C 的 quadrature phase 约定与 D terminal 相位；给出完整四板约 0/90/180/270° seed，并落实 B/C V-feed 与 D 35.34 mm 斜向 phase route
 - `docs/14_c_coupler_footprint_feasibility_v1.md`：审计 C 的 3 dB quadrature coupler footprint；证明标准 full-size branch-line 在当前 50×50 mm 同层 Patch 布局中无空间，保留 compact quadrature 路线
 
-## V3 当前工程口径
+## 当前工程口径
+
+### 尺寸
+
+- 产品/理论机械目标：**50 × 60 mm**；
+- 当前 RF 坐标有效包络：`x∈[-25,25] mm, y∈[-35,25] mm`；
+- tscircuit 因 board outline 居中限制暂用 **50 × 70 mm** CAD 外框以获得 `y=-35 mm` 下边界；多出的上侧 10 mm 不是产品需求；
+- 加工冻结时应回到 50 × 60 mm 机械外形。
 
 ### 功率
 
@@ -33,9 +41,9 @@
 - 磁控管硬件上限仍为 500 W；
 - 预留约 20% 系统损耗/反射余量，初始有效功率预算按 400 W；
 - 5–8 W/块不再作为 1–100 块全范围硬指标；
-- 50 块：约 8 W/块；
-- 80 块：约 5 W/块；
-- 100 块：约 4 W/块；
+- 机械/识别架构仍支持 1–100 块；
+- 在 80% 端到端规划效率下，50 块约 8 W/块、80 块约 5 W/块、100 块约 4 W/块；
+- **80 块 × 5 W 是功率预算上限，不是已验证保证值**，真实可同时供能板数必须由最终端到端效率重算；
 - 若必须 100 块均达到 5 W/块，则 80% 效率假设下源功率至少约 625 W，需要升级硬件。
 
 ### RF 分区
@@ -56,7 +64,7 @@
        └─ 1 块：D_term
 ```
 
-按当前 0.42 dB/cell 理论值，4 板等功率梯度目标约为 **21.5% / 30.2% / 47.6% / 100%**。D 板是终端辐射板，不再把所有板都按固定 10% 弱耦合同构板处理。
+旧的 4 板等 RF 功率 benchmark 在 0.42 dB/cell 下给出 **21.5% / 30.2% / 47.6% / 100%**；该组数值现仅作解析校准基准。当前 field-aware 主设计由 `docs/23` / `docs/24` 更新为约 **24.76% / 24.07% / 36.08% / terminal**，目标 Patch 功率比例为 **1 : 0.6412 : 0.6412 : 1**，相位为 **0°, -5.3°, -5.3°, 0°**。
 
 25/100 块优先使用局部全波模型 + 复数 S 参数网络级联。梯度比例必须在 HFSS/openEMS 得到真实 through-line 传输系数后重新标定。
 
@@ -154,10 +162,10 @@ micro_wave/
 
 因此后续 HFSS/openEMS 与 PCB 优化不再只以 coupling dB 为中心。A/B/C/D 的第一轮 6.5/5/3 dB 参数用于启动搜索，最终应由工件侧目标复激励和无源网络可实现性共同决定。
 
-- `docs/16_extended_board_tcell_design_v1.md`：50×60 工程包络与 matched-extraction T-cell 解析设计。
+- `docs/16_extended_board_tcell_design_v1.md`：50×60 产品/RF 有效包络与 50×70 tscircuit CAD workaround 的几何来源，以及 matched-extraction T-cell 解析设计。
 - `docs/17_tcell_reference_plane_bridge_phase_v1.md`：T-cell 最终参考面；5 mm 磁吸桥作为独立相移二端口，统一约 19° bridge phase，A/B/C 残差约在 ±0.7° 内
 
-当前 PCB 工程同时保留原 coupler A/B/C/D 与 matched-extraction T-cell A/B/C/D 两套可导出 topology。RF 几何实际只需要约 60 mm 的纵向有效包络；由于当前 tscircuit board outline 以原点居中实现，工程板采用 50×70 mm，使下边界达到 y=-35 mm。横向板宽始终保持 50 mm，因此 Patch 节距与相位 reference 不变。
+当前 PCB 工程同时保留原 coupler A/B/C/D 与 matched-extraction T-cell A/B/C/D 两套可导出 topology。**产品机械目标固定为 50×60 mm**；当前 RF 几何也只需要这一有效纵向包络。由于 tscircuit board outline 暂按原点居中实现，代码中的 CAD seed 采用 50×70 mm 仅用于得到 y=-35 mm 下边界并避免平移 RF reference。该 70 mm 不应解释为产品板高。
 
 - `docs/17_tcell_reference_plane_layout_v1.md`：50×60 T-cell 正确 reference plane、T-junction 坐标、inter-cell 37–39° phase target 与 D 半波 V-feed。
 - `docs/18_tcell_bandwidth_load_sensitivity_v1.md`：理想传输线频带与 loaded-Patch reflection 敏感性；给出 T-cell / isolated-topology 的定量切换判据。

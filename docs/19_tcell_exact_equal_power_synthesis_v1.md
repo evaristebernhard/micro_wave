@@ -1,5 +1,7 @@
 # T-cell 精确等功率综合 V1
 
+> **状态更新（2026-09-20）：本文保留为 equal-RF-power 解析 benchmark，不再是当前最终加热场参数。当前主设计已由 `docs/23_few_mode_robust_field_synthesis_v1.md` / `docs/24_theory_closure_master_v1.md` 更新为 field-aware mirror taper。**
+>
 > 目的：在 matched-extraction T-cell 已经具备可制造拓扑后，不再沿用旧 6.5/5/3 dB 的近似 coupling，而是把 0.42 dB/cell through-loss 显式纳入，精确反解四块 Patch 等功率。
 
 ## 1. 递推
@@ -200,11 +202,11 @@ mathbf u_{m T,seed}
 }
 ]
 
-这比旧 complex seed 更干净：四块 amplitude 在 reduced-order model 中完全一致。
+这组结果适合作为网络闭合和全波校准 benchmark；但工件分层场模型已经表明，最终加热均匀性不应继续强制四块 amplitude 完全一致。
 
 ## 6. 设计意义
 
-当前 T-cell 主方案同时满足：
+在 **equal-RF-power benchmark** 下，T-cell 解析方案同时满足：
 
 [
 oxed{
