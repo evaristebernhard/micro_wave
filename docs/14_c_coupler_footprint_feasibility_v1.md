@@ -1,5 +1,8 @@
 # C 板 3 dB 正交耦合器的尺寸可实现性审计 V1
 
+> **状态更新（2026-09-20）：** 本文关于“标准 branch-line 在 50×50 mm 中放不下”的结论仅针对历史 50×50 footprint。当前产品机械目标已扩展为 50×60 mm，标准 branch-line 可重新作为对照候选；主方案仍优先 matched T-cell。见 `docs/16_extended_board_tcell_design_v1.md` / `docs/24_theory_closure_master_v1.md`。
+
+
 > 目的：在全波仿真前，先回答 C 板“约 3 dB 强耦合 + 约 -90° branch phase”能否用标准单节 branch-line hybrid 直接塞进当前 50×50 mm Patch 板。
 
 ## 1. 标准微带尺寸的一阶反算
