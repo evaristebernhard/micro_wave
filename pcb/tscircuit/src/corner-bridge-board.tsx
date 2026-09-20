@@ -140,61 +140,8 @@ const CornerCopper = () => (
           height={mm(geom.interface.idPadWidthMm)}
           shape="rect"
         />
-      </footprint>
-    }
-  />
-)
 
-export const CornerBridgeBoard = () => (
-  <board
-    title="2.45 GHz planar L corner magnetic bridge"
-    outline={outline}
-    material="fr4"
-    layers={2}
-    thickness={mm(geom.stackup.fr4ThicknessMm)}
-    routeRemaining={false}
-    schematicDisabled
-  >
-    <net name="GND" />
-
-    <copperpour
-      name="GND_PLANE"
-      connectsTo="net.GND"
-      layer="bottom"
-      boardEdgeMargin={mm(geom.rf.boardEdgeGroundMarginMm)}
-      clearance="0.15mm"
-    />
-
-    <CornerCopper />
-
-    {geom.interface.viaXOffsetsMm.map((dx, i) => (
-      <via
-        key={`L-${i}`}
-        name={`V_GND_L_${i + 1}`}
-        pcbX={mm(-47.5 + dx)}
-        pcbY="-6mm"
-        fromLayer="top"
-        toLayer="bottom"
-        holeDiameter={mm(geom.interface.viaHoleDiameterMm)}
-        outerDiameter={mm(geom.interface.viaOuterDiameterMm)}
-        connectsTo="net.GND"
-      />
-    ))}
-    {geom.interface.viaXOffsetsMm.map((dy, i) => (
-      <via
-        key={`T-${i}`}
-        name={`V_GND_T_${i + 1}`}
-        pcbX="-6mm"
-        pcbY={mm(47.5 + dy)}
-        fromLayer="top"
-        toLayer="bottom"
-        holeDiameter={mm(geom.interface.viaHoleDiameterMm)}
-        outerDiameter={mm(geom.interface.viaOuterDiameterMm)}
-        connectsTo="net.GND"
-      />
-    ))}
-
-    <silkscreenrect pcbX="-47.5mm" pcbY="8mm" width="5mm" height="5mm" filled={false} stroke="solid" strokeWidth="0.18mm" />
+        <silkscreenrect pcbX="-47.5mm" pcbY="8mm" width="5mm" height="5mm" filled={false} stroke="solid" strokeWidth="0.18mm" />
     <silkscreenrect pcbX="-47.5mm" pcbY="13mm" width="5mm" height="5mm" filled={false} stroke="solid" strokeWidth="0.18mm" />
     <silkscreenrect pcbX="8mm" pcbY="47.5mm" width="5mm" height="5mm" filled={false} stroke="solid" strokeWidth="0.18mm" />
     <silkscreenrect pcbX="13mm" pcbY="47.5mm" width="5mm" height="5mm" filled={false} stroke="solid" strokeWidth="0.18mm" />
