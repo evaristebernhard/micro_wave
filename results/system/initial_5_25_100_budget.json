@@ -1,0 +1,63 @@
+{
+  "architecture": "local zones of up to four boards; not one 100-board microstrip chain",
+  "assumptions": {
+    "mean_board_power_w": 6.5,
+    "source_max_w": 500,
+    "upstream_loss_db": 0.8,
+    "zone_efficiency": 0.8,
+    "relative_zone_profile": [
+      1,
+      0.6412,
+      0.6412,
+      1
+    ]
+  },
+  "cases": [
+    {
+      "boards": 5,
+      "board_power_min_w": 5.0789666098,
+      "board_power_max_w": 7.9210333902,
+      "board_power_avg_w": 6.5,
+      "max_deviation_fraction": 0.2186205216,
+      "within_5_to_8_w": true,
+      "within_pm25_percent": true,
+      "useful_board_power_w": 32.5,
+      "rf_power_into_zones_w": 40.625,
+      "source_power_required_w": 48.8419926563,
+      "source_max_w": 500,
+      "feasible_under_source_limit": true,
+      "minimum_system_efficiency_for_5w_each": 0.05
+    },
+    {
+      "boards": 25,
+      "board_power_min_w": 5.0789666098,
+      "board_power_max_w": 7.9210333902,
+      "board_power_avg_w": 6.5,
+      "max_deviation_fraction": 0.2186205216,
+      "within_5_to_8_w": true,
+      "within_pm25_percent": true,
+      "useful_board_power_w": 162.5,
+      "rf_power_into_zones_w": 203.125,
+      "source_power_required_w": 244.2099632817,
+      "source_max_w": 500,
+      "feasible_under_source_limit": true,
+      "minimum_system_efficiency_for_5w_each": 0.25
+    },
+    {
+      "boards": 100,
+      "board_power_min_w": 5.0789666098,
+      "board_power_max_w": 7.9210333902,
+      "board_power_avg_w": 6.5,
+      "max_deviation_fraction": 0.2186205216,
+      "within_5_to_8_w": true,
+      "within_pm25_percent": true,
+      "useful_board_power_w": 650,
+      "rf_power_into_zones_w": 812.5,
+      "source_power_required_w": 976.8398531266,
+      "source_max_w": 500,
+      "feasible_under_source_limit": false,
+      "minimum_system_efficiency_for_5w_each": 1
+    }
+  ],
+  "warning": "Illustrative budget using assumed 0.8 dB upstream loss and 80% zone efficiency; replace with final bridge/cable/full-board S-parameter derived losses."
+}
