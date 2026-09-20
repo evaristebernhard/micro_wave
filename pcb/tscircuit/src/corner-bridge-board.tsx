@@ -90,8 +90,8 @@ const CornerCopper = () => (
 
         <smtpad
           portHints={["pin1"]}
-          pcbX="-47.5mm"
-          pcbY="0mm"
+          pcbX="-30mm"
+          pcbY="-17.5mm"
           width={mm(geom.interface.signalPadWidthMm)}
           height={mm(geom.interface.signalPadHeightMm)}
           shape="rect"
@@ -99,8 +99,8 @@ const CornerCopper = () => (
         />
         <smtpad
           portHints={["pin1"]}
-          pcbX="0mm"
-          pcbY="47.5mm"
+          pcbX="17.5mm"
+          pcbY="30mm"
           width={mm(geom.interface.signalPadHeightMm)}
           height={mm(geom.interface.signalPadWidthMm)}
           shape="rect"
@@ -109,8 +109,8 @@ const CornerCopper = () => (
 
         <smtpad
           portHints={["pin2"]}
-          pcbX="-47.5mm"
-          pcbY="-6mm"
+          pcbX="-30mm"
+          pcbY="-23.5mm"
           width={mm(geom.interface.groundPadWidthMm)}
           height={mm(geom.interface.groundPadHeightMm)}
           shape="rect"
@@ -118,8 +118,8 @@ const CornerCopper = () => (
         />
         <smtpad
           portHints={["pin2"]}
-          pcbX="-6mm"
-          pcbY="47.5mm"
+          pcbX="11.5mm"
+          pcbY="30mm"
           width={mm(geom.interface.groundPadHeightMm)}
           height={mm(geom.interface.groundPadWidthMm)}
           shape="rect"
@@ -128,16 +128,16 @@ const CornerCopper = () => (
 
         <smtpad
           portHints={["pin3"]}
-          pcbX="-47.5mm"
-          pcbY="-10.5mm"
+          pcbX="-30mm"
+          pcbY="-28mm"
           width={mm(geom.interface.idPadWidthMm)}
           height={mm(geom.interface.idPadHeightMm)}
           shape="rect"
         />
         <smtpad
           portHints={["pin3"]}
-          pcbX="-10.5mm"
-          pcbY="47.5mm"
+          pcbX="7mm"
+          pcbY="30mm"
           width={mm(geom.interface.idPadHeightMm)}
           height={mm(geom.interface.idPadWidthMm)}
           shape="rect"
@@ -147,8 +147,8 @@ const CornerCopper = () => (
           <platedhole
             key={`L-${i}`}
             portHints={["pin2"]}
-            pcbX={mm(-47.5 + dx)}
-            pcbY="-6mm"
+            pcbX={mm(-30 + dx)}
+            pcbY="-23.5mm"
             shape="circle"
             holeDiameter={mm(geom.interface.viaHoleDiameterMm)}
             outerDiameter={mm(geom.interface.viaOuterDiameterMm)}
@@ -158,8 +158,8 @@ const CornerCopper = () => (
           <platedhole
             key={`T-${i}`}
             portHints={["pin2"]}
-            pcbX="-6mm"
-            pcbY={mm(47.5 + dy)}
+            pcbX="11.5mm"
+            pcbY={mm(30 + dy)}
             shape="circle"
             holeDiameter={mm(geom.interface.viaHoleDiameterMm)}
             outerDiameter={mm(geom.interface.viaOuterDiameterMm)}
