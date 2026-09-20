@@ -510,9 +510,24 @@ def run(args):
         summary["S31_db"] = float(result["S31_db"][i0])
         summary["S31_phase_deg"] = float(result["S31_phase_deg"][i0])
         summary["branch_power_fraction_50ohm"] = float(abs(a["s"]["S31"][i0]) ** 2)
+        summary["through_power_fraction_50ohm"] = float(abs(a["s"]["S21"][i0]) ** 2)
+        summary["total_output_power_fraction"] = (
+            summary["branch_power_fraction_50ohm"]
+            + summary["through_power_fraction_50ohm"]
+        )
+        summary["conditional_branch_split"] = (
+            summary["branch_power_fraction_50ohm"]
+            / summary["total_output_power_fraction"]
+            if summary["total_output_power_fraction"] > 0
+            else 0.0
+        )
         summary["target_branch_power_fraction"] = float(g["tcell"]["targetExtraction"])
         summary["branch_error_abs"] = (
             summary["branch_power_fraction_50ohm"]
+            - summary["target_branch_power_fraction"]
+        )
+        summary["conditional_split_error_abs"] = (
+            summary["conditional_branch_split"]
             - summary["target_branch_power_fraction"]
         )
 
@@ -530,6 +545,12 @@ def run(args):
             summary["power_sum"] <= 1.05
             and summary["power_sum_max_2p35_2p55"] <= 1.08
             and summary["record_cycles_at_2p45"] >= 8.0
+        )
+        summary["candidate_design_gate"] = bool(
+            summary["network_result_valid"]
+            and summary["S11_db"] <= -15.0
+            and abs(summary["conditional_split_error_abs"]) <= 0.03
+            and summary["total_output_power_fraction"] >= 0.75
         )
 
     out_dir.mkdir(parents=True, exist_ok=True)
