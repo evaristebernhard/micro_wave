@@ -1,5 +1,7 @@
 # 扩展板高 + matched-extraction T-cell 解析设计 V1
 
+> **尺寸勘误（2026-09-20）：产品/理论机械目标是 50×60 mm。本文中的 50×70 mm 仅指当前 tscircuit 为保持既有 RF 坐标而使用的居中 CAD 外框，不是产品板高。当前总口径见 docs/24_theory_closure_master_v1.md。**
+
 > 目标：允许 PCB 尺寸增大后，重新比较标准 quadrature coupler 与 matched extraction T-cell。核心约束是不改变 50 mm 水平 Patch 节距，因此只增加板高。
 
 ## 1. 当前尺寸口径：产品 50×60 mm；tscircuit 暂用 50×70 mm 居中 CAD 外形
@@ -30,19 +32,25 @@ y\in[-35,25]\ {\rm mm}.
 
 tscircuit CAD workaround 仍以原点居中，因此 CAD 外框为 \(y\in[-35,35]\) mm。
 
-因此 y 边界由原来的：
+因此产品有效机械 y 边界由原来的：
 
 \[
 [-25,+25]\ {\rm mm}
 \]
 
-变为：
+扩展为：
 
 \[
-\boxed{[-35,+35]\ {\rm mm}}.
+\boxed{[-35,+25]\ {\rm mm}}.
 \]
 
-相对最早 50×50 mm 方案，真正新增的 10 mm 有效空间位于下方 RF/控制网络一侧；tcsircuit CAD 顶部额外出现的 10 mm 只是居中外框余量。Patch、RF IN/OUT、磁吸接口及 RF reference coordinates 保持不变。
+仅 tscircuit 的居中 CAD 外框为：
+
+\[
+[-35,+35]\ {\rm mm}.
+\]
+
+相对最早 50×50 mm 方案，真正新增的 10 mm 有效空间位于下方 RF/控制网络一侧；tscircuit CAD 顶部额外出现的 10 mm 只是居中外框余量。Patch、RF IN/OUT、磁吸接口及 RF reference coordinates 保持不变。
 
 板宽仍为：
 
@@ -50,7 +58,7 @@ tscircuit CAD workaround 仍以原点居中，因此 CAD 外框为 \(y\in[-35,35
 \boxed{50\ {\rm mm}},
 \]
 
-所以相邻 Patch 的水平节距仍是 50 mm，不改变 progressive-phase 参考。这个方案与 50×60、center=0 具有相同的 -35 mm 下边界，但总高度少 10 mm。
+所以相邻 Patch 的水平节距仍是 50 mm，不改变 RF phase reference。产品机械包络保持 50×60 mm；50×70 mm 只用于当前 tscircuit 居中外框。
 
 ## 2. 扩板以后标准 C branch-line hybrid 已经从“放不下”变成“可以作为真实候选”
 
