@@ -1,5 +1,8 @@
 # C 耦合相位与 D 终端相位闭合 V1
 
+> **状态更新（2026-09-20）：** 本文的 0/90/180/270° 解保留为 progressive-phase 网络 benchmark，不再是当前最终工件场目标。当前 field-aware phase 为近同相 mirror mode，见 `docs/23_few_mode_robust_field_synthesis_v1.md` / `docs/24_theory_closure_master_v1.md`。
+
+
 > 目的：在全波仿真之前，把 A/B/C/D 四板 Zone 的第一版复激励全部闭合到一个可制造的解析 seed，并把结果落实到 PCB 几何。
 
 ---
