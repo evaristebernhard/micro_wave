@@ -38,7 +38,7 @@
 - Gerber/Circuit JSON 导出；
 - 50 × 60 mm 产品机械目标与 50 × 70 mm tscircuit CAD workaround 的区分。
 
-**当前状态：已实现设计 seed，但不是 manufacturing freeze。**
+**当前状态：已实现 true 50 × 60 mm calibration board，并新增包含 RF 接口、T-cell、Patch、bottom ground、10 kΩ ID 支路的 full engineering board V2；仍不是 manufacturing freeze。**
 
 ### L2 — 当前主方案单板全波闭环
 
@@ -51,7 +51,7 @@
 - through loss；
 - loaded R+jX。
 
-**当前状态：未完成。**
+**当前状态：T-cell core network 已完成可信 thru/T-cell coupon verify；完整单板（launch + Patch + ID + workpiece）尚未闭环。**
 
 ### L3 — 四板 Zone 全波/网络闭环
 
@@ -316,13 +316,9 @@ R_LZ_0\frac{1-\kappa}{\kappa}
 
 ## 7. 当前最大的 Gap 排序
 
-### Gap A — 当前理论主方案还没有对应 full-wave 模型
+### Gap A — T-cell core 已验证，但完整工程板还没有 full-wave 闭环
 
-这是第一优先级。
-
-当前 openEMS 脚本仍在跑旧 edge-coupled seed，而 docs/23/docs/24 推荐的是 T-cell / field-aware 方案。
-
-必须先让“理论 PCB”和“仿真 PCB”变成同一个结构。
+当前 thru/T-cell coupon 已得到可信被动结果，说明核心 T-cell topology 不再是完全未验证状态。下一优先级是 full engineering board V2 的 launch、ID 支路、Patch 和真实 PP/workpiece 加载。
 
 ### Gap B — loaded Patch 的 R+jX 未标定
 
@@ -363,7 +359,7 @@ R_LZ_0\frac{1-\kappa}{\kappa}
 
 - **理论架构：约 75–85%**
 - **PCB 参数化/可制造 seed：约 60–70%**
-- **当前主方案单板 EM 验证：约 10–20%**
+- **当前主方案单板 EM 验证：核心 network 已验证；完整单板仍处于早期验证阶段**
 - **四板 Zone 验证：约 0–10%**
 - **25/100 块系统验证：接近 0%**
 - **500 W 实物验证：0%**
