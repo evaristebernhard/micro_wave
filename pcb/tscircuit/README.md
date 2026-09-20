@@ -1,6 +1,6 @@
 # micro_wave tscircuit PCB
 
-This subproject generates the current centered 50 mm × 70 mm engineering PCB seeds. The RF geometry itself occupies roughly a 50 mm × 60 mm effective envelope; the extra CAD height is used so tscircuit provides the required y=-35 mm lower boundary without shifting the RF reference coordinates. It now exports four position classes: A / B / C through boards and the D terminal radiator.
+This subproject targets a **50 mm × 60 mm product/mechanical PCB**. The current tscircuit implementation uses a centered **50 mm × 70 mm CAD outline only as a tooling workaround** so the lower boundary can reach y=-35 mm without shifting the established RF/Patch reference coordinates. The RF copper itself fits the 50 mm × 60 mm effective envelope. It exports four position classes: A / B / C through boards and the D terminal radiator.
 
 ## Requirements
 
@@ -73,7 +73,8 @@ dist/board-d.circuit.json
 
 Common geometry:
 
-- PCB: 50 × 50 mm
+- Product/mechanical target: **50 × 60 mm**
+- Current tscircuit CAD outline: **50 × 70 mm centered workaround**
 - Patch: 37.5 × 28.5 mm
 - Patch center: (0, 5 mm)
 - RF through-line seed: 2.9 mm wide at y = -18 mm
@@ -110,7 +111,7 @@ After Gerber generation, HFSS must add the real material stack and external stru
 - magnetic interface parasitics
 - representative / actual workpiece
 
-The first HFSS pass should determine 50 mm through-line loss and phase before multi-board cascade optimization. After that, solve A/B/C coupling and board return loss as complex S-parameters, then cascade the loaded cells with S/ABCD matrices. C should not fall back blindly to a full-size standard branch-line hybrid: the analytical footprint audit shows that topology does not fit the current same-layer 50 × 50 mm Patch layout. If the compact side-coupled seed fails, use a compact quadrature family (miniaturized/loaded coupled-line, process-appropriate Lange/interdigital, multilayer broadside, or an external/SMD hybrid).
+The first HFSS pass should determine 50 mm through-line loss and phase before multi-board cascade optimization. After that, solve A/B/C coupling and board return loss as complex S-parameters, then cascade the loaded cells with S/ABCD matrices. C should not fall back blindly to the historical 50 × 50 mm footprint conclusion. The product target is now 50 × 60 mm, so a standard branch-line hybrid becomes a valid comparison candidate, although the matched T-cell remains the simpler primary topology. If the T-cell is too load-sensitive, compare a standard/compact quadrature family (miniaturized/loaded coupled-line, process-appropriate Lange/interdigital, multilayer broadside, or an external/SMD hybrid).
 
 ## Phase-synthesis design gate
 
@@ -141,6 +142,10 @@ The reduced-order transmission-line model gives a natural 50 mm cell progression
 
 These values are stored as metadata in `src/geometry.ts` under `phaseDesignSeed`; they are not yet routed as copper meanders. See `docs/12_pre_simulation_phase_trim_estimate_v1.md`.
 
+
+## Historical progressive-phase copper seed
+
+> The 0/90/180/270° implementation below is retained as a network benchmark. It is **not the current heating-field optimum**. The current field-aware target is the near-in-phase mirror taper from `docs/23_few_mode_robust_field_synthesis_v1.md` and `docs/24_theory_closure_master_v1.md`: amplitude ratio 1 : 0.801 : 0.801 : 1 and phase 0°, -5.3°, -5.3°, 0°.
 
 ## Complete complex-taper copper seed
 
@@ -178,4 +183,4 @@ Entrypoints: `index-ta.tsx`, `index-tb.tsx`, `index-tc.tsx`, `index-td.tsx`.
 
 The original coupler variants remain in the project for topology comparison.
 
-Current mechanical envelope: **50 × 60 mm**, board center y = -5 mm, giving y ∈ [-35, 25] mm while preserving the historical Patch/RF coordinates and 50 mm horizontal pitch.
+Product/mechanical envelope: **50 × 60 mm**, equivalent RF coordinate envelope y ∈ [-35, 25] mm. Current tscircuit board outline remains **50 × 70 mm centered** only because the tool-generated outline is centered at the origin; the extra +10 mm at the top is not a product requirement.
