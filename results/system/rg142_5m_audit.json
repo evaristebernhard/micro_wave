@@ -1,0 +1,12 @@
+{
+  "cable": "RG142 / Belden 84142 nominal interpolation",
+  "frequency_ghz": 2.45,
+  "length_m": 5,
+  "attenuation_db_per_100ft": 21.55,
+  "attenuation_db_per_m": 0.7070209973753281,
+  "total_insertion_loss_db": 3.5351049868766404,
+  "requested_total_loss_db": 0.5,
+  "meets_requested_loss": false,
+  "required_max_attenuation_db_per_m": 0.1,
+  "note": "Cable-only loss; N connector and magnetic-tab loss must be added separately."
+}
