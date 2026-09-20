@@ -33,6 +33,9 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Validate T-cell calibration board
+        run: npm run check:cal
+
       - name: Build circuit
         run: npm run build
 
@@ -41,6 +44,9 @@ jobs:
 
       - name: Export Gerbers
         run: npm run export:gerbers
+
+      - name: Export calibration artifacts
+        run: npm run export:cal:circuit-json && npm run export:cal:gerbers && npm run export:cal:pcb-svg
 
       - name: Upload PCB artifacts
         uses: actions/upload-artifact@v4
