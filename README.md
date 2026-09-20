@@ -1,173 +1,157 @@
 # micro_wave
 
-2.45 GHz 微波加热设备磁吸天线板、连接桥与连接线的射频仿真设计仓库。
+2.45 GHz 微波加热磁吸天线板、连接件与多 Zone RF 分配研究仓库。
 
-当前阶段先冻结可执行参数、审查物理可行性，并定义后续 HFSS/CST/openEMS 的建模与验收口径。仓库中的理论分析和参数预算不是“三维仿真已经达标”的证明。
+当前项目已经从早期 side-coupler / progressive-phase seed 转向 **field-aware matched T-cell + rectangular Patch**。理论链条已经基本闭合，当前重点是把单板 RF 核心、完整工程 PCB、磁吸接口和工件加载逐级做成可信的 full-wave/实物结果。
 
-## 当前基线
+## 当前唯一入口
 
-**当前有效需求基线：`docs/01_rf_simulation_requirements_v3.md`。当前理论总基线：`docs/24_theory_closure_master_v1.md`。**
+- 需求基线：`docs/01_rf_simulation_requirements_v3.md`
+- 原始需求可行性审计：`docs/08_original_requirements_feasibility_audit_v1.md`
+- T-cell 负载敏感性：`docs/18_tcell_bandwidth_load_sensitivity_v1.md`
+- 工件/Patch 模型：`docs/21_loaded_patch_nearfield_analytic_synthesis_v1.md`、`docs/22_layered_medium_patch_loading_model_v1.md`
+- 当前场优化：`docs/23_few_mode_robust_field_synthesis_v1.md`
+- 理论总基线：`docs/24_theory_closure_master_v1.md`
+- 当前能力/GAP：`docs/25_current_capability_gap_audit_v1.md`
+- openEMS 端口与低成本校准：`docs/26_openems_port_fixture_audit_v1.md`
+- 当前快速设计循环：`docs/27_fast_tcell_design_loop_v1.md`
+- 文档索引：`docs/README.md`
+- 历史文档：`docs/archive/`
 
-- `docs/01_rf_simulation_requirements_v1.md`：原始需求冻结版，仅保留追踪
-- `docs/01_rf_simulation_requirements_v2.md`：第一轮工程修订版，现保留用于追踪
-- `docs/01_rf_simulation_requirements_v3.md`：当前客户技术修订基线；明确写入不可执行原始指标、替代验收口径和客户需确认项
-- `docs/02_system_theory_analysis_v1.md`：系统拓扑、功率预算、级联均匀性、WR340/50 Ω、磁吸接口等早期理论分析
-- `docs/24_theory_closure_master_v1.md`：**当前唯一理论总入口**；统一 50×60 产品机械目标、50×70 tscircuit CAD workaround、500 W/1–100 块功率边界、Zone 递推、field-aware T-cell 综合与仿真标定 gate
-- `docs/03_patch_antenna_theory_v1.md`：2.45 GHz 前向辐射矩形 Patch 的尺寸、弱耦合、馈电、功率守恒与 tscircuit/HFSS 参数化基线
-- `docs/04_pcb_design_manual_v1.md`：第一版 tscircuit PCB 的执行手册，含坐标、尺寸、层叠、Patch/主线/耦合/识别线/磁吸接口规则和 HFSS 交接清单
-- `docs/05_gradient_coupling_system_architecture_v1.md`：梯度耦合分区架构、等功率递推、A/B/C/D 四类板、500 W 系统功率边界和分配网络约束
-- `docs/06_patch_design_rationale_v1.md`：当前设计思想主文档；从“为什么采用 Patch”进一步升级到“几何 → 复数 S 参数 → Patch 复激励 → 工件功率沉积 → 无源网络反综合”的统一设计链
-- `docs/07_theory_gap_closure_v1.md`：闭合长串 FR4 损耗上限、灰板 raw S21 指标冲突、强耦合器可实现性、D 终端板与两层梯度分配等剩余理论问题
-- `docs/08_original_requirements_feasibility_audit_v1.md`：原始客户需求可行性审计；逐项记录已证明不可同时满足或不能按原样验收的指标
-- `docs/09_current_patch_smatrix_parameter_design_v1.md`：设计思想下的第一轮参数实现；建立复数 S/ABCD 级联与 A/B/C/D seed，但 6.5/5/3 dB 只作为 scalar-budget 起点，不作为最终场最优解
-- `docs/10_zone_complex_phase_synthesis_v1.md`：四板 Zone 复相位综合；由目标 Patch 复激励反推 coupling magnitude、coupled-port phase 与 through phase，并给出 0/±90/180° canonical mode 扫描方案
-- `docs/11_qmatrix_phase_dof_design_v1.md`：给出 Q 矩阵最小提取流程、phase-DOF 设计 gate、约 18 mm 相位补偿的损耗代价，以及从理想场解反推 PCB 的执行顺序
-- `docs/12_pre_simulation_phase_trim_estimate_v1.md`：在无全波仿真前给出解析 phase-trim 近似解；当前 +90° progressive mode seed，以及 A/B/C = 0 / 0.66 / 1.41 mm 的第一阶 branch trim
-- `docs/13_coupler_terminal_phase_closure_v1.md`：闭合 C 的 quadrature phase 约定与 D terminal 相位；给出完整四板约 0/90/180/270° seed，并落实 B/C V-feed 与 D 35.34 mm 斜向 phase route
-- `docs/14_c_coupler_footprint_feasibility_v1.md`：审计 C 的 3 dB quadrature coupler footprint；证明标准 full-size branch-line 在当前 50×50 mm 同层 Patch 布局中无空间，保留 compact quadrature 路线
+顶层 `docs/` 不再保留已被后续结论覆盖的 50×50、side-coupler、0/90/180/270°、equal-power 等阶段性文档。
 
-## 当前工程口径
+## 当前 PCB
 
-### 尺寸
+### Calibration board
 
-- 产品/理论机械目标：**50 × 60 mm**；
-- 当前 RF 坐标有效包络：`x∈[-25,25] mm, y∈[-35,25] mm`；
-- tscircuit 因 board outline 居中限制暂用 **50 × 70 mm** CAD 外框以获得 `y=-35 mm` 下边界；多出的上侧 10 mm 不是产品需求；
-- 加工冻结时应回到 50 × 60 mm 机械外形。
+`pcb/tscircuit/index-tcal.tsx`
 
-### 功率
+用途：只校准 RF 核心，不作为客户完整单板。
 
-- 原“500 W + 100 块 + 5–8 W/块”不再作为同时硬指标；
-- 磁控管硬件上限仍为 500 W；
-- 预留约 20% 系统损耗/反射余量，初始有效功率预算按 400 W；
-- 5–8 W/块不再作为 1–100 块全范围硬指标；
-- 机械/识别架构仍支持 1–100 块；
-- 50/80/100 块对应的 8/5/4 W 数字仅来自假设端到端效率 80% 的敏感性示例；
-- **当前尚未得到真实端到端效率，因此不存在已验证的 80 块能力或正式板数上限**；真实可同时供能板数必须由当前主方案的全波/实测效率重算；
-- 若必须 100 块均达到 5 W/块，则 80% 效率假设下源功率至少约 625 W，需要升级硬件。
+- 50 × 60 mm
+- T-cell + Patch
+- RF IN / RF OUT
+- bottom ground
+- ground-return vias
+- 无 ID 支路
 
-### RF 分区
+### Full engineering board V2
 
-系统仍支持总计 1–100 块，但不再默认全部串在一条连续 FR4 主线上。
+`pcb/tscircuit/index-full-v2.tsx`
 
-当前工程基线：
+这是当前向客户完整单板演化的主 PCB：
 
-```text
-磁控管
-  → WR340 / 匹配
-  → WR340→N
-  → 低损耗分配主干
-  → 梯度耦合 RF Zone
-       ├─ 4 块：A → B → C → D_term
-       ├─ 3 块：B → C → D_term
-       ├─ 2 块：C → D_term
-       └─ 1 块：D_term
-```
+- 真正 50 × 60 mm 板框；
+- RF IN / RF OUT 磁吸信号触点；
+- 对应 GND 接触面 + 多过孔 return；
+- V2 surrogate-calibrated T-cell；
+- rectangular Patch；
+- 完整底层 ground；
+- 客户原始 10 kΩ / 0603 ID 电阻；
+- ID IN / ID OUT；
+- RF 铜默认 exposed，便于与 PP-loaded EM stack 对齐；
+- miter/overlap transition 和八边形 T-junction，避免 V1 纯硬直角铜节点。
 
-旧的 4 板等 RF 功率 benchmark 在 0.42 dB/cell 下给出 **21.5% / 30.2% / 47.6% / 100%**；该组数值现仅作解析校准基准。当前 field-aware 主设计由 `docs/23` / `docs/24` 更新为约 **24.76% / 24.07% / 36.08% / terminal**，目标 Patch 功率比例为 **1 : 0.6412 : 0.6412 : 1**，相位为 **0°, -5.3°, -5.3°, 0°**。
+V2 仍是 **screen candidate**，不是 manufacturing freeze。
 
-25/100 块优先使用局部全波模型 + 复数 S 参数网络级联。梯度比例必须在 HFSS/openEMS 得到真实 through-line 传输系数后重新标定。
+## 当前 V2 RF 参数
 
-### 50 Ω 主线
+现有可信 openEMS thru/T-cell verify 结果用于校准 PP-loaded microstrip surrogate。
 
-- 原 2.0 mm 不再冻结；
-- tscircuit/HFSS seed 改为 **2.90 mm**；
-- 扫描范围 **2.60–3.20 mm**；
-- 最终按真实 PP 覆盖、地结构和铜厚场求解得到 50 Ω ±2 Ω。
+当前 V2 candidate：
 
-### 连接桥
+| 参数 | V2 |
+|---|---:|
+| 中心频率 | 2.45 GHz |
+| PCB | 50 × 60 mm |
+| Patch | 37.5 × 28.5 mm |
+| calibrated 50 Ω width seed | 2.670 mm |
+| series transformer | 42.11 Ω / 3.557 mm |
+| branch transformer | 78.10 Ω / 1.073 mm |
+| series electrical length seed | 15.317 mm |
+| branch electrical length seed | 15.972 mm |
+| T-junction | (-6.1105, -24.0072) mm |
+| robust junction split target | ≈29.1% |
+| final A-stage output target | 24.76% |
 
-普通 FR4、tanδ≈0.02 条件下：
+这些参数来自现有 full-wave 结果校准后的低阶 surrogate；只有 V2 screen/verify 通过后才会提升为 canonical RF geometry。
 
-- 100 mm 平面桥：设计目标 ≤0.6 dB，验收≤0.8 dB；
-- 约 100 mm 立体直角桥：目标≤0.8 dB，验收≤1.0 dB；
-- 若坚持 0.2–0.3 dB，则改用 tanδ≤0.004 的 RF 低损耗基材或短同轴。
+## 当前已验证到什么程度
 
-### 长馈线
+可信的 `thru_verify`：
 
-RG142 不再作为 500 W、3–10 m 主馈线基线。
+- S11 ≈ -24.27 dB
+- S21 ≈ -0.376 dB
+- native microstrip impedance ≈ 45.5 Ω for historical 3.137 mm line
 
-V2 采用 **LMR-900 等级或等效低损耗 50 Ω 电缆**作为比较基准：
+可信的 `tcell_verify`：
 
-- 3 m 总成：≤0.5 dB；
-- 5 m 总成：≤0.8 dB；
-- 10 m 总成：≤1.3 dB；
-- VSWR≤1.3 优选，≤1.5 硬上限。
+- S11 ≈ -26.81 dB
+- S21 ≈ -2.285 dB
+- S31 ≈ -7.800 dB
+- conditional branch split ≈ 21.9%
+- passive/converged network result
 
-### 板数识别
+所以当前可以说 **T-cell core topology 已经得到可信 full-wave 支撑**，但完整客户板（launch + ID + Patch + workpiece）仍未完成最终全波闭环。
 
-取消“10 kΩ/板简单并联计数”作为基线，改为：
+## 当前系统架构
 
-- 每板 100 Ω；
-- 0.1%；
-- ≤25 ppm/°C；
-- 串联计数；
-- 100 μA 恒流测量。
+100 块不再作为一条普通 FR4 连续微带链。
 
-由此每增加一块约增加 10 mV，1–100 块对应约 10 mV–1.00 V。
-
-## 保持不变的材料/频率参数
-
-- 中心频率：2.45 GHz
-- 工作频段：2.40–2.50 GHz
-- 全局扫频：2.0–3.0 GHz
-- 端口参考阻抗：50 Ω
-- FR4：εr=4.3，tanδ=0.02，厚 1.6 mm
-- 铜：σ=5.8×10^7 S/m，厚 35 μm，Rz=5 μm 作敏感性参数
-- 前 PP：εr=2.2，tanδ=0.0005，厚 2 mm
-- 后 PP：εr=2.2，tanδ=0.0005，厚 6 mm
-
-## 后续模型目录
+当前架构：
 
 ```text
-micro_wave/
-├── docs/
-├── hfss/
-│   ├── single_board/
-│   ├── magnetic_interface/
-│   ├── planar_bridge/
-│   ├── right_angle_bridge/
-│   ├── inter_zone_bridge/
-│   ├── cable_adapter/
-│   └── cascade/
-├── scripts/
-│   ├── pyaedt/
-│   ├── cascade/
-│   └── postprocess/
-├── data/
-│   ├── materials/
-│   ├── sparameters/
-│   └── measurements/
-└── results/
+500 W source
+  -> WR340 / matching
+  -> low-loss distribution manifold
+  -> local RF zones
+       A -> B -> C -> D
+  -> workpiece
 ```
 
+总板数可以按 1–100 的机械/控制架构设计，但真实同时供能数量仍取决于最终：
 
-## 当前设计方法
+[
+eta_{m sys}
+=
+eta_{m manifold}
+eta_{m interface}
+eta_{m zone}
+eta_{m load}.
+]
 
-当前 Patch+Zone 路线统一按以下顺序推进：
+“80 块 × 5 W”只是假设端到端效率 80% 时的敏感性示例，不是当前能力。
 
-\[
-\boxed{
-\text{Geometry}
-\rightarrow
-\text{Complex }S
-\rightarrow
-\text{Patch excitation }\mathbf u
-\rightarrow
-\text{Workpiece deposition }Q
-\rightarrow
-\text{Passive synthesis}
-}
-\]
+## 当前材料基线
 
-因此后续 HFSS/openEMS 与 PCB 优化不再只以 coupling dB 为中心。A/B/C/D 的第一轮 6.5/5/3 dB 参数用于启动搜索，最终应由工件侧目标复激励和无源网络可实现性共同决定。
+- FR4：εr≈4.3，tanδ≈0.02，1.6 mm
+- copper：35 μm
+- front PP：εr≈2.2，2 mm
+- rear PP：εr≈2.2，6 mm
+- center frequency：2.45 GHz
+- target band：2.40–2.50 GHz
 
-- `docs/16_extended_board_tcell_design_v1.md`：50×60 产品/RF 有效包络与 50×70 tscircuit CAD workaround 的几何来源，以及 matched-extraction T-cell 解析设计。
-- `docs/17_tcell_reference_plane_bridge_phase_v1.md`：T-cell 最终参考面；5 mm 磁吸桥作为独立相移二端口，统一约 19° bridge phase，A/B/C 残差约在 ±0.7° 内
+## tscircuit
 
-当前 PCB 工程同时保留原 coupler A/B/C/D 与 matched-extraction T-cell A/B/C/D 两套可导出 topology。**产品机械目标固定为 50×60 mm**；当前 RF 几何也只需要这一有效纵向包络。由于 tscircuit board outline 暂按原点居中实现，代码中的 CAD seed 采用 50×70 mm 仅用于得到 y=-35 mm 下边界并避免平移 RF reference。该 70 mm 不应解释为产品板高。
+官方 tscircuit skill 已 vendored 到：
 
-- `docs/17_tcell_reference_plane_layout_v1.md`：50×60 T-cell 正确 reference plane、T-junction 坐标、inter-cell 37–39° phase target 与 D 半波 V-feed。
-- `docs/18_tcell_bandwidth_load_sensitivity_v1.md`：理想传输线频带与 loaded-Patch reflection 敏感性；给出 T-cell / isolated-topology 的定量切换判据。
+`.codex/skills/tscircuit/`
 
-- `docs/19_tcell_exact_equal_power_synthesis_v1.md`：按 0.42 dB/cell 精确反解等功率 T-cell；A/B/C 更新为 21.498% / 30.167% / 47.584%，并重新综合线宽、T 点与 inter-cell phase。
+工程板必须按：
+
+```text
+netlist -> placement -> build -> shorts -> Gerber / PCB-SVG
+```
+
+顺序通过检查；“能导 Gerber”本身不等于 RF 已验证。
+
+## openEMS
+
+关键脚本：
+
+- `scripts/openems/check_tcell_calibration_geometry.py`
+- `scripts/openems/simulate_tcell_network_coupon.py`
+- `scripts/openems/simulate_tcell_calibration.py`
+- `scripts/openems/design_tcell_surrogate.py`
+
+快速迭代原则：已有 full-wave 数据先拟合 surrogate，只对候选做一次 screen；screen 通过后才花较长时间跑 verify。
