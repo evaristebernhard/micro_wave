@@ -43,6 +43,7 @@ jobs:
           python -m py_compile ../../scripts/openems/simulate_tcell_network_coupon.py
           python -m py_compile ../../scripts/openems/design_tcell_surrogate.py
           python -m py_compile ../../scripts/openems/simulate_full_v2_fast.py
+          python -m py_compile ../../scripts/openems/compare_full_v2_id.py
 
       - name: Validate T-cell calibration board
         run: npm run check:cal
