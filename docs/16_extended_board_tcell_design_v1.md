@@ -2,7 +2,7 @@
 
 > 目标：允许 PCB 尺寸增大后，重新比较标准 quadrature coupler 与 matched extraction T-cell。核心约束是不改变 50 mm 水平 Patch 节距，因此只增加板高。
 
-## 1. 当前工程包络：RF 约需 50×60 mm；tscircuit 工程板采用 50×70 mm 居中外形
+## 1. 当前尺寸口径：产品 50×60 mm；tscircuit 暂用 50×70 mm 居中 CAD 外形
 
 原始机械目标是：
 
@@ -10,17 +10,25 @@
 50\times50\ {\rm mm}.
 \]
 
-当前预仿真工程包络采用：
+产品/理论机械包络采用：
+
+\[
+\boxed{50\times60\ {\rm mm}}.
+\]
+
+为保持原 RF/Patch reference 不平移，当前 tscircuit 的居中 CAD outline 暂用：
 
 \[
 \boxed{50\times70\ {\rm mm}}.
 \]
 
-板中心设为：
+产品有效机械坐标采用：
 
 \[
-\boxed{y_c=0}.
+y\in[-35,25]\ {\rm mm}.
 \]
+
+tscircuit CAD workaround 仍以原点居中，因此 CAD 外框为 \(y\in[-35,35]\) mm。
 
 因此 y 边界由原来的：
 
@@ -34,7 +42,7 @@
 \boxed{[-35,+35]\ {\rm mm}}.
 \]
 
-额外 10 mm 全部增加在下方 RF/控制网络一侧。Patch、RF IN/OUT、磁吸接口及顶部边界保持原参考坐标。
+相对最早 50×50 mm 方案，真正新增的 10 mm 有效空间位于下方 RF/控制网络一侧；tcsircuit CAD 顶部额外出现的 10 mm 只是居中外框余量。Patch、RF IN/OUT、磁吸接口及 RF reference coordinates 保持不变。
 
 板宽仍为：
 
@@ -334,11 +342,13 @@ T-cell 是一个 reciprocal 3-port junction。
 
 当前不再把 50×50 视为硬边界。
 
-PCB 基准机械外形更新为：
+PCB **产品基准机械外形**更新为：
 
 \[
-\boxed{50\\times70\ {\rm mm}}
+\boxed{50\times60\ {\rm mm}}
 \]
+
+当前 tscircuit CAD seed 仍可暂用 50×70 mm 居中外框，直到加工/导出阶段显式裁切或平移 board outline。
 
 且向下单侧扩展，以保持全部已有 RF phase reference。
 
