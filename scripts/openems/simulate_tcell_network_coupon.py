@@ -351,6 +351,8 @@ def analyze(ports, sim_path: Path, freq, dut: str):
         p_sum = p_sum + np.abs(s["S31"]) ** 2
 
     zin = ports[0].uf_tot / ports[0].if_tot
+    t_end = float(ports[0].u_time[-1]) if len(ports[0].u_time) else 0.0
+    time_samples = int(len(ports[0].u_time))
 
     return {
         "s": s,
@@ -358,6 +360,8 @@ def analyze(ports, sim_path: Path, freq, dut: str):
         "zin": zin,
         "native_z": native_z,
         "native_beta": native_beta,
+        "time_samples": time_samples,
+        "t_end_s": t_end,
     }
 
 
@@ -417,6 +421,10 @@ def run(args):
     if args.dut == "tcell":
         result["S31_db"] = db20(a["s"]["S31"]).tolist()
 
+    band = (freq >= 2.35e9) & (freq <= 2.55e9)
+    if not np.any(band):
+        band = np.ones_like(freq, dtype=bool)
+
     summary = {
         "dut": args.dut,
         "profile": args.profile,
@@ -425,6 +433,10 @@ def run(args):
         "S21_db": float(result["S21_db"][i0]),
         "power_sum": float(result["power_sum"][i0]),
         "passivity_excess": float(max(0.0, result["power_sum"][i0] - 1.0)),
+        "power_sum_max_2p35_2p55": float(np.max(a["power_sum"][band])),
+        "time_samples": int(a["time_samples"]),
+        "t_end_ns": float(a["t_end_s"] * 1e9),
+        "record_cycles_at_2p45": float(a["t_end_s"] * g["frequencyGHz"] * 1e9),
         "Zin_ohm": [
             float(result["Zin_real_ohm"][i0]),
             float(result["Zin_imag_ohm"][i0]),
@@ -453,9 +465,15 @@ def run(args):
             summary["S11_db"] <= -12.0
             and summary["S21_db"] >= -1.5
             and summary["power_sum"] <= 1.05
+            and summary["power_sum_max_2p35_2p55"] <= 1.08
+            and summary["record_cycles_at_2p45"] >= 8.0
         )
     else:
-        summary["network_result_valid"] = bool(summary["power_sum"] <= 1.05)
+        summary["network_result_valid"] = bool(
+            summary["power_sum"] <= 1.05
+            and summary["power_sum_max_2p35_2p55"] <= 1.08
+            and summary["record_cycles_at_2p45"] >= 8.0
+        )
 
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / f"{args.dut}_{args.profile}.json").write_text(
