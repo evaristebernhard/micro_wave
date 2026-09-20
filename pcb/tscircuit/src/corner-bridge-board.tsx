@@ -42,26 +42,28 @@ const strokePolyline = (points: P[], width: number): P[] => {
   return [...left, ...right]
 }
 
+// tscircuit centers custom board outlines. Use already-centered coordinates
+// so the distributed RF footprint and the L-shaped board share one frame.
 const outline = [
-  { x: -50, y: -15 },
-  { x: 15, y: -15 },
-  { x: 15, y: 50 },
-  { x: -15, y: 50 },
-  { x: -15, y: 15 },
-  { x: -50, y: 15 }
+  { x: -32.5, y: -32.5 },
+  { x: 32.5, y: -32.5 },
+  { x: 32.5, y: 32.5 },
+  { x: 2.5, y: 32.5 },
+  { x: 2.5, y: -2.5 },
+  { x: -32.5, y: -2.5 }
 ]
 
 const rfPath = [
-  { x: -47.5, y: 0 },
-  { x: -6, y: 0 },
-  { x: 0, y: 6 },
-  { x: 0, y: 47.5 }
+  { x: -30.0, y: -17.5 },
+  { x: 11.5, y: -17.5 },
+  { x: 17.5, y: -11.5 },
+  { x: 17.5, y: 30.0 }
 ]
 
 const idPath = [
-  { x: -47.5, y: -10.5 },
-  { x: -10.5, y: -10.5 },
-  { x: -10.5, y: 47.5 }
+  { x: -30.0, y: -28.0 },
+  { x: 7.0, y: -28.0 },
+  { x: 7.0, y: 30.0 }
 ]
 
 const CornerCopper = () => (
@@ -190,12 +192,12 @@ export const CornerBridgeBoard = () => (
 
     <CornerCopper />
 
-    <silkscreenrect pcbX="-47.5mm" pcbY="8mm" width="5mm" height="5mm" filled={false} stroke="solid" strokeWidth="0.18mm" />
-    <silkscreenrect pcbX="-47.5mm" pcbY="13mm" width="5mm" height="5mm" filled={false} stroke="solid" strokeWidth="0.18mm" />
-    <silkscreenrect pcbX="8mm" pcbY="47.5mm" width="5mm" height="5mm" filled={false} stroke="solid" strokeWidth="0.18mm" />
-    <silkscreenrect pcbX="13mm" pcbY="47.5mm" width="5mm" height="5mm" filled={false} stroke="solid" strokeWidth="0.18mm" />
+    <silkscreenrect pcbX="-30mm" pcbY="-9.5mm" width="5mm" height="5mm" filled={false} stroke="solid" strokeWidth="0.18mm" />
+    <silkscreenrect pcbX="-30mm" pcbY="-4.5mm" width="5mm" height="5mm" filled={false} stroke="solid" strokeWidth="0.18mm" />
+    <silkscreenrect pcbX="25.5mm" pcbY="30mm" width="5mm" height="5mm" filled={false} stroke="solid" strokeWidth="0.18mm" />
+    <silkscreenrect pcbX="30.5mm" pcbY="30mm" width="5mm" height="5mm" filled={false} stroke="solid" strokeWidth="0.18mm" />
 
-    <silkscreentext pcbX="-20mm" pcbY="11mm" text="CORNER BRIDGE 5+5cm" fontSize="0.62mm" />
-    <silkscreentext pcbX="10mm" pcbY="25mm" pcbRotation={90} text="RF 50R + ID" fontSize="0.50mm" />
+    <silkscreentext pcbX="-2.5mm" pcbY="-6.5mm" text="CORNER BRIDGE 5+5cm" fontSize="0.62mm" />
+    <silkscreentext pcbX="27.5mm" pcbY="7.5mm" pcbRotation={90} text="RF 50R + ID" fontSize="0.50mm" />
   </board>
 )
