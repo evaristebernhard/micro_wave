@@ -22,13 +22,21 @@ const cal = fewModeRobustDesignSeed.targetExtraction.A
 const pIn = { x: -20.2, y: -18.0 }
 const pPatch = { x: 0.0, y: -9.25 }
 
-// Lower intersection of:
-// |J-pIn| = A series quarter-wave seed
-// |J-pPatch| = A branch quarter-wave seed
-// Recomputed from docs/23 field-aware A target.
+// Field-aware A calibration junction.
+// Distances:
+// |J-pIn|    ~= 16.75 mm  (series quarter-wave seed)
+// |J-pPatch| ~= 17.59 mm  (branch quarter-wave seed)
 const junction = { x: -5.467, y: -25.969 }
 const pOut = { x: 20.2, y: -18.0 }
 const insetEnd = { x: 0.0, y: patchDerived.notchYMax + 0.2 }
+
+const boardCenter = { x: 0, y: -5 }
+const productBounds = {
+  xMin: -25,
+  xMax: 25,
+  yMin: -35,
+  yMax: 25
+} as const
 
 const patchTopHeight = patchDerived.patchYMax - patchDerived.notchYMax
 const patchTopCenterY = (patchDerived.patchYMax + patchDerived.notchYMax) / 2
@@ -37,12 +45,30 @@ const patchLegOffset = (patchDerived.notchW + patchLegWidth) / 2
 const patchLegHeight = pcb.insetDepth
 const patchLegCenterY = patchDerived.patchYMin + patchLegHeight / 2
 
-const productOutline = [
-  { x: -25, y: -35 },
-  { x: 25, y: -35 },
-  { x: 25, y: 25 },
-  { x: -25, y: 25 }
-]
+const GroundLaunchFootprint = ({ x }: { x: number }) => (
+  <>
+    <smtpad
+      portHints={["pin2"]}
+      pcbX={mm(x)}
+      pcbY={mm(pcb.tCellGroundPadY)}
+      width={mm(pcb.rfGroundPadW)}
+      height={mm(pcb.rfGroundPadH)}
+      shape="rect"
+      coveredWithSolderMask={false}
+    />
+    {[-1.4, -0.5, 0.5, 1.4].map((dx, i) => (
+      <platedhole
+        key={`gnd-${x}-${i}`}
+        portHints={["pin2"]}
+        pcbX={mm(x + dx)}
+        pcbY={mm(pcb.tCellGroundPadY)}
+        shape="circle"
+        holeDiameter={mm(pcb.rfGroundViaHole)}
+        outerDiameter={mm(pcb.rfGroundViaOuter)}
+      />
+    ))}
+  </>
+)
 
 const CalibrationRfCopper = () => (
   <chip
@@ -128,54 +154,25 @@ const CalibrationRfCopper = () => (
           coveredWithSolderMask={false}
         />
 
-        {/* Full bottom RF ground, 0.2 mm edge pullback. */}
-        <smtpad
-          portHints={["pin2"]}
-          pcbX="0mm"
-          pcbY="-5mm"
-          width="49.6mm"
-          height="59.6mm"
-          shape="rect"
-          layer="bottom"
-          coveredWithSolderMask={false}
-        />
+        {/*
+         * Launch return pads and plated holes belong to the same distributed
+         * RF footprint. This prevents placement DRC from treating intentional
+         * launch geometry as overlapping independent components.
+         */}
+        <GroundLaunchFootprint x={-pcb.rfContactX} />
+        <GroundLaunchFootprint x={pcb.rfContactX} />
       </footprint>
     }
   />
 )
 
-const GroundLaunch = ({ x, suffix }: { x: number; suffix: string }) => (
-  <>
-    <testpoint
-      name={`TP_GND_${suffix}`}
-      footprintVariant="pad"
-      padShape="rect"
-      width={mm(pcb.rfGroundPadW)}
-      height={mm(pcb.rfGroundPadH)}
-      pcbX={mm(x)}
-      pcbY={mm(pcb.tCellGroundPadY)}
-      connections={{ pin1: "net.GND" }}
-    />
-    {[-1.4, -0.5, 0.5, 1.4].map((dx, i) => (
-      <via
-        key={`${suffix}-${i}`}
-        name={`V_GND_${suffix}_${i + 1}`}
-        pcbX={mm(x + dx)}
-        pcbY={mm(pcb.tCellGroundPadY)}
-        fromLayer="top"
-        toLayer="bottom"
-        holeDiameter={mm(pcb.rfGroundViaHole)}
-        outerDiameter={mm(pcb.rfGroundViaOuter)}
-        connectsTo="net.GND"
-      />
-    ))}
-  </>
-)
-
 export const TCellCalibrationBoard = () => (
   <board
     title="2.45 GHz T-cell calibration board"
-    outline={productOutline}
+    width="50mm"
+    height="60mm"
+    boardAnchorPosition={boardCenter}
+    boardAnchorAlignment="center"
     material="fr4"
     layers={2}
     thickness="1.6mm"
@@ -183,9 +180,17 @@ export const TCellCalibrationBoard = () => (
     schematicDisabled
   >
     <net name="GND" />
+
+    {/* Board-level return plane: not a component footprint. */}
+    <copperpour
+      name="GND_PLANE"
+      connectsTo="net.GND"
+      layer="bottom"
+      boardEdgeMargin="0.2mm"
+      clearance="0.15mm"
+    />
+
     <CalibrationRfCopper />
-    <GroundLaunch x={-pcb.rfContactX} suffix="IN" />
-    <GroundLaunch x={pcb.rfContactX} suffix="OUT" />
 
     <silkscreentext
       pcbX="0mm"
@@ -224,7 +229,8 @@ export const TCellCalibrationBoard = () => (
 )
 
 export const calibrationGeometry = {
-  productOutline,
+  boardCenter,
+  productBounds,
   inputReference: pIn,
   outputReference: pOut,
   patchReference: pPatch,
