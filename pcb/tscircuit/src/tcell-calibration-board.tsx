@@ -118,6 +118,31 @@ const CalibrationRfCopper = () => (
           points={linePolygon(junction, pPatch, cal.bareFr4BranchWidthMm)}
           coveredWithSolderMask={false}
         />
+
+        {/*
+         * Explicit copper nodes guarantee area overlap between separately
+         * stroked transformer polygons. Netlist/shorts checks do not prove
+         * same-net polygons are physically joined in the rendered Gerber.
+         */}
+        <smtpad
+          portHints={["pin1"]}
+          pcbX={mm(junction.x)}
+          pcbY={mm(junction.y)}
+          width="2.2mm"
+          height="2.2mm"
+          shape="rect"
+          coveredWithSolderMask={false}
+        />
+        <smtpad
+          portHints={["pin1"]}
+          pcbX={mm(pPatch.x)}
+          pcbY={mm(pPatch.y)}
+          width="1.6mm"
+          height="1.6mm"
+          shape="rect"
+          coveredWithSolderMask={false}
+        />
+
         <smtpad
           portHints={["pin1"]}
           shape="polygon"
