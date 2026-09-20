@@ -1,4 +1,5 @@
 import geom from "../../../design/tcell_candidate_v2.json"
+import fullGeom from "./full-engineering-board-v2-geometry.json"
 
 const mm = (value: number) => `${value}mm`
 type P = { x: number; y: number }
@@ -74,19 +75,19 @@ const patchLegWidth = (geom.patch.widthMm - notchW) / 2
 const patchLegOffset = (notchW + patchLegWidth) / 2
 const patchLegCenterY = patchYMin + geom.patch.insetDepthMm / 2
 
-// Smooth the narrow branch into the wider inset feed over the first 2 mm.
-const feedTaperEndY = pPatch.y + 2.0
+// Smooth the narrow branch into the wider inset feed using shared full-board geometry.
+const feedTaperEndY = pPatch.y + fullGeom.branchToFeed.taperLengthMm
 const feedEnd = { x: pPatch.x, y: notchYMax + 0.2 }
 
 // The client requirement calls for a 10 kΩ identification resistor.
 // The RF design does not use this value; it is a low-frequency count/ID path.
 const id = {
-  y: -32.0,
-  padX: 22.3,
-  padW: 4.2,
-  padH: 2.2,
-  traceW: 0.30,
-  resistorOhm: 10000
+  y: fullGeom.id.yMm,
+  padX: fullGeom.id.padXAbsMm,
+  padW: fullGeom.id.padWidthMm,
+  padH: fullGeom.id.padHeightMm,
+  traceW: fullGeom.id.traceWidthMm,
+  resistorOhm: fullGeom.id.resistorOhm
 } as const
 
 const GroundLaunch = ({ x }: { x: number }) => (
@@ -148,8 +149,8 @@ const FullRfFootprint = () => (
           portHints={["pin1"]}
           shape="polygon"
           points={xTaper(
-            pIn.x - 1.0,
-            pIn.x + 0.05,
+            pIn.x - fullGeom.padTransition.lengthMm,
+            pIn.x + fullGeom.padTransition.overlapMm,
             pIn.y,
             geom.launch.signalPadHeightMm,
             geom.tcell.seriesWidthMm
@@ -160,8 +161,8 @@ const FullRfFootprint = () => (
           portHints={["pin1"]}
           shape="polygon"
           points={xTaper(
-            pOut.x - 0.05,
-            pOut.x + 1.0,
+            pOut.x - fullGeom.padTransition.overlapMm,
+            pOut.x + fullGeom.padTransition.lengthMm,
             pOut.y,
             geom.tcell.through50WidthMm,
             geom.launch.signalPadHeightMm
@@ -193,7 +194,7 @@ const FullRfFootprint = () => (
         <smtpad
           portHints={["pin1"]}
           shape="polygon"
-          points={octagon(junction, geom.tcell.junctionNodeSizeMm)}
+          points={octagon(junction, fullGeom.junction.diameterMm)}
           coveredWithSolderMask={false}
         />
 
@@ -203,7 +204,7 @@ const FullRfFootprint = () => (
           shape="polygon"
           points={yTaper(
             pPatch.x,
-            pPatch.y - 0.15,
+            pPatch.y - fullGeom.branchToFeed.startOverlapMm,
             feedTaperEndY,
             geom.tcell.branchWidthMm,
             geom.patch.feedWidthMm
@@ -214,7 +215,7 @@ const FullRfFootprint = () => (
           portHints={["pin1"]}
           shape="polygon"
           points={linePolygon(
-            { x: pPatch.x, y: feedTaperEndY - 0.05 },
+            { x: pPatch.x, y: feedTaperEndY - fullGeom.branchToFeed.endOverlapMm },
             feedEnd,
             geom.patch.feedWidthMm
           )}

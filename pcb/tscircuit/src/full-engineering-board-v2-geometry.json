@@ -1,0 +1,33 @@
+{
+  "schema": "micro-wave/full-engineering-board-v2/v1",
+  "rfGeometry": "design/tcell_candidate_v2.json",
+  "padTransition": {
+    "lengthMm": 1,
+    "overlapMm": 0.05
+  },
+  "branchToFeed": {
+    "taperLengthMm": 2,
+    "startOverlapMm": 0.15,
+    "endOverlapMm": 0.05
+  },
+  "junction": {
+    "shape": "octagon",
+    "diameterMm": 2.2
+  },
+  "id": {
+    "yMm": -32,
+    "padXAbsMm": 22.3,
+    "padWidthMm": 4.2,
+    "padHeightMm": 2.2,
+    "traceWidthMm": 0.3,
+    "resistorOhm": 10000,
+    "resistorFootprint": "0603",
+    "emGapHalfLengthMm": 0.8,
+    "emResistorStripHalfWidthMm": 0.15
+  },
+  "em": {
+    "defaultPortModel": "coplanar-top-signal-to-ground-lumped",
+    "defaultIdModel": "open",
+    "note": "Fast EM uses zero-thickness PEC copper and treats the 10 kΩ ID resistor as RF-open by default; use id-model=10k for sensitivity."
+  }
+}

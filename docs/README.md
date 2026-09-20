@@ -13,7 +13,8 @@ Only current or still-useful documents remain at the top level.
 - `24_theory_closure_master_v1.md` — current theory master.
 - `25_current_capability_gap_audit_v1.md` — current engineering maturity and remaining gaps.
 - `26_openems_port_fixture_audit_v1.md` — corrected openEMS MSL-port methodology.
-- `27_fast_tcell_design_loop_v1.md` — current surrogate-guided fast iteration loop.
+- `27_fast_tcell_design_loop_v1.md` — current surrogate-guided fast T-cell iteration loop.
+- `28_full_v2_fast_em_v1.md` — current complete-board fast EM model and run gates.
 
 ## Historical material
 
