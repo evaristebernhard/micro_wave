@@ -141,7 +141,56 @@ const CornerCopper = () => (
           shape="rect"
         />
 
-        <silkscreenrect pcbX="-47.5mm" pcbY="8mm" width="5mm" height="5mm" filled={false} stroke="solid" strokeWidth="0.18mm" />
+        {geom.interface.viaXOffsetsMm.map((dx, i) => (
+          <platedhole
+            key={`L-${i}`}
+            portHints={["pin2"]}
+            pcbX={mm(-47.5 + dx)}
+            pcbY="-6mm"
+            shape="circle"
+            holeDiameter={mm(geom.interface.viaHoleDiameterMm)}
+            outerDiameter={mm(geom.interface.viaOuterDiameterMm)}
+          />
+        ))}
+        {geom.interface.viaXOffsetsMm.map((dy, i) => (
+          <platedhole
+            key={`T-${i}`}
+            portHints={["pin2"]}
+            pcbX="-6mm"
+            pcbY={mm(47.5 + dy)}
+            shape="circle"
+            holeDiameter={mm(geom.interface.viaHoleDiameterMm)}
+            outerDiameter={mm(geom.interface.viaOuterDiameterMm)}
+          />
+        ))}
+      </footprint>
+    }
+  />
+)
+
+export const CornerBridgeBoard = () => (
+  <board
+    title="2.45 GHz planar L corner magnetic bridge"
+    outline={outline}
+    material="fr4"
+    layers={2}
+    thickness={mm(geom.stackup.fr4ThicknessMm)}
+    routeRemaining={false}
+    schematicDisabled
+  >
+    <net name="GND" />
+
+    <copperpour
+      name="GND_PLANE"
+      connectsTo="net.GND"
+      layer="bottom"
+      boardEdgeMargin={mm(geom.rf.boardEdgeGroundMarginMm)}
+      clearance="0.15mm"
+    />
+
+    <CornerCopper />
+
+    <silkscreenrect pcbX="-47.5mm" pcbY="8mm" width="5mm" height="5mm" filled={false} stroke="solid" strokeWidth="0.18mm" />
     <silkscreenrect pcbX="-47.5mm" pcbY="13mm" width="5mm" height="5mm" filled={false} stroke="solid" strokeWidth="0.18mm" />
     <silkscreenrect pcbX="8mm" pcbY="47.5mm" width="5mm" height="5mm" filled={false} stroke="solid" strokeWidth="0.18mm" />
     <silkscreenrect pcbX="13mm" pcbY="47.5mm" width="5mm" height="5mm" filled={false} stroke="solid" strokeWidth="0.18mm" />
