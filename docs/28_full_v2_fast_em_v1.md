@@ -54,9 +54,9 @@ pcb/tscircuit/src/full-engineering-board-v2-geometry.json
 - 37.5 × 28.5 mm inset-fed Patch；
 - ID IN/OUT pads 和 ID copper traces。
 
-RF input/output 采用实际 signal pad 到 ground 的 50 Ω lumped port。
+RF input/output 采用**顶层 coplanar signal pad ↔ 相邻 GND pad 的 50 Ω lumped port**。这比垂直穿 FR4 到 bottom ground 更符合当前磁吸接触对结构；ground return vias 和 bottom plane 会自然参与回流。
 
-因此该模型已经把 pad/taper discontinuity 纳入 S 参数。
+因此该模型已经把 pad/taper discontinuity 和顶层 signal/GND launch geometry 纳入 S 参数。
 
 ## 4. 为何仍然较快
 
