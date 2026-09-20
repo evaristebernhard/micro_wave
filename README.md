@@ -153,5 +153,7 @@ netlist -> placement -> build -> shorts -> Gerber / PCB-SVG
 - `scripts/openems/simulate_tcell_network_coupon.py`
 - `scripts/openems/simulate_tcell_calibration.py`
 - `scripts/openems/design_tcell_surrogate.py`
+- `scripts/openems/check_full_v2_geometry.py`
+- `scripts/openems/simulate_full_v2_fast.py`
 
-快速迭代原则：已有 full-wave 数据先拟合 surrogate，只对候选做一次 screen；screen 通过后才花较长时间跑 verify。
+快速迭代原则：已有 full-wave 数据先拟合 surrogate，只对候选做一次 T-cell screen；之后先跑 Full V2 fast board（含 launch / Patch / ID copper），Full V2 通过后才进入更昂贵的 loaded-workpiece / verify。
