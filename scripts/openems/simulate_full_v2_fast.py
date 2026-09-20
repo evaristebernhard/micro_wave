@@ -465,10 +465,17 @@ def build_model(sim_path: Path, profile: str, id_mode: str):
     mesh.SmoothMeshLines("y", cfg["xy_res"], 1.4)
     mesh.SmoothMeshLines("z", cfg["z_res"], 1.4)
 
-    # Lumped pad-to-ground ports represent an idealized 50-ohm magnetic/coax
-    # feed at the actual signal pads. This includes the pad/taper discontinuity
-    # but does not claim a detailed connector model.
-    port_half = min(0.8, launch["signalPadHeightMm"] / 4)
+    # Coplanar lumped ports bridge the actual top-side signal pad and adjacent
+    # top-side GND pad. This better matches the magnetic contact pair than a
+    # vertical signal-to-bottom-ground excitation. Return vias and the bottom
+    # plane therefore participate naturally in the current path.
+    port_half_x = min(0.8, launch["signalPadWidthMm"] / 4)
+    signal_edge_y = (
+        launch["signalPadCenterYMm"] - launch["signalPadHeightMm"] / 2
+    )
+    ground_edge_y = (
+        launch["groundPadCenterYMm"] + launch["groundPadHeightMm"] / 2
+    )
     ports = []
     for nr, sx, excite in (
         (1, -launch["contactXAbsMm"], 1),
@@ -478,16 +485,16 @@ def build_model(sim_path: Path, profile: str, id_mode: str):
             port_nr=nr,
             R=50.0,
             start=[
-                sx - port_half,
-                launch["signalPadCenterYMm"] - port_half,
-                z_gnd,
+                sx - port_half_x,
+                ground_edge_y,
+                -0.10,
             ],
             stop=[
-                sx + port_half,
-                launch["signalPadCenterYMm"] + port_half,
-                z_sig,
+                sx + port_half_x,
+                signal_edge_y,
+                0.10,
             ],
-            p_dir="z",
+            p_dir="y",
             excite=excite,
             priority=50,
             edges2grid="xy",
