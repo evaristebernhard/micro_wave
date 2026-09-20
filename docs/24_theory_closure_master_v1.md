@@ -4,7 +4,7 @@
 >
 > 本文统一此前 docs/01–23 中尺寸、功率、Zone、T-cell、复幅相与工件加载的冲突口径。
 >
-> 优先级：本文 > docs/23_few_mode_robust_field_synthesis_v1.md > docs/20_four_board_zone_analytic_closure_v1.md / docs/19_tcell_exact_equal_power_synthesis_v1.md > 更早历史 seed。
+> 优先级：本文 > `docs/27_fast_tcell_design_loop_v1.md` > `docs/23_few_mode_robust_field_synthesis_v1.md` > 其它当前顶层参考。equal-power、progressive-phase 和旧 footprint 文档已移入 `docs/archive/`。
 >
 > 这里的“闭合”是指：给定少量需要全波或实测标定的物理量后，可以沿固定方程从系统目标反推到 PCB 参数；不表示当前 PCB 已完成最终 HFSS/openEMS 或实测验收。
 
@@ -32,36 +32,15 @@ y\in[-35,25]\ {\rm mm}.
 
 因此早期 50 × 50 mm 只保留为历史 footprint，不再是当前最终板尺寸。
 
-### 1.2 为什么 geometry.ts 仍有 boardH = 70
+### 1.2 当前 PCB 已直接使用真实 50 × 60 mm 板框
 
-当前 tscircuit board outline 以原点为中心生成。为了在不平移既有 RF/Patch 坐标的情况下得到所需下边界
-
-\[
-y=-35\ {\rm mm},
-\]
-
-CAD seed 暂时采用：
+早期 tscircuit 曾因居中 outline 使用 50 × 70 mm workaround。当前 calibration board 与 full engineering board V2 已改用 `boardAnchorPosition=(0,-5)`，真实板框直接为：
 
 \[
-\boxed{50\times70\ {\rm mm}},
-\qquad
-y\in[-35,35]\ {\rm mm}.
+\boxed{x\in[-25,25]\ {\rm mm},\qquad y\in[-35,25]\ {\rm mm}}.
 \]
 
-所以必须严格区分：
-
-- **50 × 60 mm：产品/理论机械目标；**
-- **50 × 70 mm：当前 tscircuit 居中 CAD 外框 workaround；**
-- 上侧额外 10 mm 不是 RF 或产品需求；
-- 加工冻结时机械外形应回到 50 × 60 mm。
-
-当前 T-cell 最深铜约在
-
-\[
-y\approx-28.8\ {\rm mm},
-\]
-
-距离产品下边界 -35 mm 仍有约 6.2 mm 余量，因此 RF footprint 本身不要求 70 mm 板高。
+因此 50 × 70 mm 仅保留在 archive/legacy variants 中，不再是当前设计约束。
 
 ---
 
@@ -148,11 +127,11 @@ N_{\max}(P_{\min})
 
 \[
 \boxed{
-\text{机械/识别架构支持 1–100 块；在 500 W 与 80\% 规划效率下，5 W/板约对应 80 块预算上限。}
+\text{机械/识别架构可以按 1–100 块设计；80 块 × 5 W 仅是代入 }\eta_{\rm sys}=0.8\text{ 的敏感性示例。}
 }
 \]
 
-其中 **80 块不是已经验证的保证值**。真实可同时供能板数必须用最终实测/全波得到的 \(\eta_{\rm sys}\) 重算。
+**80 块不是推荐上限、设计能力或已验证保证值。** 真实可同时供能板数必须用最终实测/全波得到的 \(\eta_{\rm sys}\) 重算。
 
 如果要求 100 块都至少 5 W，则：
 
@@ -476,9 +455,9 @@ Z_b
 | B | 0.2407 | 43.57 Ω | 88.81 Ω |
 | C | 0.3608 | 39.98 Ω | 66.55 Ω |
 
-裸 FR4 Hammerstad 线宽只能作为几何 seed。
+裸 FR4 Hammerstad 线宽只能作为几何 seed。最新可信 openEMS 结果已经给出 PP-loaded 校准：历史 3.137 mm nominal-50Ω line 的 native impedance 约 45.5 Ω；当前 V2 surrogate 反推出 50 Ω width seed 约 2.670 mm。详见 `docs/27_fast_tcell_design_loop_v1.md`。
 
-真实 PP + FR4 stack 下必须重新求：
+真实 PP + FR4 stack 下继续按：
 
 \[
 Z_c(W)=Z_{\rm target},
@@ -640,17 +619,13 @@ P_{\rm Zone,in}
 \approx81.3\%.
 \]
 
-这说明“80 块 × 5 W = 400 W”为什么已经非常接近 500 W 系统边界：
-
-- 80 块若按 4 板/Zone，共约 20 个 Zone；
-- Zone 自身就存在明显分配损耗；
-- 上游 manifold、接口、反射还需要功率余量。
+若仅取假设 \(\eta_{\rm sys}=0.8\)，则“80 块 × 5 W = 400 W”会用尽该假设下的全部有用功率预算；这只用于说明功率守恒敏感性，不能据此给出实际板数上限。
 
 因此以后统一写成：
 
 \[
 \boxed{
-\text{80 块 × 5 W 是约 80\% 端到端效率下的预算上限，不是已验证保证值。}
+\text{80 块 × 5 W 仅是 }\eta_{\rm sys}=0.8\text{ 假设下的敏感性示例，不是当前能力。}
 }
 \]
 

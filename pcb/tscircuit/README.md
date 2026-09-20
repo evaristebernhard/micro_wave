@@ -1,215 +1,96 @@
 # micro_wave tscircuit PCB
 
-This subproject targets a **50 mm × 60 mm product/mechanical PCB**. The current tscircuit implementation uses a centered **50 mm × 70 mm CAD outline only as a tooling workaround** so the lower boundary can reach y=-35 mm without shifting the established RF/Patch reference coordinates. The RF copper itself fits the 50 mm × 60 mm effective envelope. It exports four position classes: A / B / C through boards and the D terminal radiator.
+Current product/mechanical target: **50 × 60 mm**.
 
-## Requirements
+The old 50 × 70 mm centered-outline workaround is historical. Current calibration and full V2 boards use `boardAnchorPosition` and are true 50 × 60 mm boards.
 
-- Node.js 22+
-- npm
+## Current boards
 
-The project pins `tscircuit@0.0.2571`. The package exposes the `tsci` CLI.
+### RF calibration board
 
-## Install
+Entry: `index-tcal.tsx`
 
-```bash
-cd pcb/tscircuit
-npm install
-```
+Purpose: isolate the T-cell + Patch RF core. It intentionally omits the low-frequency ID chain.
 
-## Preview
+### Full engineering board V2
 
-```bash
-npm run dev
-```
+Entry: `index-full-v2.tsx`
 
-Open the local tscircuit preview shown by the CLI.
+This is the current complete single-board engineering candidate:
 
-### WSL2 / local proxy
+- 50 × 60 mm board;
+- RF IN / RF OUT magnetic signal pads;
+- GND contact pads and return vias;
+- bottom copper ground plane;
+- surrogate-calibrated V2 T-cell;
+- inset-fed 37.5 × 28.5 mm Patch;
+- 10 kΩ / 0603 identification resistor;
+- ID IN / ID OUT;
+- silkscreen and fabrication dimensions;
+- exposed RF top copper for consistency with the PP-loaded EM stack;
+- tapered pad transitions and an octagonal T-junction instead of the V1 square hard node.
 
-If `tsci dev` fails while polling `/api/events/list` with HTTP 502, a local HTTP proxy (for example Clash) may be intercepting the CLI's own localhost traffic. Use:
+The full V2 board imports `design/tcell_candidate_v2.json`. It is a **screen candidate**, not a manufacturing freeze.
 
-```bash
-npm run dev:wsl
-```
+## V2 RF geometry
 
-This bypasses proxies for `localhost`, `127.0.0.1`, and `::1` and pins the preview server to port 3020.
+At 2.45 GHz:
 
-You can inspect proxy variables with:
+| parameter | value |
+|---|---:|
+| 50 Ω through width candidate | 2.670 mm |
+| series transformer | 42.11 Ω / 3.557 mm |
+| branch transformer | 78.10 Ω / 1.073 mm |
+| series quarter-wave seed | 15.317 mm |
+| branch quarter-wave seed | 15.972 mm |
+| T-junction | (-6.1105, -24.0072) mm |
+| Patch | 37.5 × 28.5 mm |
+| inset depth | 10.5 mm |
 
-```bash
-env | grep -i proxy
-```
+These values come from the current openEMS-calibrated surrogate. They supersede the old bare-FR4 3.137 / 3.92 / 1.04 mm seeds for the V2 candidate only.
 
-The npm "new major version available" notice is unrelated to this issue.
+## ID line
 
-## Build Circuit JSON
+The full V2 board uses the **customer-requested 10 kΩ** identification resistor.
 
-```bash
-npm run build
-npm run export:circuit-json
-```
+This low-frequency ID path is physically present on the full board but is not part of the RF extraction equations. Its RF coupling still has to be checked in the full-board EM model.
 
-## Export Gerbers
+## Validation
 
-```bash
-npm run export:gerbers
-```
+Official tscircuit skill is vendored under:
 
-Output:
+`.codex/skills/tscircuit/`
 
-```text
-dist/board-a.gerbers.zip
-dist/board-b.gerbers.zip
-dist/board-c.gerbers.zip
-dist/board-d.gerbers.zip
-
-dist/board-a.circuit.json
-dist/board-b.circuit.json
-dist/board-c.circuit.json
-dist/board-d.circuit.json
-```
-
-## Current geometry seed
-
-Common geometry:
-
-- Product/mechanical target: **50 × 60 mm**
-- Current tscircuit CAD outline: **50 × 70 mm centered workaround**
-- Patch: 37.5 × 28.5 mm
-- Patch center: (0, 5 mm)
-- RF through-line seed: 2.9 mm wide at y = -18 mm
-- Inset depth: 10.5 mm
-- Inset side gap: 0.5 mm
-- Bottom: nearly full continuous copper ground
-- Board-count resistor: 100 Ω / 0603 placement seed
-
-Variant targets:
-
-| Board | RF role | Target coupling | Current geometry seed |
-|---|---|---:|---|
-| A | through + Patch tap | 6.5 dB (~22.4%) | 17 mm quarter-wave-scale side-coupler, 0.70 mm gap seed |
-| B | through + Patch tap | 5.0 dB (~31.6%) | 17 mm quarter-wave-scale side-coupler, 0.45 mm gap seed |
-| C | strong tap | 3.0 dB (~50%) | 17 mm strong-coupler seed, 0.30 mm gap seed; hybrid fallback expected |
-| D | Zone terminal radiator | no RF OUT | direct terminal feed into the Patch |
-
-A/B/C include an isolated-end 50 Ω termination placement seed. The exact coupling gaps are **not validated RF dimensions**; they are starting points for HFSS/openEMS.
-
-The historical 6 mm / 0.5 mm coupler is retained only in the source as a calibration reference.
-
-All RF dimensions live in `src/geometry.ts`; do not scatter RF dimensions through the JSX.
-
-## Important
-
-This is the PCB geometry seed, not a claim that the board is already electromagnetically optimized.
-
-After Gerber generation, HFSS must add the real material stack and external structures:
-
-- FR4 εr = 4.3, tanδ = 0.02, h = 1.6 mm
-- Cu = 35 μm, σ = 5.8e7 S/m, Rz = 5 μm
-- front PP = 2 mm
-- rear PP = 6 mm
-- magnetic interface parasitics
-- representative / actual workpiece
-
-The first HFSS pass should determine 50 mm through-line loss and phase before multi-board cascade optimization. After that, solve A/B/C coupling and board return loss as complex S-parameters, then cascade the loaded cells with S/ABCD matrices. C should not fall back blindly to the historical 50 × 50 mm footprint conclusion. The product target is now 50 × 60 mm, so a standard branch-line hybrid becomes a valid comparison candidate, although the matched T-cell remains the simpler primary topology. If the T-cell is too load-sensitive, compare a standard/compact quadrature family (miniaturized/loaded coupled-line, process-appropriate Lange/interdigital, multilayer broadside, or an external/SMD hybrid).
-
-## Phase-synthesis design gate
-
-The current A/B/C geometry is a coupling-magnitude seed, not yet a complete complex-taper implementation.
-
-At 2.45 GHz the 50 mm cell has an estimated natural through phase of roughly -265° to -270° (equivalently about +90° to +95° modulo 360°). That value must not be frozen merely because four cells sum to an integer number of turns.
-
-Before adding meanders or phase-shifter geometry:
-
-1. solve the four Patch unit-excitation complex fields with the workpiece present;
-2. construct the regional power-deposition matrices Q^(k);
-3. compare 0°, +90°, 180°, and -90° progressive-phase modes;
-4. optimize the target complex Patch excitation vector u*;
-5. only then synthesize branch/through phase using the relation p_(i+1) h_i = (u*_(i+1)/u*_i) p_i.
-
-Design theory: `docs/10_zone_complex_phase_synthesis_v1.md` and `docs/11_qmatrix_phase_dof_design_v1.md`.
-
-Do not add a fixed ~18 mm phase-trim meander yet. That length is only the first-order amount required to move the natural ~265° electrical path toward 360° on the present effective-permittivity estimate, and it would add roughly 0.15 dB/cell of FR4 path loss under the current 0.42 dB/50 mm estimate.
-
-### Pre-HFSS analytical phase seed
-
-The reduced-order transmission-line model gives a natural 50 mm cell progression of about +94.81° for εeff≈3.25. A +90° progressive-phase baseline therefore requires only small branch-path corrections. The current analytical seed is:
-
-- A phase trim: 0 mm
-- B phase trim: 0.66 mm
-- C phase trim: 1.41 mm
-- D: solve independently as a terminal/direct-fed radiator
-
-These values are stored as metadata in `src/geometry.ts` under `phaseDesignSeed`; they are not yet routed as copper meanders. See `docs/12_pre_simulation_phase_trim_estimate_v1.md`.
-
-
-## Historical progressive-phase copper seed
-
-> The 0/90/180/270° implementation below is retained as a network benchmark. It is **not the current heating-field optimum**. The current field-aware target is the near-in-phase mirror taper from `docs/23_few_mode_robust_field_synthesis_v1.md` and `docs/24_theory_closure_master_v1.md`: amplitude ratio 1 : 0.801 : 0.801 : 1 and phase 0°, -5.3°, -5.3°, 0°.
-
-## Complete complex-taper copper seed
-
-The PCB geometry now implements the first reduced-order complex-taper seed rather than storing phase only as metadata:
-
-- A: 6.5 dB amplitude seed, 0 mm branch phase trim;
-- B: 5.0 dB amplitude seed, +0.66 mm path added by a short V-shaped feed transition;
-- C: 3.0 dB amplitude seed, +1.41 mm V-shaped feed transition, with the Patch port assigned to the lagging quadrature branch in the analytical convention;
-- D: direct terminal feed replaced by a shortened phase route with about 35.34 mm centerline length (7.29 mm horizontal + 17.55 mm diagonal at ~29.91° + 10.5 mm inset).
-
-Under the current reduced-order model this gives an equivalent four-Patch phase seed close to 0° / 90° / 180° / 270° up to a common phase offset.
-
-These are pre-HFSS copper seeds, not frozen manufacturing dimensions. HFSS/openEMS should calibrate the actual coupled-port phase, effective permittivity and loaded propagation phase, after which the trim lengths can be corrected using approximately 5.30°/mm at the present analytical baseline.
-
-See `docs/13_coupler_terminal_phase_closure_v1.md`.
-
-
-For pre-HFSS phase synthesis, A/B/C use a common target branch phase of approximately -90° relative to the local through reference; D is direct-fed at 0°. This convention is parameterized in `src/geometry.ts` and must be recalibrated from the final complex S-parameters.
-
-## Matched-extraction T-cell variants
-
-The PCB project now exports a second A/B/C/D topology based on analytically matched extraction T-cells.
-
-- Board envelope: 50 × 70 mm (RF effective vertical envelope ≈60 mm); horizontal Patch pitch remains 50 mm.
-- A: κ≈0.224, Zt≈44.05 Ω / 3.82 mm, Zb≈93.06 Ω / 0.88 mm.
-- B: κ≈0.316, Zt≈41.35 Ω / 4.21 mm, Zb≈73.56 Ω / 1.52 mm.
-- C: κ≈0.501, Zt≈35.32 Ω / 5.32 mm, Zb≈49.90 Ω / 3.13 mm.
-- Transformer reference planes are at the inner edges of the magnetic RF pads.
-- The 10.5 mm Patch inset remains a common 50 Ω feed and is not folded into the unequal branch transformer.
-- A/B/C T-junctions are near y≈-25 to -26 mm and use ordinary manufacturable line widths.
-- Inter-cell pad/bridge section target is approximately 37–39° electrical phase.
-- D uses a direct ~33.84 mm pre-inset half-wave V-feed plus the common 10.5 mm inset.
-
-Entrypoints: `index-ta.tsx`, `index-tb.tsx`, `index-tc.tsx`, `index-td.tsx`.
-
-The original coupler variants remain in the project for topology comparison.
-
-Product/mechanical envelope: **50 × 60 mm**, equivalent RF coordinate envelope y ∈ [-35, 25] mm. Current tscircuit board outline remains **50 × 70 mm centered** only because the tool-generated outline is centered at the origin; the extra +10 mm at the top is not a product requirement.
-
-## Engineering calibration board
-
-A dedicated single-cell engineering board is now available at `index-tcal.tsx`.
-
-Purpose:
-
-- true 50 × 60 mm product outline, no 50 × 70 mm tooling margin;
-- field-aware A-stage target extraction k≈24.76%;
-- analytical targets Zt≈43.37 Ω and Zb≈87.16 Ω;
-- bare-FR4 geometry seeds 3.92 mm / 1.04 mm for the two quarter-wave transformers;
-- explicit RF IN / RF OUT / Patch reference geometry;
-- top RF copper intentionally exposed from solder mask so the EM stack can match the PP+FR4 calibration model;
-- enlarged ground-launch via groups for repeatable port/reference-plane extraction;
-- no board-count ID chain on this calibration board, to avoid mixing control-line parasitics into the first RF closure.
-
-This board is **not** the final A production board. Its job is to measure/calibrate `Zc(W)`, propagation constant, loaded Patch `R+jX`, T-junction discontinuity, through loss, extraction magnitude and phase. Only after those quantities close should A/B/C/D production copper be regenerated.
-
-Validation commands follow the vendored official tscircuit skill:
+Run:
 
 ```bash
 npm run check:cal
-npm run build:cal
-npm run export:cal:circuit-json
-npm run export:cal:gerbers
-npm run export:cal:pcb-svg
+npm run check:full-v2
 ```
 
-The project-local skill is vendored under `.codex/skills/tscircuit/` from the official `tscircuit/skill` repository.
+The full V2 check performs:
+
+```text
+netlist -> placement -> build -> shorts
+```
+
+Exports:
+
+```bash
+npm run export:full-v2:circuit-json
+npm run export:full-v2:gerbers
+npm run export:full-v2:pcb-svg
+```
+
+## Important
+
+A clean tscircuit/Gerber result proves PCB geometry consistency, not RF performance.
+
+The next RF gate is:
+
+1. V2 T-cell screen;
+2. V2 verify if screen passes;
+3. full-board launch + ID + Patch EM;
+4. loaded Patch/workpiece;
+5. A/B/C/D regeneration;
+6. four-board Zone.

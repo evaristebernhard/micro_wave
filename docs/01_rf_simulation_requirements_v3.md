@@ -48,7 +48,7 @@ P_{\rm src,max}=500\ {\rm W}.
 \boxed{50\times60\ {\rm mm}}.
 \]
 
-保持 50 mm 水平 Patch pitch。当前 RF/reference 有效坐标取 `x∈[-25,25] mm, y∈[-35,25] mm`。由于 tscircuit board outline 暂按原点居中生成，代码中的工程外框使用 50 × 70 mm 以获得 `y=-35 mm` 下边界；上侧多出的 10 mm 不是产品需求，加工冻结应回到 50 × 60 mm。
+保持 50 mm 水平 Patch pitch。当前 RF/reference 有效坐标取 `x∈[-25,25] mm, y∈[-35,25] mm`。tscircuit 现已通过 `boardAnchorPosition` 直接生成真实 **50 × 60 mm** 板框；早期 50 × 70 mm 居中外框 workaround 已归档，不再属于当前 PCB。
 
 ---
 
@@ -550,19 +550,13 @@ V3 将 1 kV/mm 只作为早期 screening threshold；最终安全判定要基于
 
 原 2 mm 主线不再冻结。
 
-当前第一版：
+当前 openEMS thru verify 已表明历史 3.137 mm 线在 PP-loaded stack 下 native impedance 约为 45.5 Ω。由两个可信 full-wave 标定点得到的 V2 50 Ω 线宽候选为：
 
 \[
-w_{\rm RF}=2.9\ {\rm mm}
+\boxed{w_{50,\rm V2}\approx2.670\ {\rm mm}}.
 \]
 
-作为 seed。
-
-扫描：
-
-\[
-2.6\sim3.2\ {\rm mm}.
-\]
+该值仍需 V2 screen/verify 后冻结。
 
 目标：
 
@@ -703,15 +697,9 @@ RF 侧冻结：
 - 必要时加 Ground guard；
 - 必须检查 RF 串扰。
 
-当前工程基线使用 100 Ω 串联计数 + 100 μA 恒流测量。
+当前 **full engineering board V2 先恢复客户原始 10 kΩ / 0603 识别电阻**，并把 ID IN/OUT 真实落板。该低频支路不参与 RF 分配公式，但必须在完整单板 EM 中检查串扰。
 
-如果客户电控侧必须保持原 10 kΩ 方案，则应先给出：
-
-- 10 kΩ 是串联还是并联；
-- ADC/测量拓扑；
-- 1–100 块的分辨率要求；
-
-再决定是否恢复原值。
+100 Ω + 恒流计数保留为可选控制替代方案，不再未经客户确认直接取代 10 kΩ。最终仍需确认 10 kΩ 的串/并联测量拓扑、ADC 方案和 1–100 块分辨率。
 
 ---
 

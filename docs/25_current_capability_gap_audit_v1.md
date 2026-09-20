@@ -38,7 +38,7 @@
 - Gerber/Circuit JSON 导出；
 - 50 × 60 mm 产品机械目标与 50 × 70 mm tscircuit CAD workaround 的区分。
 
-**当前状态：已实现设计 seed，但不是 manufacturing freeze。**
+**当前状态：已实现 true 50 × 60 mm calibration board，并新增包含 RF 接口、T-cell、Patch、bottom ground、10 kΩ ID 支路的 full engineering board V2；仍不是 manufacturing freeze。**
 
 ### L2 — 当前主方案单板全波闭环
 
@@ -51,7 +51,7 @@
 - through loss；
 - loaded R+jX。
 
-**当前状态：未完成。**
+**当前状态：T-cell core network 已完成可信 thru/T-cell coupon verify；完整单板（launch + Patch + ID + workpiece）尚未闭环。**
 
 ### L3 — 四板 Zone 全波/网络闭环
 
@@ -101,44 +101,71 @@ A\rightarrow B\rightarrow C\rightarrow D
 
 ---
 
-## 2. 当前唯一现有 openEMS 数值结果是什么
+## 2. 当前可信的 openEMS 数值证据
 
-仓库当前 results/openems/summary.json 是**旧 edge-coupled A/B/C/D seed 的第一轮单板提取**，不是当前推荐 T-cell / field-aware PCB 的验证。
+当前已经不再只有旧 edge-coupled 结果。
 
-2.45 GHz 结果：
+### 2.1 thru fixture verify
 
-| Board | S11 | 约 VSWR | Patch-port transmission |
-|---|---:|---:|---:|
-| A | -7.67 dB | 2.41 | -27.86 dB |
-| B | -9.43 dB | 2.02 | -20.27 dB |
-| C | -10.59 dB | 1.84 | -14.91 dB |
-| D | -3.07 dB | 5.72 | -7.34 dB |
-
-其中 A/B/D 的输入匹配并不满足当前 VSWR≤2 的硬目标；C 仅初步通过。
-
-Patch-port 功率比粗略对应：
+在修正 MSLPort 终止和方向后，当前可信的 thru verify 在 2.45 GHz 得到：
 
 \[
-A\approx0.16\%,
-\quad
-B\approx0.94\%,
-\quad
-C\approx3.22\%,
-\quad
-D\approx18.4\%.
+S_{11}\approx-24.27\ \mathrm{dB},
+\qquad
+S_{21}\approx-0.376\ \mathrm{dB}.
 \]
 
-但必须注意：
-
-- 这是端口提取模型；
-- 不是工件吸收功率；
-- 不是当前 T-cell 结构；
-- 不应直接换算成“每板多少 W”。
-
-所以这批结果的正确意义只是：
+历史 3.137 mm nominal-50Ω line 的 native MSL impedance 约为：
 
 \[
-\boxed{\text{仿真链路已跑通，但旧结构性能未达标。}}
+Z_0\approx45.5\ \Omega.
+\]
+
+这证明 port fixture 已经基本可信，也证明 PP-loaded stack 下 bare-FR4 线宽需要重新标定。
+
+### 2.2 T-cell core verify
+
+当前可信的 T-cell coupon verify：
+
+\[
+S_{11}\approx-26.81\ \mathrm{dB},
+\]
+
+\[
+S_{21}\approx-2.285\ \mathrm{dB},
+\qquad
+S_{31}\approx-7.800\ \mathrm{dB}.
+\]
+
+两个输出之间的条件 branch split 约：
+
+\[
+\frac{P_3}{P_2+P_3}\approx21.9\%.
+\]
+
+当前 A-stage field-aware 目标为：
+
+\[
+24.76\%.
+\]
+
+因此核心 T-cell 已经从“纯理论 seed”推进到“有可信 full-wave 支撑、仍需参数修正”的阶段。
+
+### 2.3 还没有验证的部分
+
+上述结果仍不是完整客户板结果。尚未闭合：
+
+- magnetic launch 的最终寄生；
+- full engineering board V2 的 10 kΩ ID 支路 RF 串扰；
+- loaded Patch 的 \(R+jX\)；
+- PP + workpiece 下的 Patch accepted power；
+- 完整单板 2.40–2.50 GHz 验收；
+- A/B/C/D 和四板 Zone。
+
+所以当前准确表述是：
+
+\[
+\boxed{\text{T-cell core network 已验证；完整工程单板仍未验证完成。}}
 \]
 
 ---
@@ -316,13 +343,9 @@ R_LZ_0\frac{1-\kappa}{\kappa}
 
 ## 7. 当前最大的 Gap 排序
 
-### Gap A — 当前理论主方案还没有对应 full-wave 模型
+### Gap A — T-cell core 已验证，但完整工程板还没有 full-wave 闭环
 
-这是第一优先级。
-
-当前 openEMS 脚本仍在跑旧 edge-coupled seed，而 docs/23/docs/24 推荐的是 T-cell / field-aware 方案。
-
-必须先让“理论 PCB”和“仿真 PCB”变成同一个结构。
+当前 thru/T-cell coupon 已得到可信被动结果，说明核心 T-cell topology 不再是完全未验证状态。下一优先级是 full engineering board V2 的 launch、ID 支路、Patch 和真实 PP/workpiece 加载。
 
 ### Gap B — loaded Patch 的 R+jX 未标定
 
@@ -363,7 +386,7 @@ R_LZ_0\frac{1-\kappa}{\kappa}
 
 - **理论架构：约 75–85%**
 - **PCB 参数化/可制造 seed：约 60–70%**
-- **当前主方案单板 EM 验证：约 10–20%**
+- **当前主方案单板 EM 验证：核心 network 已验证；完整单板仍处于早期验证阶段**
 - **四板 Zone 验证：约 0–10%**
 - **25/100 块系统验证：接近 0%**
 - **500 W 实物验证：0%**

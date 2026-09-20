@@ -45,6 +45,9 @@ jobs:
       - name: Validate T-cell calibration board
         run: npm run check:cal
 
+      - name: Validate full V2 engineering board
+        run: npm run check:full-v2
+
       - name: Build circuit
         run: npm run build
 
@@ -56,6 +59,9 @@ jobs:
 
       - name: Export calibration artifacts
         run: npm run export:cal:circuit-json && npm run export:cal:gerbers && npm run export:cal:pcb-svg
+
+      - name: Export full V2 engineering artifacts
+        run: npm run export:full-v2:circuit-json && npm run export:full-v2:gerbers && npm run export:full-v2:pcb-svg
 
       - name: Upload PCB artifacts
         uses: actions/upload-artifact@v4
