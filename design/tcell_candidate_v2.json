@@ -42,23 +42,23 @@
       "y": -18
     },
     "junction": {
-      "x": -6.110469,
-      "y": -24.006858
+      "x": -6.110508,
+      "y": -24.007242
     },
     "outputReference": {
       "x": 20.2,
       "y": -18
     },
-    "seriesWidthMm": 3.557263,
+    "seriesWidthMm": 3.556624,
     "through50WidthMm": 2.670082,
-    "branchWidthMm": 1.07404,
+    "branchWidthMm": 1.073036,
     "junctionNodeSizeMm": 2.2,
     "targetExtraction": 0.2476,
     "targetCouplingDb": 6.06,
-    "targetSeriesOhm": 42.104335,
-    "targetBranchOhm": 78.066087,
-    "targetSeriesQuarterWaveMm": 15.316567,
-    "targetBranchQuarterWaveMm": 15.971934
+    "targetSeriesOhm": 42.109085,
+    "targetBranchOhm": 78.096375,
+    "targetSeriesQuarterWaveMm": 15.316682,
+    "targetBranchQuarterWaveMm": 15.972305
   },
   "launch": {
     "signalPadCenterYMm": -18,
@@ -87,13 +87,13 @@
     "impedanceScaleAlpha": 0.9098681879648132,
     "impedanceScaleTwoPointRelativeSpread": 0.0017384265249093213,
     "measuredOutputSplit": 0.2192563070857283,
-    "currentSurrogateJunctionSplit": 0.2831041334344104,
-    "relativeBranchEfficiencyFit": 0.7111373295977306,
+    "currentSurrogateJunctionSplit": 0.28310413354711855,
+    "relativeBranchEfficiencyFit": 0.7111373292028129,
     "relativeBranchEfficiencyInterval": [
-      0.7111373295977306,
+      0.7111373292028129,
       0.9
     ],
-    "robustJunctionTarget": 0.29089,
+    "robustJunctionTarget": 0.29073,
     "targetOutputSplit": 0.2476,
     "note": "Candidate uses a calibrated PP-loaded impedance scale and a minimax junction split to hedge the measured branch-path penalty. Promote only after one screen/verify EM run."
   }
