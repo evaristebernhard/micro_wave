@@ -181,6 +181,13 @@ BW_{\rm VSWR\le2}\ge50\ \mathrm{MHz},
 
 只有 ID sensitivity 明显时才继续优化 ID 位置/走线。
 
+已有三份 summary 后可零成本比较：
+
+    python scripts/openems/compare_full_v2_id.py \
+      --off results/openems_full_v2_fast/full_v2_fast_off_summary.json \
+      --open results/openems_full_v2_fast/full_v2_fast_open_summary.json \
+      --tenk results/openems_full_v2_fast/full_v2_fast_10k_summary.json
+
 第四步 screen：
 
     python scripts/openems/simulate_full_v2_fast.py --profile screen --id-mode open
