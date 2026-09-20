@@ -2,765 +2,804 @@
 
 > **状态：当前理论总基线（2026-09-20）。**
 >
-> 本文用于统一此前 `docs/01–23` 中已经出现但口径不一致的尺寸、功率、Zone、T-cell、复幅相和工件加载模型。
+> 本文统一此前 docs/01–23 中尺寸、功率、Zone、T-cell、复幅相与工件加载的冲突口径。
 >
-> 优先级：本文 > `docs/23_few_mode_robust_field_synthesis_v1.md` > `docs/20_four_board_zone_analytic_closure_v1.md` / `docs/19_tcell_exact_equal_power_synthesis_v1.md` > 更早历史 seed。
+> 优先级：本文 > docs/23_few_mode_robust_field_synthesis_v1.md > docs/20_four_board_zone_analytic_closure_v1.md / docs/19_tcell_exact_equal_power_synthesis_v1.md > 更早历史 seed。
 >
-> 本文所称“闭合”是指：在给定少量可测/可仿真的物理参数后，系统目标可以沿明确方程逐级反推到 PCB 设计参数；不表示当前 PCB 已经通过最终 HFSS/openEMS 或实测验收。
+> 这里的“闭合”是指：给定少量需要全波或实测标定的物理量后，可以沿固定方程从系统目标反推到 PCB 参数；不表示当前 PCB 已完成最终 HFSS/openEMS 或实测验收。
 
 ---
 
-## 1. 先统一四个最容易混淆的口径
+## 1. 尺寸口径
 
-### 1.1 产品机械尺寸：50 × 60 mm
+### 1.1 产品/理论机械目标
 
-当前产品/理论机械目标为：
+当前产品机械目标为：
 
-[
-oxed{50	imes60 {m mm}}.
-]
+\[
+\boxed{50\times60\ {\rm mm}}.
+\]
 
-保持水平 50 mm Patch pitch 和既有 RF reference coordinates，不再把早期 50 × 50 mm 当成最终机械边界。
+保持水平方向 50 mm Patch pitch 和既有 RF reference coordinates。
 
-推荐物理坐标口径：
+推荐有效机械坐标：
 
-[
-xin[-25,25] {m mm},qquad yin[-35,25] {m mm}.
-]
+\[
+x\in[-25,25]\ {\rm mm},
+\qquad
+y\in[-35,25]\ {\rm mm}.
+\]
 
-当前 RF 铜、Patch 和 T-cell 几何可放在该 50 × 60 mm 有效机械包络内。
+因此早期 50 × 50 mm 只保留为历史 footprint，不再是当前最终板尺寸。
 
-### 1.2 为什么代码里仍是 50 × 70 mm
+### 1.2 为什么 geometry.ts 仍有 boardH = 70
 
-当前 tscircuit 的 board outline 采用以原点为中心的矩形。为了在**不平移现有 RF/Patch 坐标**的前提下得到所需的下边界 (y=-35) mm，CAD seed 暂用：
+当前 tscircuit board outline 以原点为中心生成。为了在不平移既有 RF/Patch 坐标的情况下得到所需下边界
 
-[
-oxed{50	imes70 {m mm}},qquad yin[-35,35] {m mm}.
-]
+\[
+y=-35\ {\rm mm},
+\]
 
-因此：
+CAD seed 暂时采用：
 
-- **50 × 60 mm = 产品/理论机械目标；**
-- **50 × 70 mm = 当前 tscircuit 居中外框 workaround；**
-- 多出的上侧 10 mm 不是新增 RF 需求，也不应进入产品尺寸说明；
-- 加工冻结前应把机械外形裁切/平移回真实 50 × 60 mm，同时保持 RF reference 不变。
+\[
+\boxed{50\times70\ {\rm mm}},
+\qquad
+y\in[-35,35]\ {\rm mm}.
+\]
 
-### 1.3 机械板数与同时供能板数不是一个概念
+所以必须严格区分：
 
-系统机械/识别架构可以支持：
+- **50 × 60 mm：产品/理论机械目标；**
+- **50 × 70 mm：当前 tscircuit 居中 CAD 外框 workaround；**
+- 上侧额外 10 mm 不是 RF 或产品需求；
+- 加工冻结时机械外形应回到 50 × 60 mm。
 
-[
-oxed{1	ext{–}100 {m boards}}.
-]
+当前 T-cell 最深铜约在
 
-但“100 块都同时达到 5–8 W/块”不能与 500 W 源上限同时写成硬指标。
+\[
+y\approx-28.8\ {\rm mm},
+\]
 
-### 1.4 5–8 W 必须先说明是哪一种功率
-
-全文统一区分：
-
-[
-P_{m inc}quad	ext{单板入口前向 RF},
-]
-
-[
-P_{m ext}quad	ext{从主链抽取并送入 Patch branch 的 RF},
-]
-
-[
-P_{m abs}quad	ext{工件实际吸收功率},
-]
-
-[
-P_{m loss}quad	ext{铜/介质/触点/分配网络寄生损耗}.
-]
-
-如果客户只写“5–8 W/板”，在工件材料与负载效率未冻结前，默认它只能作为 (P_{m ext}) 的设计目标；不能直接宣称等于 (P_{m abs})。
+距离产品下边界 -35 mm 仍有约 6.2 mm 余量，因此 RF footprint 本身不要求 70 mm 板高。
 
 ---
 
-## 2. 系统功率边界：500 W、80 块和 100 块如何同时写得自洽
+## 2. 功率术语必须分开
 
-源硬件上限：
+全文统一使用：
 
-[
-oxed{P_{m src,max}=500 {m W}}.
-]
+\[
+P_{\rm inc}
+\]
 
-设端到端效率为 (eta_{m sys})，总板数为 (N)，平均目标有用功率为 (ar P_b)，则必要条件：
+表示单板或 Zone 入口前向 RF 功率；
 
-[
-oxed{Nar P_ble eta_{m sys}P_{m src,max}}.
-]
+\[
+P_{\rm ext}
+\]
 
-因此可供规划使用的统一公式是：
+表示从主链抽取并送入 Patch branch 的 RF 功率；
 
-[
-oxed{
-N_{max}(P_{min})
-=
-leftlfloor
-rac{eta_{m sys}P_{m src,max}}{P_{min}}
-ightfloor.
+\[
+P_{\rm abs}
+\]
+
+表示工件真正吸收的功率；
+
+\[
+P_{\rm loss}
+\]
+
+表示铜、FR4、触点、分配网络等寄生损耗。
+
+客户原始“5–8 W/板”在工件材料和 RF→工件效率未冻结前，只能先作为 \(P_{\rm ext}\) 的设计目标，不能直接等同于 \(P_{\rm abs}\)。
+
+---
+
+## 3. 500 W、1–100 块与 5–8 W 的硬边界
+
+源功率上限：
+
+\[
+\boxed{P_{\rm src,max}=500\ {\rm W}}.
+\]
+
+设系统端到端效率为 \(\eta_{\rm sys}\)，总板数为 \(N\)，平均目标有用功率为 \(\bar P_b\)，则功率守恒要求：
+
+\[
+\boxed{
+N\bar P_b
+\le
+\eta_{\rm sys}P_{\rm src,max}.
 }
-]
+\]
 
-当前前期预算继续取：
+所以可统一写成：
 
-[
-eta_{m sys,plan}=0.80,
-]
+\[
+\boxed{
+N_{\max}(P_{\min})
+=
+\left\lfloor
+\frac{\eta_{\rm sys}P_{\rm src,max}}{P_{\min}}
+\right\rfloor.
+}
+\]
 
-则可用总有用功率预算：
+当前规划阶段继续采用：
 
-[
-oxed{P_{m useful,budget}=400 {m W}}.
-]
+\[
+\eta_{\rm sys,plan}=0.80.
+\]
 
-于是：
+于是可用有用功率预算：
 
-| 总板数 N | 平均有用功率预算上限 |
+\[
+\boxed{P_{\rm useful,budget}=400\ {\rm W}}.
+\]
+
+典型值：
+
+| 总板数 \(N\) | 平均有用功率预算 |
 |---:|---:|
 | 50 | 8.0 W/板 |
 | 60 | 6.67 W/板 |
 | 80 | 5.0 W/板 |
 | 100 | 4.0 W/板 |
 
-所以统一工程表述为：
+因此当前统一表述为：
 
-[
-oxed{
-	ext{系统机械支持 1–100 块；在 500 W + 80% 规划效率下，5 W/板的预算上限约为 80 块。}
+\[
+\boxed{
+\text{机械/识别架构支持 1–100 块；在 500 W 与 80\% 规划效率下，5 W/板约对应 80 块预算上限。}
 }
-]
+\]
 
-注意：**80 块是功率预算上限，不是已经验证的保证值。** 当前四板 Zone 本身已有约 20% 左右的 RF 分配损耗预算，因此真实 manifold、接口和工件效率加入后，能同时保持 5 W/板的数量只能由实测 (eta_{m sys}) 再确定。
+其中 **80 块不是已经验证的保证值**。真实可同时供能板数必须用最终实测/全波得到的 \(\eta_{\rm sys}\) 重算。
 
-100 块仍可作为机械/网络组态存在，但 500 W 源下应降低平均单板目标，当前第一版预算为约：
+如果要求 100 块都至少 5 W，则：
 
-[
-oxed{4 {m W/board}}.
-]
+\[
+P_{\rm src}
+\ge
+\frac{100\times5}{\eta_{\rm sys}}.
+\]
 
-若要求 100 块都至少 5 W，则至少需要：
+在 \(\eta_{\rm sys}=0.8\) 时：
 
-[
-P_{m src}
-ge
-rac{500}{eta_{m sys}}.
-]
+\[
+\boxed{P_{\rm src}\ge625\ {\rm W}}.
+\]
 
-在 (eta_{m sys}=0.8) 时：
-
-[
-oxed{P_{m src}ge625 {m W}}.
-]
+所以“500 W + 100 块 + 每块至少 5 W”不能继续作为同时硬指标。
 
 ---
 
-## 3. 系统架构：100 块不是一条 FR4 长链
+## 4. 系统架构：100 块不是一条 FR4 长链
 
-当前唯一合理的系统层级为：
+当前主架构：
 
-[
-oxed{
-	ext{500 W source}
-ightarrow
-	ext{low-loss manifold}
-ightarrow
-	ext{local RF Zones}
-ightarrow
-	ext{boards}
-ightarrow
-	ext{workpiece}.
+\[
+\boxed{
+\text{source}
+\rightarrow
+\text{low-loss manifold}
+\rightarrow
+\text{local RF Zones}
+\rightarrow
+\text{boards}
+\rightarrow
+\text{workpiece}.
 }
-]
+\]
 
-局部 Zone 取 1–4 块：
+局部 Zone 采用 1–4 块：
 
-[
+\[
 D,
-quad
-Cightarrow D,
-quad
-Bightarrow Cightarrow D,
-quad
-Aightarrow Bightarrow Cightarrow D.
-]
+\qquad
+C\rightarrow D,
+\qquad
+B\rightarrow C\rightarrow D,
+\qquad
+A\rightarrow B\rightarrow C\rightarrow D.
+\]
 
-100 块系统通过多个局部 Zone 组成，而不是 100 块沿约 5 m 普通 FR4 微带连续串联。
+系统总计可以达到 1–100 块，但通过多个局部 Zone 组成。
 
-若普通 FR4 每 50 mm cell 的 through-loss 约：
+对于普通 FR4 50 mm cell，当前理论 through-loss 基线约为：
 
-[
-L_{m cell}approx0.42 {m dB},
-]
+\[
+L_{\rm cell}\approx0.42\ {\rm dB}.
+\]
 
-则：
+功率传输系数：
 
-[
-	au=10^{-L_{m cell}/10}approx0.9078.
-]
+\[
+\tau
+=
+10^{-L_{\rm cell}/10}
+\approx0.9078.
+\]
 
-连续长链的损耗随级数指数累积，故 100-cell FR4 chain 不是“参数还没调好”，而是架构级错误。
+因此 100 个 50 mm cell 连成约 5 m 普通 FR4 微带链会产生指数级累计损耗。该结构的问题不是“参数还没调好”，而是架构级不可行。
 
 ---
 
-## 4. 单 Zone 的通用功率递推：这是幅度综合的闭合核心
+## 5. 单 Zone 通用功率递推
 
-设四板 Zone 为：
+四板 Zone：
 
-[
-Aightarrow Bightarrow Cightarrow D.
-]
+\[
+A\rightarrow B\rightarrow C\rightarrow D.
+\]
 
-令第 (i) 块希望送入 Patch branch 的目标 RF 功率为 (e_i)，中间级 through-path 功率传输效率为 (	au_i)。
+设第 \(i\) 块希望送入 Patch branch 的目标 RF 功率为 \(e_i\)，中间级 through-path 功率传输效率为 \(\tau_i\)。
 
-从末端向前递推：
+末端：
 
-[
-P_D=e_D,
-]
+\[
+P_D=e_D.
+\]
 
-[
-oxed{
-P_i=e_i+rac{P_{i+1}}{	au_i},
-qquad i=C,B,A.
+由后向前：
+
+\[
+\boxed{
+P_i
+=
+e_i
++
+\frac{P_{i+1}}{\tau_i},
+\qquad
+i=C,B,A.
 }
-]
+\]
 
-于是每一级需要的抽取比例：
+每一级所需抽取比例：
 
-[
-oxed{
-kappa_i=rac{e_i}{P_i}.
+\[
+\boxed{
+\kappa_i
+=
+\frac{e_i}{P_i}.
 }
-]
+\]
 
-这一定义同时覆盖：
+这是当前幅度综合的核心闭合式。
 
-- 旧的 equal-RF-power 目标；
+它同时覆盖：
+
+- equal-RF-power benchmark；
 - 当前 field-aware unequal-power 目标；
-- 后续任意从工件优化反推出的 (e_i)。
+- 后续任何由工件优化反推出的 \(e_i\)。
 
-因此以后不再把某一组 6.5/5/3 dB 或 21.5/30.2/47.6% 当作永久常数；它们只是特定 (e_i,	au_i) 下的一个解。
+以后不再把某一组固定 coupling dB 当成永久参数。
 
 ---
 
-## 5. 旧 equal-power 解的地位：解析基准，不再是最终场设计
+## 6. Equal-power 解的正确地位
 
 若：
 
-[
+\[
 e_A=e_B=e_C=e_D=E,
-]
+\]
 
-且：
+并且：
 
-[
-	au_A=	au_B=	au_C=10^{-0.42/10},
-]
+\[
+\tau_A=\tau_B=\tau_C
+=
+10^{-0.42/10},
+\]
 
-则递推得到：
+则：
 
-[
-kappa_A=0.214983,
-quad
-kappa_B=0.301666,
-quad
-kappa_C=0.475842.
-]
+\[
+\kappa_A=0.214983,
+\]
+
+\[
+\kappa_B=0.301666,
+\]
+
+\[
+\kappa_C=0.475842.
+\]
 
 对应：
 
-[
-6.676 {m dB},
-quad
-5.205 {m dB},
-quad
-3.225 {m dB}.
-]
+\[
+6.676\ {\rm dB},
+\qquad
+5.205\ {\rm dB},
+\qquad
+3.225\ {\rm dB}.
+\]
 
-这套结果仍有价值，因为它证明：
+这套结果仍然有价值，因为它证明了：
 
-1. 四板局部 Zone 的功率分配可以解析闭合；
+1. 四板 Zone 可以解析闭合；
 2. A/B/C 必须位置专用；
-3. 原固定弱耦合方案不对；
-4. 它可以作为全波校准 benchmark。
+3. fixed 10% tap 不合理；
+4. 可用于全波/网络模型校准。
 
-但它已经被工件场模型进一步更新，**不再作为当前最终功率 taper。**
+但它现在只作为 **equal-power benchmark**，不再是最终工件场设计。
 
 ---
 
-## 6. 当前主设计目标：field-aware mirror taper
+## 7. 当前主设计：field-aware mirror taper
 
-`docs/23` 的 layered few-mode robust model 已把优化对象从“每块 Patch RF 功率相等”升级为：
+docs/23 已把目标从“每块 Patch RF 功率相等”升级为：
 
-[
-oxed{	ext{工件有限体积内的吸收场均匀性}}.
-]
+\[
+\boxed{\text{工件有限体积内的吸收场均匀性}}.
+\]
 
-当前推荐复激励方向为：
+当前推荐复激励：
 
-[
-oxed{
-mathbf u
-propto
-(1, 0.801e^{-j5.3^circ}, 0.801e^{-j5.3^circ}, 1).
+\[
+\boxed{
+\mathbf u
+\propto
+\left(
+1,\,
+0.801e^{-j5.3^\circ},\,
+0.801e^{-j5.3^\circ},\,
+1
+\right).
 }
-]
+\]
 
-因此 accepted RF power 比例：
+accepted RF power 比例：
 
-[
-oxed{
+\[
+\boxed{
 e_A:e_B:e_C:e_D
 =
 1:0.6412:0.6412:1.
 }
-]
+\]
 
-若四板平均 accepted RF 仍取 6.5 W：
+若四板平均 accepted RF 取 6.5 W：
 
-[
-oxed{
+\[
+\boxed{
 (e_A,e_B,e_C,e_D)
-approx
-(7.92, 5.08, 5.08, 7.92) {m W}.
+\approx
+(7.92,\ 5.08,\ 5.08,\ 7.92)\ {\rm W}.
 }
-]
+\]
 
-这恰好全部位于 5–8 W 区间。
+四块均落在原始 5–8 W 区间内。
 
-在加入当前 phase-section 后的损耗估计：
+加入当前 phase-section 后的 cell-loss 估计：
 
-[
-	au_Aapprox0.8768,
-quad
-	au_Bapprox0.8785,
-quad
-	au_Capprox0.8802,
-]
+\[
+\tau_A\approx0.8768,
+\qquad
+\tau_B\approx0.8785,
+\qquad
+\tau_C\approx0.8802.
+\]
 
-通用递推给出：
+代入通用递推得到：
 
-[
-oxed{
-kappa_Aapprox24.76%,
-quad
-kappa_Bapprox24.07%,
-quad
-kappa_Capprox36.08%.
+\[
+\boxed{
+\kappa_A\approx24.76\%,
+\qquad
+\kappa_B\approx24.07\%,
+\qquad
+\kappa_C\approx36.08\%.
 }
-]
+\]
 
-对应约：
+对应：
 
-[
-6.06 {m dB},
-quad
-6.19 {m dB},
-quad
-4.43 {m dB}.
-]
+\[
+6.06\ {\rm dB},
+\qquad
+6.19\ {\rm dB},
+\qquad
+4.43\ {\rm dB}.
+\]
 
-因此当前设计主线已经从：
+因此当前主线已经从：
 
-[
-	ext{equal power + 90° travelling mode}
-]
+\[
+\text{equal power + 90° travelling mode}
+\]
 
 更新为：
 
-[
-oxed{
-	ext{outer-strong power taper + near-in-phase mirror mode}.
+\[
+\boxed{
+\text{outer-strong power taper + near-in-phase mirror mode}.
 }
-]
+\]
 
 ---
 
-## 7. T-cell：从目标抽取比例直接反综合阻抗
+## 8. T-cell 反综合
 
-设参考阻抗：
+参考阻抗：
 
-[
-Z_0=50 Omega.
-]
+\[
+Z_0=50\ \Omega.
+\]
 
-对某一级目标 (kappa)，T-junction 下游 through arm 为 (Z_0)，Patch 在设计频率处的目标实部为 (R_L)。
+目标抽取比例为 \(\kappa\)，Patch 在设计频率处目标实部为 \(R_L\)。
 
 输入侧 quarter-wave transformer：
 
-[
-oxed{
-Z_t=Z_0sqrt{1-kappa}.
+\[
+\boxed{
+Z_t
+=
+Z_0\sqrt{1-\kappa}.
 }
-]
+\]
 
 Patch branch quarter-wave transformer：
 
-[
-oxed{
+\[
+\boxed{
 Z_b
 =
-sqrt{
-R_L Z_0rac{1-kappa}{kappa}
+\sqrt{
+R_L Z_0
+\frac{1-\kappa}{\kappa}
 }.
 }
-]
+\]
 
-若 (R_L=50Omega)，化为：
+若：
 
-[
-Z_b=50sqrt{rac{1-kappa}{kappa}}.
-]
+\[
+R_L=50\ \Omega,
+\]
 
-代入当前 field-aware (kappa)：
+则：
 
-| Board | (kappa) | (Z_t) | (Z_b)（(R_L=50Omega) seed） |
+\[
+Z_b
+=
+50\sqrt{
+\frac{1-\kappa}{\kappa}
+}.
+\]
+
+代入当前 field-aware \(\kappa\)：
+
+| Board | \(\kappa\) | \(Z_t\) | \(Z_b\)（\(R_L=50\Omega\) seed） |
 |---|---:|---:|---:|
 | A | 0.2476 | 43.37 Ω | 87.16 Ω |
 | B | 0.2407 | 43.57 Ω | 88.81 Ω |
 | C | 0.3608 | 39.98 Ω | 66.55 Ω |
 
-当前裸 FR4 Hammerstad 线宽仅用于 PCB seed；最终必须在真实 PP + FR4 stack 下重新求：
+裸 FR4 Hammerstad 线宽只能作为几何 seed。
 
-[
-Z_c(W)=Z_{m target},
-]
+真实 PP + FR4 stack 下必须重新求：
+
+\[
+Z_c(W)=Z_{\rm target},
+\]
 
 以及：
 
-[
-eta(W,f_0)L=rac{pi}{2}.
-]
+\[
+\beta(W,f_0)L
+=
+\frac{\pi}{2}.
+\]
 
 ---
 
-## 8. Loaded Patch 的闭合 gate：不能只看 Zone input S11
+## 9. Loaded Patch gate
 
-设实际 loaded Patch：
+设真实 loaded Patch：
 
-[
+\[
 Z_L=R+jX.
-]
+\]
 
-对于复场设计，关键不是只让入口 S11 很小，而是控制 Patch branch 的幅相误差。
+不能只用 Zone input S11 判断 Patch 是否调好。
 
-当前相位误差约 5° 的一阶 gate：
+对于复场设计，若希望局部相位误差控制在约 5°：
 
-[
-oxed{
-|X/R|lesssim	an5^circapprox0.087.
+\[
+\boxed{
+|X/R|
+\lesssim
+\tan5^\circ
+\approx0.087.
 }
-]
+\]
 
-因此单板/单 cell 标定至少必须输出：
+所以单板/单 cell 标定至少应输出：
 
-- (operatorname{Re}Z_L)；
-- (operatorname{Im}Z_L)；
+- \(\operatorname{Re}Z_L\)；
+- \(\operatorname{Im}Z_L\)；
 - Patch accepted power；
 - Patch complex phase；
-- cell through magnitude/phase；
+- cell through magnitude / phase；
 - parasitic loss。
 
-若 (|X/R|) 过大，即使系统入口 S11 看起来很好，也不能认为场综合已经成立。
+即使入口 S11 很好，只要 \(|X/R|\) 过大，复场综合仍可能失效。
 
 ---
 
-## 9. 场模型：从复激励到工件吸收
+## 10. 从 RF 激励到工件吸收
 
-对第 (m) 个目标工件区域，定义功率沉积二次型：
+对第 \(m\) 个工件目标区域，定义功率沉积矩阵：
 
-[
-oxed{
-H_m=mathbf u^dagger Q_mmathbf u.
+\[
+\boxed{
+H_m
+=
+\mathbf u^\dagger Q_m\mathbf u.
 }
-]
+\]
 
-当前 few-mode layered spectral model 用：
+当前 layered few-mode model 已包含：
 
 - Patch 有限孔径谱；
 - PP superstrate；
 - air gap；
 - complex workpiece permittivity；
-- finite workpiece depth；
+- finite workpiece depth。
 
-构造近似 (Q_m)。
+因此当前完整设计链应写成：
 
-这一步的作用是把“RF 网络设计”与“真正工件加热目标”连接起来。
-
-因此当前完整设计链是：
-
-[
-oxed{
-	ext{workpiece target}
-ightarrow
+\[
+\boxed{
+\text{workpiece target}
+\rightarrow
 Q_m
-ightarrow
-mathbf u^*
-ightarrow
-(e_i,phi_i)
-ightarrow
-kappa_i
-ightarrow
-(Z_{t,i},Z_{b,i},L_{phi,i})
-ightarrow
-	ext{PCB geometry}.
+\rightarrow
+\mathbf u^*
+\rightarrow
+(e_i,\phi_i)
+\rightarrow
+\kappa_i
+\rightarrow
+(Z_{t,i},Z_{b,i},L_{\phi,i})
+\rightarrow
+\text{PCB geometry}.
 }
-]
+\]
 
-这才是当前仓库中应称为“理论闭合”的主线。
+这才是当前项目的理论闭合主线。
 
 ---
 
-## 10. 相位综合：当前不再冻结 +90° travelling-wave
+## 11. 相位综合：+90° 只保留为网络 benchmark
 
-旧 T-cell 网络天然容易得到约 +90° 相邻 progression，这仍是一个方便的网络 benchmark。
+理想 T-cell 很容易得到约 +90° 相邻 phase progression，因此旧文档中：
 
-但当前工件场模型的推荐 phase target 为：
+\[
+0^\circ,\ 90^\circ,\ 180^\circ,\ 270^\circ
+\]
 
-[
-phi_A=0^circ,
-]
+仍是有价值的网络 benchmark。
 
-[
-phi_B=phi_C=-5.3^circ,
-]
+但当前工件场模型推荐：
 
-[
-phi_D=0^circ.
-]
+\[
+\phi_A=0^\circ,
+\]
 
-所以网络天然相位与工件目标相位之间的差，应由额外 phase section / trim 修正，而不是反过来强迫工件优化服从网络天然 +90°。
+\[
+\phi_B=\phi_C=-5.3^\circ,
+\]
+
+\[
+\phi_D=0^\circ.
+\]
+
+因此网络天然相位与工件目标之间的差值应该由 phase section / trim 修正，而不是强迫工件优化服从 +90° travelling-wave。
 
 当前等效 50 Ω phase-section seed：
 
-[
-oxed{
-L_{phi,AB/BC/CD}
-approx
-17.97, 16.97, 15.97 {m mm}.
+\[
+\boxed{
+L_{\phi,AB/BC/CD}
+\approx
+17.97,\ 16.97,\ 15.97\ {\rm mm}.
 }
-]
+\]
 
-这些是电长度 seed，不是加工冻结值。
+这仍是电长度 seed，不是制造冻结值。
 
 ---
 
-## 11. 当前单 Zone 额定尺度与 500 W 系统如何连接
+## 12. 单 Zone 额定尺度与 500 W 系统
 
 按当前 field-aware 6.5 W/板平均点：
 
-[
-sum e_i=26 {m W}.
-]
-
-当前递推估算 Zone input：
-
-[
-oxed{
-P_{m Zone,in}approx31.99 {m W}.
-}
-]
-
-局部 Zone 的 accepted-RF 分配效率约：
-
-[
-eta_{m Zone}
+\[
+\sum_i e_i
 =
-rac{26}{31.99}
-approx81.3%.
-]
+26\ {\rm W}.
+\]
 
-这个数解释了为什么“80 块 × 5 W = 400 W”已经非常接近 500 W 系统边界：
+当前 loss-aware 递推估计：
+
+\[
+\boxed{
+P_{\rm Zone,in}
+\approx31.99\ {\rm W}.
+}
+\]
+
+局部 Zone accepted-RF 分配效率：
+
+\[
+\eta_{\rm Zone}
+=
+\frac{26}{31.99}
+\approx81.3\%.
+\]
+
+这说明“80 块 × 5 W = 400 W”为什么已经非常接近 500 W 系统边界：
 
 - 80 块若按 4 板/Zone，共约 20 个 Zone；
-- 仅局部 Zone 分配损耗就会把 source-side 需求推近 500 W；
-- 上游 manifold、接口和反射还需要额外余量。
+- Zone 自身就存在明显分配损耗；
+- 上游 manifold、接口、反射还需要功率余量。
 
-因此以后不再把“80 块 × 5 W”写成无条件保证，而写成：
+因此以后统一写成：
 
-[
-oxed{
-	ext{500 W 系统在约 80% 端到端效率规划下，5 W/板对应约 80 块的理论预算上限。}
+\[
+\boxed{
+\text{80 块 × 5 W 是约 80\% 端到端效率下的预算上限，不是已验证保证值。}
 }
-]
+\]
 
-真实板数必须由最终：
+最终应使用：
 
-[
-eta_{m sys}
+\[
+\eta_{\rm sys}
 =
-eta_{m manifold}
-eta_{m Zone}
-eta_{m interface}
-eta_{m load}
-]
+\eta_{\rm manifold}
+\eta_{\rm Zone}
+\eta_{\rm interface}
+\eta_{\rm load}
+\]
 
-重新计算。
+重新计算可同时供能板数。
 
 ---
 
-## 12. 当前结构选择：为什么 T-cell 是主方案，但不是无条件最终方案
+## 13. T-cell 是当前主方案，但不是无条件最终方案
 
 T-cell 的优势：
 
-- (kappa) 可解析反综合；
+- \(\kappa\) 可解析反综合；
 - 线宽可制造；
-- 不需要几十微米超强 edge-coupled gap；
-- 容易把幅度设计与相位 trim 分离；
-- 适合先做单 cell 全波标定。
+- 不需要几十微米级超强 edge-coupled gap；
+- 幅度设计与 phase trim 可以解耦；
+- 适合先做单 cell full-wave calibration。
 
 主要风险：
 
-[
-oxed{
-	ext{reciprocal 3-port T-cell 没有理想 output isolation}.
+\[
+\boxed{
+\text{reciprocal 3-port T-cell 没有理想 output isolation}.
 }
-]
+\]
 
-当工件变化导致 Patch reflection 增大时，反射会沿 through chain 回传。
+工件变化导致 Patch reflection 增大时，反射会沿 through chain 回传。
 
-因此拓扑决策 gate 为：
+因此拓扑 gate：
 
 - loaded Patch reflection 小：优先 T-cell；
-- loaded Patch reflection / mutual loading 大：比较 isolated hybrid / Wilkinson / compact quadrature topology。
-
-这也是为什么不能只凭解析匹配公式直接 manufacturing freeze。
+- loaded Patch reflection / mutual loading 大：比较 isolated hybrid、Wilkinson、compact quadrature 等路线。
 
 ---
 
-## 13. 50 × 60 mm 与当前 T-cell 的几何可实现性
-
-当前最深 T-cell 铜约在：
-
-[
-yapprox-28.8 {m mm}.
-]
-
-产品目标下边界：
-
-[
-y=-35 {m mm}.
-]
-
-仍有约：
-
-[
-6.2 {m mm}
-]
-
-几何余量。
-
-Patch 上缘也位于 (y<25) mm 内。
-
-因此当前 RF geometry **并不要求产品板高 70 mm**；50 × 70 只是当前 tscircuit 中心化 outline 的工程实现。
-
----
-
-## 14. 旧文档如何解释，不再互相打架
+## 14. 旧文档如何解释
 
 ### 仍有效
 
-- V3 中对 500 W / 100 块 / 5–8 W 冲突的功率守恒审计；
-- 长 FR4 chain 不可行结论；
-- T-cell 的 matched-extraction 公式；
-- loaded Patch (R+jX) gate；
-- 分层工件模型和 (Q_m) 设计链。
+- 500 W / 100 块 / 5–8 W 的功率守恒审计；
+- 100-cell 普通 FR4 长链不可行；
+- T-cell matched-extraction 公式；
+- loaded Patch \(R+jX\) gate；
+- layered workpiece model 与 \(Q_m\) 设计链。
 
 ### 降级为历史 seed / benchmark
 
 - 50 × 50 mm 最终机械边界；
 - 所有板 fixed 10% tap；
 - 6.5 / 5 / 3 dB 作为最终 coupling；
-- equal-RF-power 21.50 / 30.17 / 47.58% 作为最终 taper；
--固定 0/90/180/270° 作为最终加热 phase；
+- equal-power 的 21.50 / 30.17 / 47.58% 作为最终 taper；
+- 0/90/180/270° 作为最终加热 phase；
 - 100 块 × 5–8 W 在 500 W 下同时成立；
 - raw S21≤0.5 dB 与 intentional extraction 混用。
 
-### 当前优先设计参数
+### 当前优先参数
 
-- 产品机械：50 × 60 mm；
+- 产品机械目标：50 × 60 mm；
 - tscircuit CAD workaround：50 × 70 mm；
-- Patch：37.5 × 28.5 mm seed；
-- field-aware power ratio：1 : 0.6412 : 0.6412 : 1；
-- field-aware phase：0°, -5.3°, -5.3°, 0°；
-- (kappa_A,kappa_B,kappa_C)：24.76%, 24.07%, 36.08%；
-- T-cell impedance target：43.37/43.57/39.98 Ω series，87.16/88.81/66.55 Ω branch（50 Ω resonant-load seed）；
-- phase section equivalent length：17.97/16.97/15.97 mm。
+- Patch seed：37.5 × 28.5 mm；
+- power ratio：1 : 0.6412 : 0.6412 : 1；
+- phase：0°, -5.3°, -5.3°, 0°；
+- \(\kappa_A,\kappa_B,\kappa_C\)：24.76%, 24.07%, 36.08%；
+- series \(Z_t\)：43.37, 43.57, 39.98 Ω；
+- branch \(Z_b\)：87.16, 88.81, 66.55 Ω（50 Ω resonant-load seed）；
+- equivalent phase section：17.97, 16.97, 15.97 mm。
 
 ---
 
-## 15. 下一轮仿真只需要标定什么
+## 15. 下一轮 full-wave 只标定有限物理量
 
-理论主线已经不需要继续大范围 blind sweep。下一轮 full-wave 应只标定以下有限物理量：
+下一轮 HFSS/openEMS 不应再次大范围 blind sweep 架构，只标定：
 
-1. 真实 PP + FR4 stack 下 (Z_c(W))；
-2. 真实 (eta(W,f)) 与 phase/mm；
-3. loaded Patch 的 (R_L+jX_L)；
-4. 单 cell (	au_i)；
-5. magnetic interface 的 insertion loss / phase / return loss；
+1. 真实 PP + FR4 stack 下的 \(Z_c(W)\)；
+2. 真实 \(\beta(W,f)\) 与 phase/mm；
+3. loaded Patch 的 \(R_L+jX_L\)；
+4. 单 cell \(\tau_i\)；
+5. magnetic interface insertion loss / phase / return loss；
 6. T-junction discontinuity；
 7. Patch mutual coupling；
-8. 真实工件下的 (Q_m) / absorbed-power correction。
+8. 真实工件下 \(Q_m\) 的修正。
 
 标定后直接重新代入：
 
-[
-mathbf u^*
-ightarrow
+\[
+\mathbf u^*
+\rightarrow
 e_i
-ightarrow
+\rightarrow
 P_i
-ightarrow
-kappa_i
-ightarrow
-Z_t,Z_b,L_phi.
-]
-
-不需要重新发明系统架构。
+\rightarrow
+\kappa_i
+\rightarrow
+Z_t,Z_b,L_\phi.
+\]
 
 ---
 
 ## 16. 最终闭合结论
 
-当前项目可以用下列链条作为唯一理论主线：
+当前项目唯一理论主线：
 
-[
-oxed{
-egin{aligned}
-&	ext{500 W source power budget}\
-&Downarrow\
-&	ext{multi-Zone architecture}\
-&Downarrow\
-&	ext{workpiece layered field model }Q_m\
-&Downarrow\
-&	ext{optimal complex Patch excitation }mathbf u^*\
-&Downarrow\
-&	ext{target accepted powers }e_i	ext{ and phases }phi_i\
-&Downarrow\
-&	ext{loss-aware recursion }P_i=e_i+P_{i+1}/	au_i\
-&Downarrow\
-&kappa_i=e_i/P_i\
-&Downarrow\
-&Z_t=Z_0sqrt{1-kappa_i},quad
-Z_b=sqrt{R_LZ_0(1-kappa_i)/kappa_i}\
-&Downarrow\
-&	ext{phase trim + 50 × 60 mm PCB mapping}\
-&Downarrow\
-&	ext{single-cell full-wave calibration}\
-&Downarrow\
-&	ext{Zone/network validation}.
-end{aligned}
+\[
+\boxed{
+\begin{aligned}
+&\text{500 W source budget}\\
+&\Downarrow\\
+&\text{multi-Zone architecture}\\
+&\Downarrow\\
+&\text{layered workpiece model }Q_m\\
+&\Downarrow\\
+&\text{optimal complex Patch excitation }\mathbf u^*\\
+&\Downarrow\\
+&\text{target }e_i,\phi_i\\
+&\Downarrow\\
+&\text{loss-aware recursion }P_i=e_i+P_{i+1}/\tau_i\\
+&\Downarrow\\
+&\kappa_i=e_i/P_i\\
+&\Downarrow\\
+&Z_t=Z_0\sqrt{1-\kappa_i}\\
+&Z_b=\sqrt{R_LZ_0(1-\kappa_i)/\kappa_i}\\
+&\Downarrow\\
+&\text{phase trim + 50 × 60 mm PCB mapping}\\
+&\Downarrow\\
+&\text{single-cell full-wave calibration}\\
+&\Downarrow\\
+&\text{Zone/network validation}.
+\end{aligned}
 }
-]
+\]
 
-这条链中：
+其中：
 
 - **架构、功率守恒、递推和 T-cell 反综合已经解析闭合；**
 - **工件场目标已有 reduced-order robust 解；**
-- **仍需全波/实测标定的是材料、负载、接口和不连续引起的修正量。**
+- **仍需全波/实测标定的是材料、负载、接口与不连续引起的修正量。**
 
-因此后续文档与 PCB 参数都应从本文出发，不再并列引用多套互相冲突的“最终方案”。
+后续设计、文档和参数更新都应从本文出发，不再并列引用多套互相冲突的“最终方案”。
