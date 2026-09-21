@@ -115,7 +115,7 @@ export const CableMagneticTabBoard = () => {
         padShape="rect"
         width="4.2mm"
         height="2.2mm"
-        pcbX="6mm"
+        pcbX="11.5mm"
         pcbY={mm(yCable)}
       />
       <trace
