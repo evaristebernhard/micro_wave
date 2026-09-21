@@ -15,6 +15,8 @@
 - 当前能力/GAP：`docs/25_current_capability_gap_audit_v1.md`
 - openEMS 端口与低成本校准：`docs/26_openems_port_fixture_audit_v1.md`
 - 当前快速设计循环：`docs/27_fast_tcell_design_loop_v1.md`
+- Full V2 快速 EM：`docs/28_full_v2_fast_em_v1.md`
+- Full V2 功率流数学物理审计：`docs/29_full_v2_power_flow_physics_audit_v1.md`
 - 文档索引：`docs/README.md`
 - 历史文档：`docs/archive/`
 
@@ -92,7 +94,15 @@ V2 仍是 **screen candidate**，不是 manufacturing freeze。
 - conditional branch split ≈ 21.9%
 - passive/converged network result
 
-所以当前可以说 **T-cell core topology 已经得到可信 full-wave 支撑**，但完整客户板（launch + ID + Patch + workpiece）仍未完成最终全波闭环。
+所以当前可以说 **T-cell core topology 已经得到可信 full-wave 支撑**。
+
+Full V2 也已经完成第一轮 fast/screen：最新 screen 在 2.45 GHz 得到 S11≈-17.15 dB、VSWR≈1.32，但 S21≈-11.69 dB，through power 只有约 6.78%。当前 A-stage loss-aware 目标要求下一板参考面保留约 66% 功率，因此这轮结果只能表述为：
+
+[
+oxed{	ext{matching/numerical gate passed; Zone power-flow functional gate failed}}
+]
+
+同时约 91.3% 的 non-through 功率尚未分解成 Patch radiation、介质损耗、边界能流或最终工件吸收，不能称为“有用抽取”。完整客户板（launch + ID + Patch + workpiece）仍未完成最终全波闭环。
 
 ## 当前系统架构
 
@@ -156,4 +166,9 @@ netlist -> placement -> build -> shorts -> Gerber / PCB-SVG
 - `scripts/openems/check_full_v2_geometry.py`
 - `scripts/openems/simulate_full_v2_fast.py`
 
-快速迭代原则：已有 full-wave 数据先拟合 surrogate，只对候选做一次 T-cell screen；之后先跑 Full V2 fast board（含 launch / Patch / ID copper），Full V2 通过后才进入更昂贵的 loaded-workpiece / verify。
+快速迭代原则：已有 full-wave 数据先拟合 surrogate，只对候选做一次 T-cell screen；之后跑 Full V2 fast/screen。这里“通过”必须同时包含两层：
+
+1. 数值/匹配 gate：被动性、S11/VSWR、带宽；
+2. 功能 gate：through power 与 Zone 递推一致，并且 non-through 功率有明确物理归因。
+
+只有两层都合理后才进入更昂贵的 loaded-workpiece / verify。
