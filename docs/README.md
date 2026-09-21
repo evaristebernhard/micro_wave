@@ -14,7 +14,8 @@ Only current or still-useful documents remain at the top level.
 - `25_current_capability_gap_audit_v1.md` — current engineering maturity and remaining gaps.
 - `26_openems_port_fixture_audit_v1.md` — corrected openEMS MSL-port methodology.
 - `27_fast_tcell_design_loop_v1.md` — current surrogate-guided fast T-cell iteration loop.
-- `28_full_v2_fast_em_v1.md` — current complete-board fast EM model and run gates.
+- `28_full_v2_fast_em_v1.md` — current complete-board fast EM model; distinguishes numerical/matching gate from Zone power-flow functional gate.
+- `29_full_v2_power_flow_physics_audit_v1.md` — mathematical/physical audit of the latest Full V2 results, power conservation, observability, and required power-flow decomposition.
 
 ## Historical material
 

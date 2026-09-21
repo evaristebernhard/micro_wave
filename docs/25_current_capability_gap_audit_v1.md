@@ -1,6 +1,6 @@
 # 当前能力与客户需求 Gap 审计 V1
 
-> 日期：2026-09-20
+> 日期：2026-09-20；Full V2 结果修订：2026-09-21
 >
 > 本文回答两个问题：
 >
@@ -51,7 +51,7 @@
 - through loss；
 - loaded R+jX。
 
-**当前状态：T-cell core network 已完成可信 thru/T-cell coupon verify；完整单板（launch + Patch + ID + workpiece）尚未闭环。**
+**当前状态：T-cell core network 已完成可信 thru/T-cell coupon verify；Full V2 已完成第一轮 fast/screen，但最新 screen 只有约 6.78% through power，和 A-stage 需要保留约 66% 功率给后级的目标明显不符。完整单板仍未闭环。**
 
 ### L3 — 四板 Zone 全波/网络闭环
 
@@ -151,7 +151,49 @@ S_{31}\approx-7.800\ \mathrm{dB}.
 
 因此核心 T-cell 已经从“纯理论 seed”推进到“有可信 full-wave 支撑、仍需参数修正”的阶段。
 
-### 2.3 还没有验证的部分
+### 2.3 Full V2 最新结果：匹配通过，但功率流功能未通过
+
+2026-09-21 的 Full V2 `screen/open`：
+
+\[
+S_{11}\approx-17.15\ \mathrm{dB},
+\qquad
+S_{21}\approx-11.69\ \mathrm{dB},
+\]
+
+因此：
+
+\[
+R\approx1.93\%,
+\qquad
+T\approx6.78\%,
+\qquad
+1-R-T\approx91.29\%.
+\]
+
+输入匹配和 VSWR 是好的，但当前 A-stage loss-aware Zone 目标要求下一板参考面保留约：
+
+\[
+T_{A,\rm target}\approx66\%.
+\]
+
+所以正确结论是：
+
+\[
+\boxed{
+\text{数值/匹配 gate 通过，但 Zone power-flow functional gate 未通过}
+}
+\]
+
+并且：
+
+\[
+1-R-T
+\]
+
+当前只是未归因的非直通功率，不能解释成 Patch 有用取能或工件吸收。详细推导见 `docs/29_full_v2_power_flow_physics_audit_v1.md`。
+
+### 2.4 还没有验证的部分
 
 上述结果仍不是完整客户板结果。尚未闭合：
 
@@ -343,9 +385,25 @@ R_LZ_0\frac{1-\kappa}{\kappa}
 
 ## 7. 当前最大的 Gap 排序
 
-### Gap A — T-cell core 已验证，但完整工程板还没有 full-wave 闭环
+### Gap A — Full V2 已有第一轮 full-wave，但功率流严重偏离 Zone 目标
 
-当前 thru/T-cell coupon 已得到可信被动结果，说明核心 T-cell topology 不再是完全未验证状态。下一优先级是 full engineering board V2 的 launch、ID 支路、Patch 和真实 PP/workpiece 加载。
+当前 thru/T-cell coupon 已得到可信被动结果；Full V2 也已完成第一轮 fast/screen。
+
+最新 screen 的关键矛盾不是 S11，而是：
+
+\[
+T_{\rm sim}\approx6.78\%
+\]
+
+远低于 A-stage 下一板参考面所需的约：
+
+\[
+T_{A,\rm target}\approx66\%.
+\]
+
+同时约 91.3% 的非直通功率尚未分解为 Patch radiation、dielectric loss、boundary/PML flux 等明确物理通道。
+
+因此下一优先级是 **power-flow decomposition + launch/through reference + Patch branch 可辨识性**，不是直接进入四板。
 
 ### Gap B — loaded Patch 的 R+jX 未标定
 
@@ -410,9 +468,20 @@ R_LZ_0\frac{1-\kappa}{\kappa}
 最短路径是：
 
 ### Step 1
-把 openEMS/HFSS 模型切换到当前 T-cell PCB。
+建立与 Full V2 相同 launch / finite-ground / boundary 的 through reference，先验证 port/launch 本身不会造成 -10 dB 量级 through collapse。
 
 ### Step 2
+对 Full V2 做显式功率分解，至少区分：
+
+\[
+P_{\rm refl},\quad
+P_{\rm through},\quad
+P_{\rm patch/rad},\quad
+P_{\rm dielectric},\quad
+P_{\rm boundary}.
+\]
+
+### Step 3
 只做一块标准单板/单 cell，标定：
 
 \[
@@ -425,7 +494,7 @@ S_{21},\quad
 S_{\rm patch}.
 \]
 
-### Step 3
+### Step 4
 根据 full-wave 标定结果重新求：
 
 \[
@@ -434,7 +503,7 @@ S_{\rm patch}.
 
 再生成 A/B/C/D。
 
-### Step 4
+### Step 5
 跑四板完整 Zone + 工件。
 
 只有到这一步通过，才能开始讨论：
@@ -477,5 +546,5 @@ S_{\rm patch}.
 
 \[
 \boxed{
-\text{把当前 T-cell 主方案做成第一块真正 full-wave 闭环的板。}
+\text{先把 Full V2 的功率去向闭合，再把当前 T-cell 主方案做成第一块真正 full-wave 闭环的板。}
 \]

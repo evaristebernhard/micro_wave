@@ -1,8 +1,10 @@
 # Full Engineering Board V2 快速 openEMS 模型 V1
 
-> 日期：2026-09-20
+> 日期：2026-09-20；结果解释修订：2026-09-21
 >
-> 目的：补齐 tscircuit 工程验证与完整板电磁验证之间的缺口。该模型用于快速筛选 Full Engineering Board V2 是否因为 launch、pad taper、ID 支路、Patch 和有限 ground 而破坏 T-cell core 的良好结果。
+> 目的：补齐 tscircuit 工程验证与完整板电磁验证之间的缺口。该模型用于快速筛选 Full Engineering Board V2 的数值稳定性、输入匹配和功率流趋势。
+>
+> **重要修订：当前脚本中的 `screen_gate` 只表示数值/匹配 gate，不表示 Zone 功率分配功能通过。最新 Full V2 screen 虽然 `screen_gate=true`，但 through power 仅约 6.78%，与 A-stage 需要保留约 66% 功率给后级的系统目标明显不符。**
 
 ## 1. 当前工程状态
 
@@ -137,7 +139,7 @@ P_{\rm non-through}
 - T-cell/launch accepted loss；
 - 其它离开二端口的功率。
 
-当前只把它作为“完整板是否仍然能把目标量级功率从 through path 抽走”的 screening observable。
+当前只能把它作为**未归因的非直通功率**。在没有单独积分 Patch radiation、介质损耗、PML outward flux 和工件吸收之前，不能把它称为“有用抽取”，更不能直接与 \(\kappa_A,\kappa_B,\kappa_C\) 等 Patch accepted-power 目标等同。
 
 还会自动计算：
 
@@ -157,7 +159,7 @@ BW_{\rm VSWR\le2}
 
     python scripts/openems/simulate_full_v2_fast.py --profile fast --id-mode open --threads 4
 
-当前 gate：
+当前脚本内置的**数值/匹配 gate**：
 
 \[
 S_{11}(2.45)\le-10\ \mathrm{dB},
@@ -192,7 +194,7 @@ BW_{\rm VSWR\le2}\ge50\ \mathrm{MHz},
 
     python scripts/openems/simulate_full_v2_fast.py --profile screen --id-mode open
 
-screen 通过以后才值得建立 loaded-workpiece / finite-conductivity 模型。
+`screen_gate=true` 以后仍必须做**功能 gate**。对 A/B/C 级联板，至少应检查 through power 是否与 loss-aware Zone 递推一致，并确认非直通功率的物理去向。只有数值 gate 与功能 gate 都合理后，才值得进入 loaded-workpiece / finite-conductivity 模型。
 
 ## 8. 当前设计层级
 
@@ -215,3 +217,168 @@ screen 通过以后才值得建立 loaded-workpiece / finite-conductivity 模型
 \]
 
 因此不再从 T-cell coupon 直接跳到四板/100 板系统。
+
+
+---
+
+## 9. 2026-09-21 最新 Full V2 结果
+
+当前 `open` ID 模式下：
+
+| profile | S11 @ 2.45 GHz | S21 @ 2.45 GHz | reflected | through | non-through |
+|---|---:|---:|---:|---:|---:|
+| fast | -19.34 dB | -12.49 dB | 1.16% | 5.63% | 93.20% |
+| screen | -17.15 dB | -11.69 dB | 1.93% | 6.78% | 91.29% |
+
+screen 的 VSWR 约 1.322，且在 2.25–2.65 GHz 内均满足 VSWR≤2，因此**输入匹配本身不是当前主要矛盾**。
+
+但当前 field-aware 四板目标要求 A-stage extraction 约：
+
+\[
+\kappa_A=24.76\%.
+\]
+
+按 `docs/23_few_mode_robust_field_synthesis_v1.md` 的 loss-aware 递推：
+
+\[
+(P_A,P_B,P_C,P_D)\approx(4.0386,2.6643,1.7773,1),
+\]
+
+所以 A 板之后仍需保留：
+
+\[
+T_{A,\rm target}
+\approx
+\frac{P_B}{P_A}
+\approx0.6597.
+\]
+
+对应理想量级：
+
+\[
+S_{21,A}\approx10\log_{10}(0.6597)\approx-1.81\ \mathrm{dB}
+\]
+
+（这里是功率比转 dB；实际还应把接口和局部寄生损耗单独列入）。
+
+而当前 Full V2 screen：
+
+\[
+T_{\rm sim}=|S_{21}|^2\approx0.0678.
+\]
+
+因此：
+
+\[
+\frac{T_{\rm sim}}{T_{A,\rm target}}
+\approx0.103.
+\]
+
+也就是当前完整板向后级保留的功率只有 A-stage 目标量级的约 **10%**。
+
+所以最新结果的正确标签是：
+
+\[
+\boxed{
+\text{matching/numerical gate passed; Zone power-flow functional gate failed}
+}
+\]
+
+而不是“Full V2 已通过”。
+
+## 10. 为什么不能把 91.3% non-through 解释为 Patch 有用取能
+
+二端口后处理只知道：
+
+\[
+R=|S_{11}|^2,
+\qquad
+T=|S_{21}|^2,
+\]
+
+以及：
+
+\[
+1-R-T.
+\]
+
+开放 full-board 模型中更完整的功率守恒应写为：
+
+\[
+1
+=
+R+T
++P_{\rm patch,rad}
++P_{\rm diel}
++P_{\rm metal}
++P_{\rm PML/other}
++P_{\rm workpiece}.
+\]
+
+当前 fast/screen 使用 PEC，因此：
+
+\[
+P_{\rm metal}\approx0
+\]
+
+只是一阶近似；同时模型没有真实工件，所以：
+
+\[
+P_{\rm workpiece}=0.
+\]
+
+因此当前：
+
+\[
+1-R-T\approx91.3\%
+\]
+
+只能说明大量功率没有从端口 2 返回，不能证明这些功率被 Patch 以目标方式接收，更不能证明它们转化为工件加热。
+
+## 11. 频率响应给出的诊断线索
+
+screen 在 2.25–2.65 GHz 内：
+
+- S11 约从 -16.7 dB 平滑变化到 -17.6 dB；
+- S21 约从 -11.8 dB 平滑变化到 -11.3 dB；
+- non-through 始终约 91%。
+
+这个响应缺少明显的窄带 Patch resonance 结构。
+
+这**不能单独证明模型错误**，但说明下一步应同时验证两类假设：
+
+1. 完整板几何确实形成了很强的宽带辐射/泄漏路径；
+2. coplanar lumped-port、PML、有限 ground 或端口功率分解让大量能流被统一记入 `non-through`，从而掩盖真实的 Patch/through 分功。
+
+因此下一轮不是继续调 S11，而是做 power-flow decomposition。
+
+## 12. 下一轮必须增加的功能观测量
+
+建议至少增加：
+
+\[
+P_{\rm port1,ref},
+\quad
+P_{\rm port2,out},
+\quad
+P_{\rm patch/rad},
+\quad
+P_{\rm dielectric},
+\quad
+P_{\rm boundary},
+\]
+
+并做以下最小对照：
+
+- Full V2，Patch present；
+- 同一 launch/through 几何，Patch/branch removed 或 matched-terminated；
+- ID off / open / 10k；
+- 必要时独立 magnetic-interface coupon。
+
+只有这些量闭合后，才能把：
+
+\[
+\kappa_i
+\]
+
+从“二端口剩余量”恢复成真正的 Patch accepted-power / workpiece-power 目标。
