@@ -145,6 +145,15 @@ def profile_config(name: str) -> dict:
             "f_lo": 2.30e9,
             "f_hi": 2.60e9,
         },
+        "loaded": {
+            "nr_ts": 12000,
+            "end_criteria": 5e-3,
+            "xy_res": 1.40,
+            "z_res": 1.20,
+            "points": 61,
+            "f_lo": 2.30e9,
+            "f_hi": 2.60e9,
+        },
         "screen": {
             "nr_ts": 45000,
             "end_criteria": 2e-4,
@@ -157,7 +166,12 @@ def profile_config(name: str) -> dict:
     }[name]
 
 
-def build_model(sim_path: Path, profile: str, id_mode: str):
+def build_model(
+    sim_path: Path,
+    profile: str,
+    id_mode: str,
+    workpiece: dict | None = None,
+):
     rf = load_json(RF_GEOM_PATH)
     full = load_json(FULL_GEOM_PATH)
     cfg = profile_config(profile)
@@ -201,6 +215,27 @@ def build_model(sim_path: Path, profile: str, id_mode: str):
     front_pp = CSX.AddMaterial(
         "front_PP", epsilon=stack["ppEpsilonR"], kappa=pp_kappa
     )
+    workpiece_mat = None
+    workpiece_z0 = None
+    workpiece_z1 = None
+    if workpiece is not None:
+        workpiece_kappa = (
+            2
+            * math.pi
+            * f0
+            * EPS0
+            * workpiece["epsilon_r"]
+            * workpiece["loss_tangent"]
+        )
+        workpiece_mat = CSX.AddMaterial(
+            "WORKPIECE",
+            epsilon=workpiece["epsilon_r"],
+            kappa=workpiece_kappa,
+        )
+        workpiece_z0 = (
+            stack["frontPpThicknessMm"] + workpiece["air_gap_mm"]
+        )
+        workpiece_z1 = workpiece_z0 + workpiece["thickness_mm"]
     signal = CSX.AddMetal("RF_TOP")
     ground = CSX.AddMetal("GROUND")
     id_metal = CSX.AddMetal("ID_TOP")
@@ -213,6 +248,12 @@ def build_model(sim_path: Path, profile: str, id_mode: str):
         [x_max, y_max, stack["frontPpThicknessMm"]],
         priority=1,
     )
+    if workpiece_mat is not None:
+        workpiece_mat.AddBox(
+            [x_min, y_min, workpiece_z0],
+            [x_max, y_max, workpiece_z1],
+            priority=1,
+        )
     edge = board["edgeMarginMm"]
     sheet_box(
         ground,
@@ -414,7 +455,9 @@ def build_model(sim_path: Path, profile: str, id_mode: str):
         "y0": y_min - 8.0,
         "y1": y_max + 8.0,
         "z0": z_gnd - 5.0,
-        "z1": stack["frontPpThicknessMm"] + 10.0,
+        "z1": (workpiece_z1 + 10.0)
+        if workpiece_z1 is not None
+        else stack["frontPpThicknessMm"] + 10.0,
     }
 
     x_lines = [domain["x0"], x_min, x_max, domain["x1"], 0.0]
@@ -455,6 +498,7 @@ def build_model(sim_path: Path, profile: str, id_mode: str):
         -fr4_t / 2,
         z_sig,
         stack["frontPpThicknessMm"],
+        *([] if workpiece_z0 is None else [workpiece_z0, workpiece_z1]),
         domain["z1"],
     ]
 
@@ -502,7 +546,10 @@ def build_model(sim_path: Path, profile: str, id_mode: str):
         ports.append(port)
 
     sim_path.mkdir(parents=True, exist_ok=True)
-    CSX.Write2XML(str(sim_path / f"full_v2_{profile}_{id_mode}.xml"))
+    xml_tag = ""
+    if workpiece is not None:
+        xml_tag = f"_wp_gap{str(workpiece['air_gap_mm']).replace('.', 'p')}mm"
+    CSX.Write2XML(str(sim_path / f"full_v2_{profile}_{id_mode}{xml_tag}.xml"))
     freq = np.linspace(cfg["f_lo"], cfg["f_hi"], cfg["points"])
 
     metadata = {
@@ -515,6 +562,7 @@ def build_model(sim_path: Path, profile: str, id_mode: str):
         "metal_model": "zero-thickness PEC",
         "port_model": full["em"]["defaultPortModel"],
         "rear_pp_model": "omitted behind continuous bottom ground in fast model",
+        "workpiece": workpiece,
         "mesh_lines": {
             "x": int(len(mesh.GetLines(0))),
             "y": int(len(mesh.GetLines(1))),
@@ -546,18 +594,75 @@ def contiguous_bandwidth(freq, mask, center_hz):
     return float(freq[hi] - freq[lo]), float(freq[lo]), float(freq[hi])
 
 
+def port_time_domain_diagnostics(sim_path: Path) -> dict:
+    """Summarize the raw port record before trusting frequency-domain values.
+
+    A normal CalcPort call will happily transform a very short or interrupted
+    record and can consequently return plausible-looking S11 together with a
+    numerically zero S21.  Preserve enough raw information in every result for
+    that failure mode to be detected during post-processing.
+    """
+
+    files = {}
+    for name in ("port_ut_1", "port_it_1", "port_ut_2", "port_it_2"):
+        path = sim_path / name
+        times = []
+        peak_abs = 0.0
+        if path.exists():
+            for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+                if not line or line.startswith("%"):
+                    continue
+                fields = line.split()
+                if len(fields) < 2:
+                    continue
+                try:
+                    times.append(float(fields[0]))
+                    peak_abs = max(peak_abs, abs(float(fields[1])))
+                except ValueError:
+                    continue
+        files[name] = {
+            "samples": len(times),
+            "time_window_ns": 0.0 if not times else max(times) * 1e9,
+            "peak_abs": peak_abs,
+        }
+
+    min_samples = min((item["samples"] for item in files.values()), default=0)
+    min_time_window_ns = min(
+        (item["time_window_ns"] for item in files.values()), default=0.0
+    )
+    return {
+        "files": files,
+        "minimum_samples": min_samples,
+        "minimum_time_window_ns": min_time_window_ns,
+    }
+
+
 def run(args):
     out_dir = args.out.resolve()
-    sim_path = out_dir / f"{args.profile}_{args.id_mode}"
+    workpiece = None
+    if args.workpiece_epsilon is not None:
+        workpiece = {
+            "epsilon_r": float(args.workpiece_epsilon),
+            "loss_tangent": float(args.workpiece_tan_delta),
+            "air_gap_mm": float(args.workpiece_gap_mm),
+            "thickness_mm": float(args.workpiece_thickness_mm),
+            "footprint_width_mm": 50.0,
+            "footprint_height_mm": 60.0,
+        }
+    workpiece_tag = ""
+    if workpiece is not None:
+        gap_tag = str(workpiece["air_gap_mm"]).replace(".", "p")
+        workpiece_tag = f"_wp_gap{gap_tag}mm"
+    sim_path = out_dir / f"{args.profile}_{args.id_mode}{workpiece_tag}"
     if sim_path.exists() and not args.post_only:
         shutil.rmtree(sim_path)
 
     FDTD, ports, freq, rf, full, metadata = build_model(
-        sim_path, args.profile, args.id_mode
+        sim_path, args.profile, args.id_mode, workpiece=workpiece
     )
 
     if args.xml_only:
-        print(sim_path / f"full_v2_{args.profile}_{args.id_mode}.xml")
+        print(sim_path / f"full_v2_{args.profile}_{args.id_mode}{workpiece_tag}.xml")
         return
 
     if not args.post_only:
@@ -568,6 +673,8 @@ def run(args):
             numThreads=args.threads,
             disable_dumps=True,
         )
+
+    port_diagnostics = port_time_domain_diagnostics(sim_path)
 
     for p in ports:
         p.CalcPort(str(sim_path), freq, ref_impedance=50.0, signal_type="pulse")
@@ -594,6 +701,7 @@ def run(args):
 
     result = {
         **metadata,
+        "port_time_domain_diagnostics": port_diagnostics,
         "geometry": {
             "rf": str(RF_GEOM_PATH.relative_to(ROOT)),
             "full": str(FULL_GEOM_PATH.relative_to(ROOT)),
@@ -608,9 +716,24 @@ def run(args):
         "non_through_accepted_fraction": non_through.tolist(),
     }
 
+    electrical_gate = bool(
+        s11_db[i0] <= -10.0
+        and power_sum[i0] <= 1.05
+        and bw_hz >= 50e6
+    )
+    # This is an operational corruption/truncation guard, not a proof that the
+    # FDTD energy criterion has converged.  Cross-profile stability is still
+    # required before a result is used for a design decision.
+    data_quality_gate = bool(
+        port_diagnostics["minimum_samples"] >= args.min_port_samples
+        and port_diagnostics["minimum_time_window_ns"]
+        >= args.min_port_window_ns
+    )
+
     summary = {
         "profile": args.profile,
         "id_mode": args.id_mode,
+        "workpiece": workpiece,
         "f_ghz": float(freq[i0] / 1e9),
         "S11_db": float(s11_db[i0]),
         "S21_db": float(s21_db[i0]),
@@ -627,19 +750,22 @@ def run(args):
             rf["tcell"]["targetExtraction"]
         ),
         "yee_cells_approx": metadata["yee_cells_approx"],
-        "screen_gate": bool(
-            s11_db[i0] <= -10.0
-            and power_sum[i0] <= 1.05
-            and bw_hz >= 50e6
-        ),
+        "port_minimum_samples": port_diagnostics["minimum_samples"],
+        "port_minimum_time_window_ns": port_diagnostics["minimum_time_window_ns"],
+        "electrical_gate": electrical_gate,
+        "data_quality_gate": data_quality_gate,
+        "screen_gate": bool(electrical_gate and data_quality_gate),
+        "result_status": "screen-usable" if data_quality_gate else "insufficient-time-record",
         "interpretation": (
             "non_through_accepted_fraction is not pure workpiece absorption; "
-            "it combines Patch radiation and all accepted/lost power in this fast model"
+            "it combines Patch radiation and all accepted/lost power in this fast model; "
+            "data_quality_gate only rejects short/truncated port records and does not prove "
+            "full FDTD convergence"
         ),
     }
 
     out_dir.mkdir(parents=True, exist_ok=True)
-    stem = f"full_v2_{args.profile}_{args.id_mode}"
+    stem = f"full_v2_{args.profile}_{args.id_mode}{workpiece_tag}"
     (out_dir / f"{stem}.json").write_text(
         json.dumps(result, indent=2), encoding="utf-8"
     )
@@ -652,8 +778,19 @@ def run(args):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--profile", choices=["smoke", "fast", "screen"], default="fast"
+        "--profile", choices=["smoke", "fast", "loaded", "screen"], default="fast"
     )
+    parser.add_argument(
+        "--workpiece-epsilon",
+        type=float,
+        default=None,
+        help="add a finite lossy workpiece slab above front PP",
+    )
+    parser.add_argument(
+        "--workpiece-tan-delta", type=float, default=0.2
+    )
+    parser.add_argument("--workpiece-gap-mm", type=float, default=5.0)
+    parser.add_argument("--workpiece-thickness-mm", type=float, default=20.0)
     parser.add_argument(
         "--id-mode",
         choices=["off", "open", "10k"],
@@ -662,6 +799,18 @@ def main():
     )
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--threads", type=int, default=4)
+    parser.add_argument(
+        "--min-port-samples",
+        type=int,
+        default=20,
+        help="minimum samples in every raw port record for the data-quality gate",
+    )
+    parser.add_argument(
+        "--min-port-window-ns",
+        type=float,
+        default=1.0,
+        help="minimum raw port time window for the data-quality gate",
+    )
     parser.add_argument("--post-only", action="store_true")
     parser.add_argument("--xml-only", action="store_true")
     args = parser.parse_args()

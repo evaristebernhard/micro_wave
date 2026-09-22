@@ -1,0 +1,33 @@
+{
+  "profile": "fast",
+  "id_mode": "open",
+  "workpiece": {
+    "epsilon_r": 10.0,
+    "loss_tangent": 0.2,
+    "air_gap_mm": 5.0,
+    "thickness_mm": 20.0,
+    "footprint_width_mm": 50.0,
+    "footprint_height_mm": 60.0
+  },
+  "f_ghz": 2.45,
+  "S11_db": -25.01354476087534,
+  "S21_db": -300.0,
+  "VSWR": 1.1189729338550787,
+  "reflected_power_fraction": 0.0031524305234237296,
+  "through_power_fraction": 0.0,
+  "non_through_accepted_fraction": 0.9968475694765763,
+  "power_sum_reflected_plus_through": 0.0031524305234237296,
+  "passivity_excess": 0.0,
+  "vswr_le_2_bandwidth_mhz": 300.0,
+  "vswr_le_2_band_lo_ghz": 2.3,
+  "vswr_le_2_band_hi_ghz": 2.6,
+  "target_non_through_fraction_reference": 0.2476,
+  "yee_cells_approx": 1185800,
+  "port_minimum_samples": 2,
+  "port_minimum_time_window_ns": 0.0454132891282,
+  "electrical_gate": true,
+  "data_quality_gate": false,
+  "screen_gate": false,
+  "result_status": "insufficient-time-record",
+  "interpretation": "non_through_accepted_fraction is not pure workpiece absorption; it combines Patch radiation and all accepted/lost power in this fast model; data_quality_gate only rejects short/truncated port records and does not prove full FDTD convergence"
+}

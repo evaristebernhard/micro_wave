@@ -8,12 +8,39 @@
   "metal_model": "zero-thickness PEC",
   "port_model": "coplanar-top-signal-to-ground-lumped",
   "rear_pp_model": "omitted behind continuous bottom ground in fast model",
+  "workpiece": null,
   "mesh_lines": {
     "x": 127,
     "y": 164,
     "z": 45
   },
   "yee_cells_approx": 903672,
+  "port_time_domain_diagnostics": {
+    "files": {
+      "port_ut_1": {
+        "samples": 28,
+        "time_window_ns": 1.22716313828,
+        "peak_abs": 7.90139229139e-05
+      },
+      "port_it_1": {
+        "samples": 28,
+        "time_window_ns": 1.22717721836,
+        "peak_abs": 1.88661203993e-06
+      },
+      "port_ut_2": {
+        "samples": 28,
+        "time_window_ns": 1.22716313828,
+        "peak_abs": 2.91959104288e-05
+      },
+      "port_it_2": {
+        "samples": 28,
+        "time_window_ns": 1.22717721836,
+        "peak_abs": 5.99949146363e-07
+      }
+    },
+    "minimum_samples": 28,
+    "minimum_time_window_ns": 1.22716313828
+  },
   "geometry": {
     "rf": "design/tcell_candidate_v2.json",
     "full": "pcb/tscircuit/src/full-engineering-board-v2-geometry.json"

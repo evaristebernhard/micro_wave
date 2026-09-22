@@ -15,6 +15,9 @@ Only current or still-useful documents remain at the top level.
 - `26_openems_port_fixture_audit_v1.md` — corrected openEMS MSL-port methodology.
 - `27_fast_tcell_design_loop_v1.md` — current surrogate-guided fast T-cell iteration loop.
 - `28_full_v2_fast_em_v1.md` — current complete-board fast EM model and run gates.
+- `29_full_v2_id_sensitivity_v1.md` — Full V2 ID copper/resistor RF sensitivity result.
+- `30_full_v2_loaded_simulation_closure_v1.md` — Full V2 loaded-workpiece run audit, data-quality gate, and closure status.
+- `31_pcb_status_explainer_v1.tex` — XeLaTeX source for the current Full V2 PCB status PDF.
 
 ## Historical material
 
