@@ -1,33 +1,34 @@
 # micro_wave 当前情况
 
-> 更新时间：2026-09-22  
-> 当前主线：`main` @ `2e478df29fb07fb03904a909d1c13fc03a340828`
+> 更新时间：2026-09-22
 >
-> 这份文档只回答一个问题：**项目现在真实做到哪一步了。**
+> 本文只回答一个问题：**项目现在真实做到哪一步了。**
 >
-> 它不是需求书，不是理论总纲，也不把历史方案当成当前目标。后续如果仓库状态发生实质变化，应优先更新本文。
+> 当前工程状态基于 2026-09-22 的 main；之后几次提交只是整理这份状态文档和入口，没有改变 RF/PCB 设计本身。
+>
+> 本文不是需求书，不是理论总纲，也不把历史方案当成当前目标。后续仓库状态发生实质变化时，优先更新本文。
 
 ---
 
 ## 1. 一句话结论
 
-当前项目已经有一块完整的 **Full Engineering Board V2** 工程 PCB，并且完成了可信的 T-cell coupon 验证、完整板空载 RF 筛选和 ID 支路敏感性检查。
+当前项目已经有完整的 **Full Engineering Board V2 工程 PCB**，并完成了可信的 T-cell coupon 验证、完整板空载 RF 筛选和 ID 支路敏感性检查。
 
-但是当前还不能说“单板已经实现 5–8 W 有效取能”，也不能说“4 板 Zone 或 5/25/100 板系统已经闭合”。
+但现在还不能说“单板已经实现 5–8 W 有效取能”，也不能说“4 板 Zone 或 5/25/100 板系统已经闭合”。
 
-现在真正没有闭合的是：
+目前真正没有闭合的是：
 
 1. Full V2 输入功率到底分到 through、Patch、介质损耗、辐射和工件吸收中的哪一部分；
-2. loaded-workpiece 仿真目前时域记录不足，工件吸收功率还没有可信结果；
+2. loaded-workpiece 仿真时域记录不足，工件吸收功率还没有可信结果；
 3. A/B/C/D 的真实 extraction 还没有基于 loaded Patch 重新闭合；
 4. bridge / cable-tab / 5-25-100 系统链已经在 PR #22 开发，但还没有合入 main，也没有形成最终 S 参数验证；
 5. 500 W 实物、热、打火、触点温升和真实加热测试还没有开始。
 
 所以当前项目处于：
 
-[
-oxed{	ext{工程 PCB + 单件 RF 验证阶段，系统功率闭环尚未完成}}
-]
+$$
+\boxed{\text{工程 PCB + 单件 RF 验证阶段，系统功率闭环尚未完成}}
+$$
 
 ---
 
@@ -37,7 +38,7 @@
 
 当前主 PCB：
 
-`pcb/tscircuit/index-full-v2.tsx`
+    pcb/tscircuit/index-full-v2.tsx
 
 当前结构：
 
@@ -60,13 +61,13 @@
 
 Full V2 已经完成现有 tscircuit 工程检查链：
 
-```text
+~~~text
 netlist
 -> placement
 -> build
 -> shorts
 -> Gerber / Circuit JSON / PCB-SVG / 3D preview
-```
+~~~
 
 这说明当前 PCB 在 CAD/连接关系层面已经是完整工程候选。
 
@@ -80,28 +81,28 @@ netlist
 
 修正 openEMS MSL port fixture 后，当前可信的 T-cell 核心结果为：
 
-[
-S_{11}approx -26.81 {m dB}
-]
+$$
+S_{11}\approx -26.81\ {\rm dB}
+$$
 
-[
-S_{21}approx -2.285 {m dB},qquad
-S_{31}approx -7.800 {m dB}
-]
+$$
+S_{21}\approx -2.285\ {\rm dB},\qquad
+S_{31}\approx -7.800\ {\rm dB}
+$$
 
 conditional branch split 约：
 
-[
-21.9%
-]
+$$
+21.9\%
+$$
 
 当前 A-stage 理论 extraction seed 约：
 
-[
-24.76%
-]
+$$
+24.76\%
+$$
 
-因此可以认为：
+因此当前准确说法是：
 
 **T-cell 核心拓扑已经有可信 full-wave 支撑，但还没有和真实 loaded Patch 功率闭合。**
 
@@ -120,23 +121,23 @@ conditional branch split 约：
 
 screen/open 的 through power 为：
 
-[
-|S_{21}|^2approx 6.78%
-]
+$$
+|S_{21}|^2\approx 6.78\%
+$$
 
 而当前 A-stage loss-aware 理论里，到下一块板参考面应该保留的功率量级约为：
 
-[
-rac{P_B}{P_A}approx 66%
-]
+$$
+\frac{P_B}{P_A}\approx 66\%
+$$
 
 两者并不在同一量级。
 
 因此当前 Full V2 最大的问题不是 S11 不够好，而是：
 
-[
-oxed{	ext{大部分输入功率去了哪里，目前还没有被单独观测出来}}
-]
+$$
+\boxed{\text{大部分输入功率去了哪里，目前还没有被单独观测出来}}
+$$
 
 这部分功率不能直接写成 Patch 取能，更不能写成工件吸收。
 
@@ -150,20 +151,20 @@ Full V2 已经比较：
 - ID copper open；
 - 显式 10 kΩ。
 
-2.45 GHz 下 `open - off`：
+2.45 GHz 下 open - off：
 
 - ΔS11 ≈ +0.033 dB；
 - ΔS21 ≈ -0.007 dB。
 
-`10k - open` 更小。
+10k - open 更小。
 
 当前可以认为：
 
-[
-oxed{	ext{现有 ID 铜和 10 kΩ 对 Full V2 RF 筛选影响可忽略}}
-]
+$$
+\boxed{\text{现有 ID 铜和 10 kΩ 对 Full V2 RF 筛选影响可忽略}}
+$$
 
-所以后续 RF 优化不需要每次重复跑 10 kΩ，可以继续用 `id-mode open` 做主筛选。
+所以后续 RF 优化不需要每次重复跑 10 kΩ，可以继续用 id-mode open 做主筛选。
 
 ---
 
@@ -171,18 +172,18 @@ Full V2 已经比较：
 
 当前已经建立：
 
-```text
+~~~text
 Patch
 -> 2 mm front PP
 -> air gap
 -> finite lossy workpiece
-```
+~~~
 
 代表工件参数：
 
-[
-arepsilon_r'=10,qquad 	andelta=0.2,qquad t=20 {m mm}
-]
+$$
+\varepsilon_r'=10,\qquad \tan\delta=0.2,\qquad t=20\ {\rm mm}
+$$
 
 也已经有 0 / 5 / 10 / 20 mm gap 的试算记录。
 
@@ -200,17 +201,13 @@ Patch
 
 因此目前不能把：
 
-[
+$$
 1-|S_{11}|^2-|S_{21}|^2
-]
+$$
 
 解释为工件吸收率。
 
-当前脚本已经增加 data-quality gate，可以自动把这些短时窗结果标成：
-
-`insufficient-time-record`
-
-这是正确状态。
+当前脚本已经增加 data-quality gate，可以自动把这些短时窗结果标成 insufficient-time-record。这是正确状态。
 
 ---
 
@@ -231,9 +228,9 @@ PR #22 已包含：
 
 因此这部分准确状态不是“还没做”，而是：
 
-[
-oxed{	ext{工程实现已在分支完成，最终验证和主线合并未完成}}
-]
+$$
+\boxed{\text{工程实现已在分支完成，最终验证和主线合并未完成}}
+$$
 
 ### 6.1 5 / 25 / 100 当前预算结果
 
@@ -242,7 +239,7 @@ PR #22 中已有一份 **假设性预算**：
 - mean board power = 6.5 W；
 - upstream loss = 0.8 dB；
 - zone efficiency = 80%；
-- zone profile = ([1, 0.6412, 0.6412, 1])。
+- zone profile = [1, 0.6412, 0.6412, 1]。
 
 在这些假设下：
 
@@ -256,9 +253,9 @@ PR #22 中已有一份 **假设性预算**：
 
 尤其 100 块时：
 
-[
-100	imes 5 {m W}=500 {m W}
-]
+$$
+100\times 5\ {\rm W}=500\ {\rm W}
+$$
 
 已经等于源最大功率，因此只要系统存在任何损耗，“500 W 输入同时保证 100 块都至少 5 W”就不可能成立。
 
@@ -266,15 +263,15 @@ PR #22 中已有一份 **假设性预算**：
 
 PR #22 对 RG142 的估算：
 
-[
-	ext{loss}approx0.707 {m dB/m}
-]
+$$
+\text{loss}\approx0.707\ {\rm dB/m}
+$$
 
 所以 5 m cable-only：
 
-[
-oxed{3.54 {m dB}}
-]
+$$
+\boxed{3.54\ {\rm dB}}
+$$
 
 还没有计 N connector 和 magnetic tab。
 
@@ -288,10 +285,10 @@ PR #22 对 RG142 的估算：
 
 作用：补齐 bridge、cable-tab、5/25/100 network chain。
 
-当前评价：
+当前状态：
 
-- CAD/脚本/预算链已经做出来；
-- 但 bridge/tab 的最终全波 S 参数还没有形成可信验收结果；
+- CAD / 脚本 / 预算链已经做出来；
+- bridge/tab 的最终全波 S 参数还没有形成可信验收结果；
 - 系统预算里的损耗和效率仍有假设项；
 - 应在单件 S 参数可信后再替换预算参数。
 
@@ -299,10 +296,10 @@ PR #22 对 RG142 的估算：
 
 作用：修正 Full V2 power-flow 的物理解读。
 
-这个 PR 提出的核心判断应继续保留：
+其中应继续保留的判断：
 
 - 低 S11 不等于功率分配正确；
-- `1-|S11|²-|S21|²` 不能叫“吸收功率”；
+- $1-|S_{11}|^2-|S_{21}|^2$ 不能叫“吸收功率”；
 - Full V2 当前 through power 只有约 6.78%；
 - 当前 A-stage 到下一板的目标量级约 66%；
 - 下一步应优先做 power decomposition，而不是继续盲调 S11。
@@ -315,23 +312,23 @@ PR #23 目前未合并，但这部分物理判断与 main 最新 loaded-workpiec
 
 现在最需要解决的不是“再画一块 PCB”，而是下面这条链：
 
-[
-oxed{
-	ext{launch reference}
-ightarrow
-	ext{power decomposition}
-ightarrow
-	ext{Patch accepted power}
-ightarrow
-	ext{workpiece absorbed power}
-ightarrow
-	ext{re-synthesize }A/B/C/D
-ightarrow
-	ext{4-board Zone}
-ightarrow
-	ext{5/25/100 network}
+$$
+\boxed{
+\text{launch reference}
+\rightarrow
+\text{power decomposition}
+\rightarrow
+\text{Patch accepted power}
+\rightarrow
+\text{workpiece absorbed power}
+\rightarrow
+\text{re-synthesize }A/B/C/D
+\rightarrow
+\text{4-board Zone}
+\rightarrow
+\text{5/25/100 network}
 }
-]
+$$
 
 具体来说：
 
@@ -346,9 +343,9 @@ PR #23 目前未合并，但这部分物理判断与 main 最新 loaded-workpiec
 
 4. **对工件体积做损耗积分**  
    得到真正的：
-   [
-   P_{m abs,workpiece}
-   ]
+   $$
+   P_{\rm abs,workpiece}
+   $$
    再谈单板 5–8 W。
 
 5. **根据 loaded 结果重新综合 A/B/C/D**  
@@ -393,26 +390,26 @@ PR #23 目前未合并，但这部分物理判断与 main 最新 loaded-workpiec
 
 ### 当前主状态
 
-- `docs/00_current_status.md` — **当前唯一项目现状入口**
+- docs/00_current_status.md — **当前唯一项目现状入口**
 
 ### 单板与仿真
 
-- `pcb/tscircuit/index-full-v2.tsx`
-- `docs/26_openems_port_fixture_audit_v1.md`
-- `docs/27_fast_tcell_design_loop_v1.md`
-- `docs/28_full_v2_fast_em_v1.md`
-- `docs/29_full_v2_id_sensitivity_v1.md`
-- `docs/30_full_v2_loaded_simulation_closure_v1.md`
-- `scripts/openems/simulate_full_v2_fast.py`
+- pcb/tscircuit/index-full-v2.tsx
+- docs/26_openems_port_fixture_audit_v1.md
+- docs/27_fast_tcell_design_loop_v1.md
+- docs/28_full_v2_fast_em_v1.md
+- docs/29_full_v2_id_sensitivity_v1.md
+- docs/30_full_v2_loaded_simulation_closure_v1.md
+- scripts/openems/simulate_full_v2_fast.py
 
 ### 系统链（PR #22，未合并）
 
-- `pcb/tscircuit/index-flat-bridge.tsx`
-- `pcb/tscircuit/index-corner-bridge.tsx`
-- `pcb/tscircuit/index-cable-tab.tsx`
-- `scripts/openems/simulate_connection_hardware.py`
-- `scripts/system/cable_model.py`
-- `scripts/system/cascade_power_budget.py`
+- pcb/tscircuit/index-flat-bridge.tsx
+- pcb/tscircuit/index-corner-bridge.tsx
+- pcb/tscircuit/index-cable-tab.tsx
+- scripts/openems/simulate_connection_hardware.py
+- scripts/system/cable_model.py
+- scripts/system/cascade_power_budget.py
 
 ---
 
