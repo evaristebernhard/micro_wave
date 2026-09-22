@@ -2,10 +2,13 @@
 
 2.45 GHz 微波加热磁吸天线板、连接件与多 Zone RF 分配研究仓库。
 
-当前项目已经从早期 side-coupler / progressive-phase seed 转向 **field-aware matched T-cell + rectangular Patch**。理论链条已经基本闭合，当前重点是把单板 RF 核心、完整工程 PCB、磁吸接口和工件加载逐级做成可信的 full-wave/实物结果。
+当前项目已经从早期 side-coupler / progressive-phase seed 转向 **field-aware matched T-cell + rectangular Patch**。当前主线已经有完整 Full V2 工程 PCB、空载 RF 筛选和 ID 敏感性结果，但 loaded-workpiece、功率流归因、A/B/C/D Zone 和系统级验证仍未闭合。
 
-## 当前唯一入口
+**先看当前真实进度：`docs/00_current_status.md`。** 这份文件是项目现状的唯一主入口；其它文档是专项分析或历史审计。
 
+## 当前入口
+
+- **当前项目状态：`docs/00_current_status.md`**
 - 需求基线：`docs/01_rf_simulation_requirements_v3.md`
 - 原始需求可行性审计：`docs/08_original_requirements_feasibility_audit_v1.md`
 - T-cell 负载敏感性：`docs/18_tcell_bandwidth_load_sensitivity_v1.md`
