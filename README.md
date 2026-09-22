@@ -15,6 +15,7 @@
 - 当前能力/GAP：`docs/25_current_capability_gap_audit_v1.md`
 - openEMS 端口与低成本校准：`docs/26_openems_port_fixture_audit_v1.md`
 - 当前快速设计循环：`docs/27_fast_tcell_design_loop_v1.md`
+- 当前交付要求：`docs/29_current_delivery_requirements_v1.md`
 - 文档索引：`docs/README.md`
 - 历史文档：`docs/archive/`
 
@@ -157,3 +158,15 @@ netlist -> placement -> build -> shorts -> Gerber / PCB-SVG
 - `scripts/openems/simulate_full_v2_fast.py`
 
 快速迭代原则：已有 full-wave 数据先拟合 surrogate，只对候选做一次 T-cell screen；之后先跑 Full V2 fast board（含 launch / Patch / ID copper），Full V2 通过后才进入更昂贵的 loaded-workpiece / verify。
+
+
+## 当前连接件交付物
+
+- `pcb/tscircuit/index-flat-bridge.tsx` — 100 × 50 mm 平面桥；
+- `pcb/tscircuit/index-corner-bridge.tsx` — 5 cm + 5 cm 平面 L 型直角桥；
+- `pcb/tscircuit/index-cable-tab.tsx` — 30 × 50 mm N/coax-to-magnetic tab；
+- `scripts/openems/simulate_connection_hardware.py` — flat/corner/tab 快速 S 参数模型；
+- `scripts/system/cable_model.py` — RG142/替代低损耗电缆模型；
+- `scripts/system/cascade_power_budget.py` — 5/25/100 块功率与 500 W feasibility。
+
+多板交付采用单件 full-wave + network cascade，不建立 100 块完整 3D FDTD。

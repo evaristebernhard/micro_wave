@@ -15,6 +15,7 @@ Only current or still-useful documents remain at the top level.
 - `26_openems_port_fixture_audit_v1.md` — corrected openEMS MSL-port methodology.
 - `27_fast_tcell_design_loop_v1.md` — current surrogate-guided fast T-cell iteration loop.
 - `28_full_v2_fast_em_v1.md` — current complete-board fast EM model and run gates.
+- `29_current_delivery_requirements_v1.md` — current delivery scope: Full V2 + flat/corner bridge + cable tab + 5/25/100 network model.
 
 ## Historical material
 

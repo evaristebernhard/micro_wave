@@ -1,0 +1,68 @@
+{
+  "schema": "micro-wave/connection-hardware/v1",
+  "frequencyGHz": 2.45,
+  "stackup": {
+    "fr4ThicknessMm": 1.6,
+    "fr4EpsilonR": 4.3,
+    "fr4LossTangent": 0.02,
+    "frontPpThicknessMm": 2,
+    "ppEpsilonR": 2.2,
+    "ppLossTangent": 0.0005
+  },
+  "interface": {
+    "signalPadWidthMm": 4.6,
+    "signalPadHeightMm": 4,
+    "groundPadWidthMm": 4.6,
+    "groundPadHeightMm": 2.4,
+    "idPadWidthMm": 4.2,
+    "idPadHeightMm": 2.2,
+    "signalYmm": 0,
+    "groundYmm": -6,
+    "idYmm": -12,
+    "viaXOffsetsMm": [
+      -1.4,
+      -0.5,
+      0.5,
+      1.4
+    ],
+    "viaHoleDiameterMm": 0.3,
+    "viaOuterDiameterMm": 0.6,
+    "magnetOutlineWidthMm": 5,
+    "magnetOutlineHeightMm": 5,
+    "magnetYmm": [
+      8,
+      16
+    ]
+  },
+  "rf": {
+    "systemOhm": 50,
+    "calibratedTraceWidthMm": 2.670082,
+    "idTraceWidthMm": 0.3,
+    "boardEdgeGroundMarginMm": 0.2
+  },
+  "flatBridge": {
+    "boardWidthMm": 100,
+    "boardHeightMm": 50,
+    "housingHeightMm": 30,
+    "contactXAbsMm": 47.5,
+    "targetInsertionLossDb": 0.2
+  },
+  "cornerBridge": {
+    "assembly": "two-orthogonal-fr4-legs-plus-right-angle-copper-joint",
+    "legLengthMm": 50,
+    "legWidthMm": 30,
+    "housingHeightMm": 30,
+    "outerContactOffsetFromEdgeMm": 2.5,
+    "targetInsertionLossDb": 0.3,
+    "jointModel": "mitered-copper-right-angle-joint"
+  },
+  "cableTab": {
+    "boardWidthMm": 30,
+    "boardHeightMm": 50,
+    "contactEdgeYmm": -22.5,
+    "coaxEdgeYmm": 22.5,
+    "targetCableLengthM": 5,
+    "requestedCableType": "RG142",
+    "requestedInsertionLossDbAt5m": 0.5
+  }
+}

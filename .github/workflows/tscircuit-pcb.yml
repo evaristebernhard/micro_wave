@@ -5,11 +5,13 @@ on:
     paths:
       - "pcb/tscircuit/**"
       - "scripts/openems/**"
+      - "scripts/system/**"
       - ".github/workflows/tscircuit-pcb.yml"
   pull_request:
     paths:
       - "pcb/tscircuit/**"
       - "scripts/openems/**"
+      - "scripts/system/**"
       - ".github/workflows/tscircuit-pcb.yml"
 
 jobs:
@@ -39,17 +41,29 @@ jobs:
         run: |
           python ../../scripts/openems/check_tcell_calibration_geometry.py
           python ../../scripts/openems/check_full_v2_geometry.py
+          python ../../scripts/openems/check_connection_hardware_geometry.py
           python -m py_compile ../../scripts/openems/simulate_tcell_calibration.py
           python -m py_compile ../../scripts/openems/simulate_tcell_network_coupon.py
           python -m py_compile ../../scripts/openems/design_tcell_surrogate.py
           python -m py_compile ../../scripts/openems/simulate_full_v2_fast.py
           python -m py_compile ../../scripts/openems/compare_full_v2_id.py
+          python -m py_compile ../../scripts/openems/simulate_connection_hardware.py
+          python -m py_compile ../../scripts/system/cable_model.py
+          python -m py_compile ../../scripts/system/cascade_power_budget.py
+
+      - name: Validate deterministic system models
+        run: |
+          python ../../scripts/system/cable_model.py --out ../../results/system/rg142_5m_audit_ci.json
+          python ../../scripts/system/cascade_power_budget.py --out ../../results/system/initial_5_25_100_budget_ci.json
 
       - name: Validate T-cell calibration board
         run: npm run check:cal
 
       - name: Validate full V2 engineering board
         run: npm run check:full-v2
+
+      - name: Validate connection hardware PCBs
+        run: npm run check:flat-bridge && npm run check:corner-bridge && npm run check:cable-tab
 
       - name: Build circuit
         run: npm run build
@@ -65,6 +79,9 @@ jobs:
 
       - name: Export full V2 engineering artifacts
         run: npm run export:full-v2:circuit-json && npm run export:full-v2:gerbers && npm run export:full-v2:pcb-svg
+
+      - name: Export connection hardware artifacts
+        run: npm run export:connections
 
       - name: Upload PCB artifacts
         uses: actions/upload-artifact@v4
